@@ -14,6 +14,13 @@ export function Tabs({ tabs }: { tabs: { id: string; label: string; content: Rea
     return () => window.removeEventListener("hashchange", fromHash);
   }, [tabs]);
 
+  // On narrow screens the tab strip scrolls; keep the active tab in view.
+  useEffect(() => {
+    const el = document.getElementById(`tab-${active}`);
+    const strip = el?.parentElement;
+    if (el && strip && strip.scrollWidth > strip.clientWidth) strip.scrollLeft = el.offsetLeft - strip.offsetLeft - 16;
+  }, [active]);
+
   return (
     <div>
       <div className="tabs" role="tablist">

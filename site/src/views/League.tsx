@@ -5,11 +5,13 @@ import { OutlookTable } from "@/components/OutlookTable";
 import { RoundBrowser } from "@/components/RoundBrowser";
 import { StandingsTable } from "@/components/StandingsTable";
 import { Tabs } from "@/components/Tabs";
+import { XgTable } from "@/components/XgTable";
 import { accuracy, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, type Lang } from "@/lib/i18n";
 import { countryOf, LEAGUES, leagueByCode, nameLang, SEASON, type LeagueCode } from "@/lib/leagues";
 import { lite } from "@/lib/picks";
+import { leagueStats } from "@/lib/stats";
 
 export function leagueParams() {
   return LEAGUES.map((l) => ({ code: l.code }));
@@ -63,7 +65,12 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
               </div>
             ),
           },
-          { id: "ihtimaller", label: t.outlook, content: <OutlookTable rows={sim.leagues[code] ?? []} league={league} runs={sim.runs} lang={lang} /> },
+          {
+            id: "ihtimaller",
+            label: t.outlook,
+            content: <OutlookTable rows={sim.leagues[code] ?? []} league={league} runs={sim.runs} lang={lang} current={new Map(table.map((r, i) => [r.team, [i + 1, r.points] as [number, number]]))} />,
+          },
+          { id: "istatistik", label: t.stats, content: <XgTable rows={leagueStats(code)} lang={lang} /> },
         ]}
       />
     </>
