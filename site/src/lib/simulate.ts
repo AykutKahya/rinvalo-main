@@ -120,3 +120,51 @@ export function simulateLeague(
     .sort((a, b) => a.avgPosition - b.avgPosition);
   return { outlook, impact };
 }
+
+/** League-phase sizes: 36 clubs, 8 games each (6 in the Conference League). */
+export const CUP_PHASE_GAMES: Record<string, number> = { ucl: 144, uel: 144, uecl: 108 };
+
+/**
+ * A cup's league phase: odds of finishing top 8 (straight to the round of 16), 9-24 (play-off)
+ * or 25-36 (out). Reuses the league simulation with the cup's lines.
+ */
+export function simulateCupPhase(code: string, tsdb: number, fixtures: Fixture[], predictions: Record<string, Prediction>, runs = 5000) {
+  const phase = fixtures.filter((f) => f.round <= 8);
+  const lines = { tsdb, zones: { europe: 8, relegation: 12 } } as League;
+  return simulateLeague(lines, phase, predictions, runs).outlook;
+}
+
+/**
+ * Odds that `first` (home side of the first leg) goes through a knockout tie of one or two legs.
+ * A level aggregate goes to extra time (a third of a game) and then penalties, a coin toss.
+ */
+export function tieOdds(legs: { home: string; away: string; status: string; hg: number | null; ag: number | null; p?: Prediction }[], first: string, runs = 5000, seed = 1): number | null {
+  if (legs.some((l) => l.status !== "finished" && !l.p)) return null;
+  const rand = mulberry32(seed);
+  let wins = 0;
+  for (let run = 0; run < runs; run++) {
+    let a = 0;
+    let b = 0;
+    let last: Prediction | undefined;
+    for (const l of legs) {
+      const [hg, ag] = l.status === "finished" ? [l.hg!, l.ag!] : [samplePoisson(l.p!.lh, rand), samplePoisson(l.p!.la, rand)];
+      if (l.home === first) {
+        a += hg;
+        b += ag;
+      } else {
+        a += ag;
+        b += hg;
+      }
+      if (l.p) last = l.p;
+    }
+    if (a === b && last) {
+      const firstHome = legs[legs.length - 1].home === first;
+      const ea = samplePoisson((firstHome ? last.lh : last.la) / 3, rand);
+      const eb = samplePoisson((firstHome ? last.la : last.lh) / 3, rand);
+      a += ea;
+      b += eb;
+    }
+    if (a > b || (a === b && rand() < 0.5)) wins++;
+  }
+  return Math.round((wins / runs) * 1000) / 1000;
+}

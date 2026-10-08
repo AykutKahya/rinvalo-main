@@ -46,3 +46,27 @@ export function Stakes({ stakes, league, lang }: { stakes: Stake[]; league: Leag
     </section>
   );
 }
+
+/** Two-legged (or single) knockout tie: each side's chance of going through. */
+export function TieOdds({ tie, lang }: { tie: { first: string; second: string; p: number }; lang: Lang }) {
+  const { pct } = fmt(lang);
+  return (
+    <section className="card card-pad stakes">
+      <div className="section-title" style={{ margin: 0 }}>
+        <h2>{dict(lang).league.tie}</h2>
+      </div>
+      {[
+        [tie.first, tie.p],
+        [tie.second, 1 - tie.p],
+      ].map(([slug, v]) => (
+        <div key={slug as string} className="stakes-row" style={{ gridTemplateColumns: "minmax(0, 1fr) 90px" }}>
+          <span className="tname">
+            <Crest slug={slug as string} size="sm" />
+            {team(slug as string, lang).name}
+          </span>
+          <b className="num">{pct(v as number)}</b>
+        </div>
+      ))}
+    </section>
+  );
+}

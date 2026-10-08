@@ -71,7 +71,8 @@ export function Leagues({ lang }: { lang: Lang }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: 16 }}>
         {CUPS.map((c) => {
-          const table = leagueTable(c.code).slice(0, 5);
+          // A partial league phase (missing source days) would mislead, so no table until it is complete.
+          const table = sim.cups?.[c.code] ? leagueTable(c.code).slice(0, 5) : [];
           const played = leagueMatches(c.code).filter((m) => m.status === "finished").length;
           return (
             <Link key={c.code} href={p.leagueOf(c.code)} className="card card-pad reveal" style={{ display: "flex", flexDirection: "column", gap: 12, borderTop: `4px solid ${c.accent}` }}>

@@ -12,7 +12,7 @@ import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
 import { ShareButton } from "@/components/ShareButton";
-import { Stakes } from "@/components/Stakes";
+import { Stakes, TieOdds } from "@/components/Stakes";
 import { Form, StandingsTable } from "@/components/StandingsTable";
 import { getMarket, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -142,6 +142,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
 
       <div className="match-grid">
         <div className="stack">
+          {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
           {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
           {p && !cup && <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />}
           {p ? (

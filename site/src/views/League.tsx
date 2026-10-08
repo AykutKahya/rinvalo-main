@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LeagueMark } from "@/components/Crest";
+import { CupOutlook } from "@/components/CupOutlook";
 import { OutlookTable } from "@/components/OutlookTable";
 import { RoundBrowser } from "@/components/RoundBrowser";
 import { StandingsTable } from "@/components/StandingsTable";
@@ -38,6 +39,9 @@ function CupPage({ cup, lang }: { cup: Cup; lang: Lang }) {
   const matches = leagueMatches(cup.code);
   const rounds = CUP_ROUNDS.filter((r) => r <= 8 || matches.some((m) => m.round === r));
   const played = matches.filter((m) => m.status === "finished").length;
+  const sim = getSimulation();
+  // Only shown once every league-phase game is known (the free source misses some Conference League days).
+  const odds = sim.cups?.[cup.code];
   return (
     <>
       <div className="page-head">
@@ -64,18 +68,23 @@ function CupPage({ cup, lang }: { cup: Cup; lang: Lang }) {
               />
             ),
           },
-          {
-            id: "puan",
-            label: t.cupTable,
-            content: (
-              <div className="card card-pad">
-                <StandingsTable rows={leagueTable(cup.code)} zones={zonesOf(cup.code)} lang={lang} />
-                <p className="muted" style={{ fontSize: 12.5, margin: "10px 0 0" }}>
-                  {t.cupZones}
-                </p>
-              </div>
-            ),
-          },
+          ...(odds
+            ? [
+                {
+                  id: "puan",
+                  label: t.cupTable,
+                  content: (
+                    <div className="card card-pad">
+                      <StandingsTable rows={leagueTable(cup.code)} zones={zonesOf(cup.code)} lang={lang} />
+                      <p className="muted" style={{ fontSize: 12.5, margin: "10px 0 0" }}>
+                        {t.cupZones}
+                      </p>
+                    </div>
+                  ),
+                },
+                { id: "ihtimaller", label: t.cupOdds, content: <CupOutlook rows={odds} runs={sim.runs} lang={lang} /> },
+              ]
+            : []),
         ]}
       />
     </>

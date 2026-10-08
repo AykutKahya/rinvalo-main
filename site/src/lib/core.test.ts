@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseOpenfootball } from "../../scripts/sources/openfootball";
 import { fit, outcomeOf, pickOf, predict, type ModelMatch } from "./model";
-import { simulateLeague } from "./simulate";
+import { simulateLeague, tieOdds } from "./simulate";
 import { buildTable } from "./table";
 import { resolveTeam } from "./teams";
 import { LEAGUES } from "./leagues";
@@ -117,4 +117,14 @@ test("openfootball lines with and without kick-off time are parsed", () => {
     { id: "bayern-stuttgart", hg: 5, ag: 1 },
     { id: "mainz-paderborn", hg: 0, ag: 0 },
   ]);
+});
+
+test("a 3-0 first-leg win makes going through very likely", () => {
+  const p = { fixtureId: "x", madeAt: "", model: "", lh: 1.3, la: 1.3, p: [0.4, 0.25, 0.35] as [number, number, number], score: [1, 1] as [number, number], top: [], over25: 0.5, btts: 0.5, grid: [] };
+  const legs = [
+    { home: "a", away: "b", status: "finished", hg: 3, ag: 0 },
+    { home: "b", away: "a", status: "scheduled", hg: null, ag: null, p },
+  ];
+  const odds = tieOdds(legs, "a", 4000)!;
+  assert.ok(odds > 0.9 && odds < 1);
 });

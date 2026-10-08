@@ -96,6 +96,10 @@ export interface SimulationFile {
   leagues: Record<string, TeamOutlook[]>;
   /** Stakes of the coming fortnight's games, by fixture id. */
   impact?: Record<string, MatchImpact>;
+  /** Cup league phase: champion = 1st, europe = top 8, relegation = 25th-36th. */
+  cups?: Record<string, TeamOutlook[]>;
+  /** Knockout ties by fixture id: odds that `first` goes through. */
+  ties?: Record<string, { first: string; second: string; p: number }>;
 }
 
 export interface OverridesFile {
