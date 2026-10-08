@@ -1,0 +1,48 @@
+"use client";
+
+import type { Session } from "@supabase/supabase-js";
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export interface Account {
+  /** False when the deployment has no Supabase settings. */
+  enabled: boolean;
+  ready: boolean;
+  session: Session | null;
+  username: string | null;
+  refresh: () => void;
+}
+
+/** The signed-in visitor and their league name. */
+export function useAccount(): Account {
+  const sb = supabase();
+  const [session, setSession] = useState<Session | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [ready, setReady] = useState(!sb);
+  const [tick, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
+
+  useEffect(() => {
+    if (!sb) return;
+    sb.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setReady(true);
+    });
+    const { data } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
+    return () => data.subscription.unsubscribe();
+  }, [sb]);
+
+  useEffect(() => {
+    if (!sb || !session) {
+      setUsername(null);
+      return;
+    }
+    sb.from("profiles")
+      .select("username")
+      .eq("id", session.user.id)
+      .maybeSingle()
+      .then(({ data }) => setUsername(data?.username ?? null));
+  }, [sb, session, tick]);
+
+  return { enabled: !!sb, ready, session, username, refresh };
+}

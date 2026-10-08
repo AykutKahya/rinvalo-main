@@ -1,0 +1,65 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { dict, type Lang } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase";
+import { AccountPanel } from "./AccountPanel";
+import { Leaderboard } from "./Leaderboard";
+import { MyPicks } from "./MyPicks";
+import { useAccount } from "./useAccount";
+
+type Tab = "standings" | "mine" | "account";
+
+/** Prediction league: standings, the visitor's picks, and their account, on one page. */
+export function LeagueHub({ lang }: { lang: Lang }) {
+  const t = dict(lang).league2;
+  const account = useAccount();
+  const [tab, setTab] = useState<Tab>("standings");
+  const [cloud, setCloud] = useState<Record<string, [number, number]>>({});
+
+  useEffect(() => {
+    const h = window.location.hash.slice(1) as Tab;
+    if (["standings", "mine", "account"].includes(h)) setTab(h);
+  }, []);
+
+  // Picks saved to the account join the ones kept in this browser.
+  useEffect(() => {
+    const sb = supabase();
+    if (!sb || !account.session) return setCloud({});
+    sb.from("picks")
+      .select("fixture_id, hg, ag")
+      .then(({ data }) => setCloud(Object.fromEntries((data ?? []).map((r) => [r.fixture_id, [r.hg, r.ag] as [number, number]]))));
+  }, [account.session]);
+
+  const tabs: [Tab, string][] = account.enabled
+    ? [
+        ["standings", t.standings],
+        ["mine", t.mine],
+        ["account", account.session ? (account.username ?? t.account) : t.signIn],
+      ]
+    : [["mine", t.mine]];
+  const current = account.enabled ? tab : "mine";
+
+  return (
+    <div className="stack">
+      <div className="tabs" role="tablist">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={current === id}
+            onClick={() => {
+              setTab(id);
+              history.replaceState(null, "", `#${id}`);
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {current === "standings" && <Leaderboard lang={lang} me={account.username} />}
+      {current === "mine" && <MyPicks lang={lang} cloud={cloud} />}
+      {current === "account" && <AccountPanel account={account} lang={lang} />}
+    </div>
+  );
+}

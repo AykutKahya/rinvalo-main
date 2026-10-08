@@ -19,7 +19,7 @@ function points(pick: [number, number] | null, h: number, a: number) {
   return outcome(pick[0], pick[1]) === outcome(h, a) ? 1 : 0;
 }
 
-export function MyPicks({ lang }: { lang: Lang }) {
+export function MyPicks({ lang, cloud = {} }: { lang: Lang; cloud?: Record<string, [number, number]> }) {
   const t = dict(lang).myPicks;
   const f = fmt(lang);
   const p = paths(lang);
@@ -39,7 +39,7 @@ export function MyPicks({ lang }: { lang: Lang }) {
   }, []);
 
   if (!guesses || !data) return <div className="card empty" style={{ minHeight: 240 }} />;
-  const rows = Object.entries(guesses)
+  const rows = Object.entries({ ...guesses, ...cloud })
     .filter(([id]) => data.fixtures[id])
     .map(([id, pick]) => {
       const [kickoff, home, away, hg, ag, rh, ra] = data.fixtures[id];

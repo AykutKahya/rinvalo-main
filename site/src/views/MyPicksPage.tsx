@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { MyPicks } from "@/components/MyPicks";
+import { LeagueHub } from "@/components/LeagueHub";
 import { alternates, dict, type Lang } from "@/lib/i18n";
 
 export function myPicksMetadata(lang: Lang): Metadata {
-  const t = dict(lang).myPicks;
-  return { title: t.title, description: t.description, alternates: alternates(lang, "myPicks"), robots: { index: false } };
+  const t = dict(lang).league2;
+  return { title: t.title, description: t.description, alternates: alternates(lang, "myPicks") };
 }
 
 export function MyPicksPage({ lang }: { lang: Lang }) {
@@ -12,10 +12,10 @@ export function MyPicksPage({ lang }: { lang: Lang }) {
     <>
       <div className="page-head">
         <div>
-          <h1>{dict(lang).myPicks.title}</h1>
+          <h1>{dict(lang).league2.title}</h1>
         </div>
       </div>
-      <MyPicks lang={lang} />
+      <LeagueHub lang={lang} />
     </>
   );
 }

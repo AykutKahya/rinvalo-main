@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { dict, paths, type Lang } from "@/lib/i18n";
+import { supabase } from "@/lib/supabase";
+import { useAccount } from "./useAccount";
 
 const KEY = "rinvalo:guesses";
 
@@ -36,7 +38,27 @@ export function GuessWidget(props: {
   const [a, setA] = useState(1);
   const [saved, setSaved] = useState<[number, number] | null>(null);
   const [ready, setReady] = useState(false);
+  const [cloud, setCloud] = useState<"saved" | "locked" | null>(null);
+  const account = useAccount();
+  const l2 = dict(lang).league2;
   const locked = actual !== null || (ready && Date.now() > Date.parse(kickoff));
+
+  // Signed in: the pick stored in the account wins over this browser's copy.
+  useEffect(() => {
+    const sb = supabase();
+    if (!sb || !account.session) return;
+    sb.from("picks")
+      .select("hg, ag")
+      .eq("fixture_id", id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setSaved([data.hg, data.ag]);
+        setH(data.hg);
+        setA(data.ag);
+        setCloud("saved");
+      });
+  }, [id, account.session]);
 
   useEffect(() => {
     const g = load()[id];
@@ -55,6 +77,13 @@ export function GuessWidget(props: {
       localStorage.setItem(KEY, JSON.stringify(all));
     } catch {}
     setSaved([h, a]);
+    const sb = supabase();
+    if (sb && account.session) {
+      // The database refuses picks after kick-off.
+      sb.from("picks")
+        .upsert({ fixture_id: id, hg: h, ag: a, updated_at: new Date().toISOString() })
+        .then(({ error }) => setCloud(error ? "locked" : "saved"));
+    }
   }
 
   const stepper = (value: number, set: (n: number) => void, label: string) => (
@@ -105,10 +134,17 @@ export function GuessWidget(props: {
           </p>
         </>
       )}
-      {saved && (
-        <Link href={paths(lang).myPicks} className="guess-all">
-          {dict(lang).myPicks.link}
+      {cloud && <p className={`guess-cloud ${cloud}`}>{cloud === "saved" ? `✓ ${l2.synced}` : l2.locked}</p>}
+      {account.enabled && account.ready && !account.session ? (
+        <Link href={`${paths(lang).myPicks}#account`} className="guess-all">
+          {l2.joinCta}
         </Link>
+      ) : (
+        saved && (
+          <Link href={paths(lang).myPicks} className="guess-all">
+            {dict(lang).myPicks.link}
+          </Link>
+        )
       )}
     </div>
   );
