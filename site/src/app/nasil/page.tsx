@@ -4,11 +4,14 @@ import Link from "next/link";
 export const metadata: Metadata = { title: "Model nasıl çalışıyor?" };
 
 const STEPS = [
-  ["Geçmiş maçlar", "Beş ligin son beş sezonundaki yaklaşık 9.000 maç ve bu sezon oynanan her maç modele girer. Yakın tarihli maçlar daha ağır basar: sekiz ay önceki bir maç bugünkünün yarısı kadar etkilidir."],
-  ["Hücum ve savunma gücü", "Her takıma bir hücum ve bir savunma puanı verilir. Ev sahibi avantajı da her lig için ayrıca ölçülür."],
-  ["Beklenen gol", "İki takımın puanlarından her iki takım için beklenen gol çıkar. Örneğin 1,8'e 0,9."],
-  ["Bütün skorlar", "Beklenen gollerden 0-0'dan 10-10'a kadar her skorun olasılığı hesaplanır. 1-X-2, 2.5 üst ve karşılıklı gol yüzdeleri bu tablodan toplanır."],
-  ["Lige yeni çıkanlar", "Hiç verisi olmayan takım, lige yeni çıkan takımların ortalamasıyla başlar ve oynadıkça kendi gücüne yaklaşır. Böylece her maç için tahmin vardır."],
+  ["Veri", "Beş ligin son beş sezonundaki yaklaşık 9.000 maç ve bu sezon oynanan her maç: skorlar, şutlar, isabetli şutlar ve bu sezondan itibaren maç başı xG (beklenen gol). Her bilgi yalnız maçtan önce bilinen haliyle kullanılır."],
+  ["Gol modeli", "Her takıma skorlardan bir hücum ve bir savunma gücü verilir, ev avantajı her lig için ayrı ölçülür. Yakın maçlar daha ağır basar: sekiz ay önceki bir maç bugünkünün yarısı kadar etkilidir."],
+  ["Şut ve xG modeli", "Aynı hesap goller yerine pozisyon kalitesiyle (xG, yoksa isabetli şutlar) yapılır. Şanslı ya da şanssız skorları ayıklar ve form değişimini daha hızlı yakalar; hafızası daha kısadır."],
+  ["Elo güç puanı", "Her maçtan sonra kazanana puan aktaran bir güç sıralaması. Yaz arasında kadrolar değiştiği için puanlar her sezon başında ortalamaya doğru çekilir."],
+  ["Birleştirme", "Üç model, geçmiş sezonlarda en isabetli sonucu verecek şekilde ağırlıklandırılarak tek olasılığa birleştirilir. Daha karmaşık bir yapay öğrenme modeli (LightGBM) de denendi; testte daha kötü sonuç verdiği için kullanılmıyor."],
+  ["Skorlar", "Birleşik 1-X-2 olasılığına uyan beklenen gollerden 0-0'dan 10-10'a her skorun olasılığı çıkar. 2.5 üst ve karşılıklı gol bu tablodan hesaplanır."],
+  ["Güven ve gerekçe", "Fark büyükse ve modeller aynı sonucu gösteriyorsa güven yüksek, ayrışıyorlarsa düşük olur. Her maçın yanında tahmini en çok etkileyen nedenler yazılır."],
+  ["Piyasa karşılaştırması", "Bahis oranları açıklandığında kâr payı çıkarılıp olasılığa çevrilir ve Rinvalo'nun yanında gösterilir. Piyasa farklı bir sonuç bekliyorsa güven düşürülür. Rinvalo'nun kendi tahmini piyasadan etkilenmez."],
   ["Dondurma", "Tahminler günde altı kez yenilenir. Maç başladığı anda son tahmin dondurulur ve başarı hesabı bununla yapılır."],
 ];
 
@@ -37,7 +40,7 @@ export default function HowPage() {
       <div className="card card-pad" style={{ marginTop: 16 }}>
         <h2 style={{ fontSize: 16, marginBottom: 4 }}>Ne bilmez?</h2>
         <p style={{ margin: 0, color: "var(--ink-2)" }}>
-          Model sakatlık, ceza, kadro değişikliği ve teknik direktör değişimini bilmez; yalnız skorlardan öğrenir. Bu yüzden tahminler kesin sonuç değildir. Veriler TheSportsDB ve openfootball açık kaynaklarından günde altı kez otomatik alınır.
+          Model sakatlık, ceza, ilk 11 ve teknik direktör değişimini bilmez; skor, şut, xG ve form verisinden öğrenir. Bahis piyasası bunları da fiyatladığı için geçmiş testlerde Rinvalo'nun birkaç puan önünde. Bu yüzden tahminler kesin sonuç değildir. Veriler TheSportsDB, football-data.co.uk ve openfootball açık kaynaklarından günde altı kez otomatik alınır.
         </p>
         <p style={{ margin: "10px 0 0" }}>
           <Link href="/basari" className="btn ghost">

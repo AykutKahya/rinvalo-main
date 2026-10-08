@@ -3,6 +3,7 @@ import type { MatchView } from "@/lib/data";
 import { pct, shortDay, dayNum, time } from "@/lib/format";
 import { pickOf } from "@/lib/model";
 import { team } from "@/lib/teams";
+import { ConfidenceDot } from "./Confidence";
 import { Crest } from "./Crest";
 
 const LABELS = ["1", "X", "2"];
@@ -59,6 +60,7 @@ export function MatchRow({ m, favorites = [], showDate = false }: { m: MatchView
       )}
       <span className={`sc${m.exact ? " exact" : ""}`} title="Tahmini skor">
         {p ? `${p.score[0]}-${p.score[1]}` : "–"}
+        {!finished && <ConfidenceDot level={p?.confidence} />}
       </span>
       <span className={`mark${verdict}`} aria-label={m.hit === null ? undefined : m.hit ? "tahmin tuttu" : "tahmin tutmadı"}>
         {m.hit === null ? "" : m.hit ? "✓" : "✕"}

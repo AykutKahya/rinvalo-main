@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Archivo } from "next/font/google";
 import Link from "next/link";
-import { getBacktest, getMatches, getSimulation, leagueTable, LEAGUES, type MatchView } from "@/lib/data";
+import { getEngineBacktest, getMatches, getSimulation, leagueTable, LEAGUES, type MatchView } from "@/lib/data";
 import { fullDate, pct, shortDay, time } from "@/lib/format";
 import { pickOf } from "@/lib/model";
 import { matchOfTheWeek, recentResults, upcoming } from "@/lib/picks";
@@ -49,7 +49,7 @@ export default function HeadlinePage() {
   const lead = matchOfTheWeek(all, sim, now);
   const recent = recentResults(all, now, 7).slice(0, 6);
   const recentHits = recent.filter((m) => m.hit).length;
-  const bt = getBacktest().total;
+  const bt = getEngineBacktest()?.overall["Rinvalo modeli"];
   const week = upcoming(all, now, 7);
   const race = (sim.leagues["super-lig"] ?? []).slice().sort((x, y) => y.champion - x.champion).slice(0, 3);
   const round = week.find((m) => m.league === "super-lig")?.round;
@@ -128,7 +128,7 @@ export default function HeadlinePage() {
               <>
                 <div className={s.pct}>{bt ? pct(bt.accuracy) : "–"}</div>
                 <p>
-                  Karne bu hafta sonu başlıyor. O zamana kadar: son iki sezonun {bt?.matches.toLocaleString("tr-TR")} maçlık testinde model 1-X-2&apos;yi {bt ? pct(bt.accuracy) : "–"} bildi.
+                  Karne bu hafta sonu başlıyor. O zamana kadar: son 3 sezonun {bt?.matches.toLocaleString("tr-TR")} maçlık testinde model 1-X-2&apos;yi {bt ? pct(bt.accuracy) : "–"} bildi.
                 </p>
                 <Link href="/basari" className={s.ok} style={{ alignSelf: "flex-start" }}>
                   KARNEYİ GÖR →

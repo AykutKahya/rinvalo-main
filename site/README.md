@@ -6,18 +6,18 @@ Futbol maçlarını takip eden, her maç için skor ve sonuç tahmini yayınlaya
 ## Nasıl çalışır
 
 ```
-TheSportsDB (ücretsiz) ─┐
-openfootball (yedek) ───┼─> scripts/update.ts ──> data/*.json ──> git commit ──> Vercel derlemesi
-data/overrides.json ────┘          │
-                           model + simülasyon
+TheSportsDB (ücretsiz) ──┐
+openfootball (yedek) ────┼─> scripts/update.ts ─┐
+data/overrides.json ─────┘                      ├─> engine/predict.py ─> scripts/simulate.ts ─> git commit ─> Vercel
+football-data.co.uk ───────> scripts/stats.ts ──┘
 ```
 
 - `.github/workflows/rinvalo-site-bot.yml` botu günde 6 kez çalıştırır. Bot yeni veri bulursa JSON
   dosyalarını `main`'e commit eder, Vercel de siteyi yeniden derler.
 - Tahminler maç başlayana kadar her koşuda yenilenir. Maç başladıktan sonra tahmin dondurulur ve
   başarı oranı bu dondurulmuş tahminle hesaplanır.
-- Model: zaman ağırlıklı Poisson + Dixon-Coles (`src/lib/model.ts`). 2024-25 ve 2025-26 sezonlarının
-  3.540 maçlık geriye dönük testinde 1-X-2 isabeti %52,1 (bahis şirketi favorisi %54,0).
+- Tahmin motoru Python'dadır: [`engine/`](../engine/README.md). `src/lib/model.ts` içindeki basit model
+  yalnız yedektir; motor bir koşuda hata verirse onun tahminleri yerinde kalır.
 
 ## Dosyalar
 
@@ -28,7 +28,9 @@ data/overrides.json ────┘          │
 | `data/predictions.json` | Her maçın tahmini (bot yazar) |
 | `data/simulation.json` | Şampiyonluk, Avrupa ve küme düşme ihtimalleri (bot yazar) |
 | `data/overrides.json` | **Elle düzeltmeler** (sen yazarsın) |
-| `data/backtest.json` | Geriye dönük test sonucu (`npm run backtest`) |
+| `data/stats-history.json`, `data/stats-current.json` | Şut, isabetli şut, xG ve bahis oranları (football-data.co.uk) |
+| `data/odds-upcoming.json`, `data/market.json` | Yaklaşan ve oynanmış maçların piyasa olasılıkları |
+| `data/engine-backtest.json` | Motorun geriye dönük test sonucu (`npm run backtest`) |
 
 ## Bir skoru veya tarihi elle düzeltmek
 

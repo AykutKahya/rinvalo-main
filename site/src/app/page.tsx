@@ -3,7 +3,7 @@ import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { MatchBrowser } from "@/components/MatchBrowser";
 import { ProbBar } from "@/components/ProbBar";
-import { accuracy, getBacktest, getMatches, getSimulation, LEAGUES } from "@/lib/data";
+import { accuracy, getEngineBacktest, getMatches, getSimulation, LEAGUES } from "@/lib/data";
 import { dayKey, pct, shortDay, time } from "@/lib/format";
 import { closestPicks, lite, matchOfTheWeek, surestPicks } from "@/lib/picks";
 import { team } from "@/lib/teams";
@@ -26,7 +26,7 @@ export default function Home() {
   const surest = surestPicks(all, now);
   const closest = closestPicks(all, now);
   const record = accuracy(all);
-  const bt = getBacktest().total;
+  const eb = getEngineBacktest();
   const race = (sim.leagues["super-lig"] ?? []).slice(0, 4);
 
   return (
@@ -149,8 +149,8 @@ export default function Home() {
             </>
           ) : (
             <>
-              <b>{bt ? pct(bt.accuracy) : "–"}</b>
-              <span>Son iki sezonun {bt?.matches ?? 0} maçlık testinde 1-X-2 isabeti</span>
+              <b>{eb ? pct(eb.byConfidence.high.accuracy) : "–"}</b>
+              <span>Son 3 sezon testinde yüksek güvenli tahminlerin isabeti</span>
             </>
           )}
         </Link>

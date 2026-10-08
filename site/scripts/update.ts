@@ -12,8 +12,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from "node:path";
 import { LEAGUES, SEASON, type League } from "../src/lib/leagues";
 import { fit, predict, type ModelMatch } from "../src/lib/model";
-import { simulateLeague } from "../src/lib/simulate";
-import type { Fixture, HistoryFile, OverridesFile, PredictionsFile, SeasonFile, SimulationFile } from "../src/lib/types";
+import type { Fixture, HistoryFile, OverridesFile, PredictionsFile, SeasonFile } from "../src/lib/types";
 import { fetchOpenfootball } from "./sources/openfootball";
 import { fetchRound } from "./sources/thesportsdb";
 
@@ -166,8 +165,8 @@ async function main() {
   season.fixtures = [...byId.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id.localeCompare(b.id));
   season.updatedAt = now.toISOString();
 
-  // Predictions: refresh every match that has not kicked off; anything started stays frozen.
-  const sims: SimulationFile = { updatedAt: now.toISOString(), runs: 5000, leagues: {} };
+  // Fallback predictions from the simple TypeScript model. The Python engine (engine/predict.py)
+  // runs next and replaces them; if it fails, these keep the site supplied. Started matches stay frozen.
   let refreshed = 0;
   for (const league of LEAGUES) {
     const fixtures = season.fixtures.filter((f) => f.league === league.code);
@@ -190,13 +189,11 @@ async function main() {
         refreshed++;
       }
     }
-    sims.leagues[league.code] = simulateLeague(league, fixtures, predictions.predictions, sims.runs);
   }
   predictions.model = Object.values(predictions.predictions)[0]?.model ?? "";
 
   save("season.json", season);
   save("predictions.json", predictions);
-  save("simulation.json", sims);
   if (!existsSync(join(DATA, "overrides.json"))) save("overrides.json", overrides);
 
   const finished = season.fixtures.filter((f) => f.status === "finished").length;

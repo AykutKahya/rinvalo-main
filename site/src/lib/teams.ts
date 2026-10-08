@@ -77,7 +77,7 @@ const ROWS: Row[] = [
   ["barcelona", "Barcelona", "BAR", "#a50044", "#004d98", "FC Barcelona"],
   ["celta", "Celta Vigo", "CEL", "#8ac3ee", "#ffffff", "Celta", "RC Celta", "RC Celta de Vigo"],
   ["alaves", "Alavés", "ALA", "#0761af", "#ffffff", "Alaves", "Deportivo Alavés"],
-  ["deportivo", "Deportivo", "DEP", "#0066b3", "#ffffff", "Deportivo de A Coruña", "Deportivo La Coruna", "RC Deportivo", "RC Deportivo La Coruña"],
+  ["deportivo", "Deportivo", "DEP", "#0066b3", "#ffffff", "Deportivo de A Coruña", "Deportivo La Coruna", "RC Deportivo", "RC Deportivo La Coruña", "La Coruna"],
   ["elche", "Elche", "ELC", "#05642c", "#ffffff"],
   ["espanyol", "Espanyol", "ESP", "#007fc8", "#ffffff", "Espanol", "RCD Espanyol", "RCD Espanyol de Barcelona"],
   ["getafe", "Getafe", "GET", "#005999", "#ffffff"],

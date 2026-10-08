@@ -1,8 +1,7 @@
 # Rinvalo v2 bot: refreshes fixtures, results, predictions and season odds for site/ and
 # commits the JSON files. Each commit to main triggers a new Vercel build.
 #
-# Cost: about 6 runs a day x 1-2 minutes, plus one ~7 minute full refresh, so roughly
-# 400 GitHub Actions minutes a month. The free plan includes 2,000.
+# Cost: public repository, so GitHub Actions minutes are free.
 name: Rinvalo site bot
 
 on:
@@ -40,19 +39,44 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
+      - name: Set up Python
+        # v7.0.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: engine/requirements.txt
+
+      - name: Install engine
+        run: python -m pip install -r ../engine/requirements.txt
+
       - name: Test
-        run: npm test
+        run: |
+          npm test
+          python -m unittest discover -s ../engine
 
       - name: Update data
         env:
           FULL: ${{ (github.event.schedule == '23 2 * * *' || inputs.full) && '1' || '0' }}
         run: npm run update
 
+      - name: Match statistics and odds
+        continue-on-error: true
+        run: npm run stats
+
+      - name: Rinvalo engine predictions
+        # If the engine fails, the fallback predictions written by `npm run update` stay in place.
+        continue-on-error: true
+        run: python ../engine/predict.py
+
+      - name: Season simulation
+        run: npm run simulate
+
       - name: Commit changed data
         run: |
           git config user.name "rinvalo-bot"
           git config user.email "rinvalo-bot@users.noreply.github.com"
-          git add data/season.json data/predictions.json data/simulation.json data/overrides.json data/crests.json public/crests public/leagues
+          git add data public/crests public/leagues
           if git diff --cached --quiet; then
             echo "Değişiklik yok."
             exit 0

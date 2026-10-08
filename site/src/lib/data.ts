@@ -21,10 +21,25 @@ export const getPredictions = cache(() => read<PredictionsFile>("predictions.jso
 export const getSimulation = cache(() => read<SimulationFile>("simulation.json", { updatedAt: "", runs: 0, leagues: {} }));
 export const getHistory = cache(() => read<HistoryFile>("history.json", { source: "", matches: [] }));
 
-export interface Backtest {
-  [k: string]: { matches: number; accuracy: number; exactScore: number; alwaysHome: number; logloss: number };
+export const getMarket = cache(() => read<Record<string, [number, number, number]>>("market.json", {}));
+
+export interface Scores {
+  matches: number;
+  accuracy: number;
+  logloss: number;
+  brier: number;
+  rps: number;
 }
-export const getBacktest = cache(() => read<Backtest>("backtest.json", {}));
+export interface EngineBacktest {
+  seasons: string[];
+  overall: Record<string, Scores>;
+  perLeague: Record<string, { rinvalo: Scores; old: Scores; market: Scores }>;
+  byConfidence: Record<"high" | "medium" | "low", { matches: number; accuracy: number }>;
+  calibration: { bin: string; predicted: number; observed: number; n: number }[];
+  disagreement: { matches: number; rinvaloRight: number; marketRight: number };
+}
+export const getEngineBacktest = cache(() => read<EngineBacktest | null>("engine-backtest.json", null));
+
 
 /** A fixture joined with its frozen or live prediction. */
 export interface MatchView extends Fixture {

@@ -56,6 +56,12 @@ export interface Prediction {
   btts: number;
   /** Probability grid capped at 5 goals each side: grid[h][a]. */
   grid: number[][];
+  /** Engine-only fields (absent on fallback predictions). */
+  confidence?: "high" | "medium" | "low";
+  reasons?: string[];
+  /** Margin-free betting market probabilities, when odds were published. */
+  market?: [number, number, number] | null;
+  components?: { goals: [number, number, number]; shots: [number, number, number]; elo: number };
 }
 
 export interface PredictionsFile {

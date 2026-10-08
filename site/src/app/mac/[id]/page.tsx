@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
+import { ConfidencePill } from "@/components/Confidence";
 import { Countdown } from "@/components/Countdown";
 import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { GuessWidget } from "@/components/GuessWidget";
+import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
 import { Form, StandingsTable } from "@/components/StandingsTable";
-import { getMatch, getMatches, headToHead, leagueMatches, leagueTable } from "@/lib/data";
+import { getMarket, getMatch, getMatches, headToHead, leagueMatches, leagueTable } from "@/lib/data";
 import { fullDate, longDay, pct, time } from "@/lib/format";
 import { leagueByCode } from "@/lib/leagues";
 import { pickOf } from "@/lib/model";
@@ -111,6 +113,7 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
               <>
                 <span className="mh-label">Rinvalo tahmini</span>
                 <span className="mh-score">{p ? `${p.score[0]}-${p.score[1]}` : "–"}</span>
+                <ConfidencePill level={p?.confidence} />
               </>
             )}
           </div>
@@ -130,6 +133,9 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
 
       <div className="match-grid">
         <div className="stack">
+          {p && (
+            <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={m.league === "super-lig" ? "tr" : "en"} />
+          )}
           {p ? (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
@@ -137,6 +143,16 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
                 {finished && <span className="muted" style={{ fontSize: 13 }}>Tahmin {p.score[0]}-{p.score[1]} idi</span>}
               </div>
               <ExplainPick home={h.name} away={a.name} lh={p.lh} la={p.la} p={p.p} />
+              {p.reasons && p.reasons.length > 0 && (
+                <div className="why-box">
+                  <div className="eyebrow">Neden bu tahmin?</div>
+                  <ul>
+                    {p.reasons.map((r) => (
+                      <li key={r}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="kv-grid four">
                 <div className="kv">
                   <small>Beklenen gol</small>
