@@ -139,6 +139,8 @@ export interface TeamRating {
   /** Elo now, and how much the team's last game moved it. */
   elo: number;
   last: number;
+  /** [date, rating] after each game of this season. */
+  hist?: [string, number][];
   /** Goals and xG for/against per game against an average opponent. */
   gf: number;
   ga: number;

@@ -385,6 +385,7 @@ const TR = {
     hubTitle: "İki takımı yan yana koy",
   },
   share: { button: "Paylaş", copied: "Bağlantı kopyalandı" },
+  chart: { title: "Sezon grafiği", rating: "Güç puanı", position: "Sıra", xg: "xG", xgFor: "Attığı xG", xgAgainst: "Yediği xG", rolling: "Son 3 maç ortalaması" },
   stakes: {
     title: "Bu maçın önemi",
     win: "Kazanırsa",
@@ -741,6 +742,7 @@ const EN: Dict = {
     hubTitle: "Put two teams side by side",
   },
   share: { button: "Share", copied: "Link copied" },
+  chart: { title: "Season chart", rating: "Rating", position: "Position", xg: "xG", xgFor: "xG for", xgAgainst: "xG against", rolling: "Rolling 3-game average" },
   stakes: {
     title: "What's at stake",
     win: "Win",

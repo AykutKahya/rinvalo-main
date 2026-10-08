@@ -637,3 +637,13 @@ table.power td { vertical-align: middle; }
 .stakes-row b.good { color: var(--good); }
 .stakes-row b.bad { color: var(--bad); }
 @media (max-width: 560px) { .stakes-head, .stakes-row { grid-template-columns: minmax(0, 1fr) repeat(3, 52px); } .stakes-row b { font-size: 16px; } }
+
+/* ---------- Season chart ---------- */
+.chart { display: block; max-width: 100%; margin-top: 10px; }
+.chart-grid { stroke: var(--line); stroke-width: 1; }
+.chart-axis { fill: var(--muted); font-size: 12px; font-family: var(--font-body); }
+.chart-empty { padding: 24px; text-align: center; color: var(--muted); }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--card-2); }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; font: inherit; font-weight: 700; font-size: 13px; color: var(--muted); cursor: pointer; }
+.seg button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { CalendarButton } from "@/components/CalendarButton";
 import { CountUp } from "@/components/CountUp";
+import { SeasonChart } from "@/components/SeasonChart";
 import { Crest } from "@/components/Crest";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { MatchRow } from "@/components/MatchRow";
@@ -13,6 +14,7 @@ import { accuracy, getMatches, getSimulation, leagueTable, seasonTeams } from "@
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
 import { competitionName, leagueByCode, nameLang } from "@/lib/leagues";
+import { teamSeries } from "@/lib/series";
 import { team } from "@/lib/teams";
 
 export function teamParams() {
@@ -94,6 +96,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
 
       <div className="match-grid">
         <div className="stack">
+          {league && <SeasonChart series={teamSeries(slug, entry.league)} lang={lang} />}
           {upcoming.length > 0 && (
             <section className="card group" style={{ margin: 0 }}>
               <div className="group-head">

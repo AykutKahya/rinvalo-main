@@ -10,6 +10,7 @@ last pre-kick-off prediction stays frozen and is what the accuracy page grades.
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 import os
 import sys
 from datetime import datetime, timezone
@@ -130,11 +131,15 @@ def ratings(engine: Engine, fixtures: list[dict], now: pd.Timestamp) -> dict:
         season = season_of(max(f["kickoff"] for f in fixtures if f["league"] == league))
         teams = sorted({t for f in fixtures if f["league"] == league for t in (f["home"], f["away"])})
         # Replay the league to see how much each team's last game moved its rating.
-        replay, last = Elo(), {}
+        replay, last, hist = Elo(), {}, defaultdict(list)
         for d, s, h, a, hg, ag, *_ in engine.history[league]:
             before = (replay.get(h, s), replay.get(a, s))
             replay.update(h, a, hg, ag, s)
             last[h], last[a] = replay.r[h] - before[0], replay.r[a] - before[1]
+            if s == season:
+                # Rating after each game of this season, for the team page chart.
+                for t in (h, a):
+                    hist[t].append([d.strftime("%Y-%m-%d"), round(replay.r[t])])
         goals, qual = engine.strengths(league, season, now.normalize())
         rows = []
         for t in teams:
@@ -144,6 +149,7 @@ def ratings(engine: Engine, fixtures: list[dict], now: pd.Timestamp) -> dict:
                 "team": t,
                 "elo": round(engine.elo[league].get(t, season), 1),
                 "last": round(last.get(t, 0.0), 1),
+                "hist": hist.get(t, []),
                 "gf": gf,
                 "ga": ga,
                 "xgf": xgf,
