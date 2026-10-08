@@ -39,6 +39,16 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
 - **Kısa veri penceresi:** yalnız son 1 ya da 2 sezonla kurmak 5 sezondan kötü (0,9942 / 0,9886 vs 0,9873).
 - **Piyasa karışımı:** en iyi karışım (geriye dönük, iyimser) modele sıfır ağırlık veriyor. Ücretsiz
   verilerle piyasanın bilmediği bir bilgi yakalanamıyor; piyasa sakatlık ve ilk 11'i fiyatlıyor.
+- **Ekim 2026, 9 lig (2023-26, walk-forward; temel: isabet %52,16, log loss 0,9831):**
+  - Beraberlik göstergeleri (dc/xq beraberlik, toplam gol, güç farkı): 0,9826, isabet %52,09.
+  - Lig başına sabit: 0,9837 (kötü).
+  - Dinlenme farkı: 0,9832.
+  - Avrupa kupaları dahil ortak Elo farkı (`engine/cups.py`): ek olarak 0,9829, Elo yerine 0,9828.
+  - Kupa yorgunluğu (son 4 günde Avrupa maçı, kupa dahil dinlenme): 0,9839 (kötü).
+
+  Hiçbiri gürültüden büyük değil; model değiştirilmedi. Maçların %25,8'i berabere bitse de
+  beraberlik neredeyse hiç en olası sonuç olmuyor: piyasa 10.300 maçın yalnız 5'inde beraberliği
+  favori gösteriyor.
 
 ## Çalıştırma
 
