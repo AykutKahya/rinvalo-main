@@ -12,11 +12,13 @@ import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
 import { ShareButton } from "@/components/ShareButton";
+import { Stakes } from "@/components/Stakes";
 import { Form, StandingsTable } from "@/components/StandingsTable";
-import { getMarket, getMatch, getMatches, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
+import { getMarket, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
-import { competitionName, isCup, nameLang, zonesOf } from "@/lib/leagues";
+import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
+import { stakesOf } from "@/lib/stakes";
 import { team } from "@/lib/teams";
 
 export function matchParams() {
@@ -140,6 +142,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
 
       <div className="match-grid">
         <div className="stack">
+          {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
           {p && !cup && <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />}
           {p ? (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>

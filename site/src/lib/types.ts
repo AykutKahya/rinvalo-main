@@ -79,10 +79,23 @@ export interface TeamOutlook {
   avgPosition: number;
 }
 
+/** One side's season-ending odds split by the match result: [win for home, draw, win for away]. */
+export interface SideImpact {
+  champion: [number, number, number];
+  europe: [number, number, number];
+  relegation: [number, number, number];
+}
+export interface MatchImpact {
+  home: SideImpact;
+  away: SideImpact;
+}
+
 export interface SimulationFile {
   updatedAt: string;
   runs: number;
   leagues: Record<string, TeamOutlook[]>;
+  /** Stakes of the coming fortnight's games, by fixture id. */
+  impact?: Record<string, MatchImpact>;
 }
 
 export interface OverridesFile {

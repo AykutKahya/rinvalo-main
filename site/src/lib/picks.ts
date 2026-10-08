@@ -1,4 +1,5 @@
 import type { MatchView } from "./data";
+import { stakeWeight } from "./stakes";
 import type { SimulationFile } from "./types";
 
 const DAY = 86_400_000;
@@ -7,12 +8,16 @@ export function upcoming(matches: MatchView[], now: number, days: number): Match
   return matches.filter((m) => m.status === "scheduled" && m.prediction && Date.parse(m.kickoff) > now && Date.parse(m.kickoff) < now + days * DAY);
 }
 
-/** Match of the week: the two strongest sides by projected finish, closest contest breaks ties. */
+/**
+ * Match of the week: the game the season turns on most (biggest title, Europe or relegation swing),
+ * then the two strongest sides by projected finish.
+ */
 export function matchOfTheWeek(matches: MatchView[], sim: SimulationFile, now: number): MatchView | undefined {
   const pos = new Map<string, number>();
   for (const rows of Object.values(sim.leagues)) rows.forEach((r) => pos.set(r.team, r.avgPosition));
   const pool = upcoming(matches, now, 7);
-  const score = (m: MatchView) => (pos.get(m.home) ?? 10) + (pos.get(m.away) ?? 10) + Math.max(...m.prediction!.p) * 4;
+  const score = (m: MatchView) =>
+    (pos.get(m.home) ?? 10) + (pos.get(m.away) ?? 10) + Math.max(...m.prediction!.p) * 4 - stakeWeight(sim.impact?.[m.id], m.home, m.away) * 60;
   return [...pool].sort((a, b) => score(a) - score(b))[0];
 }
 

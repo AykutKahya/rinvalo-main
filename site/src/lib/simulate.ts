@@ -4,7 +4,7 @@
  */
 import type { League } from "./leagues";
 import { buildTable, compareRows, type TableRow } from "./table";
-import type { Fixture, Prediction, TeamOutlook } from "./types";
+import type { Fixture, MatchImpact, Prediction, TeamOutlook } from "./types";
 
 /** Small deterministic PRNG so the published numbers do not jump between identical runs. */
 function mulberry32(seed: number) {
@@ -28,12 +28,17 @@ function samplePoisson(lambda: number, rand: () => number): number {
   return k - 1;
 }
 
+/**
+ * `focus` lists upcoming fixtures whose stakes we want: for each, the same runs are split by that
+ * game's result, so "if they win / draw / lose" odds come at no extra cost.
+ */
 export function simulateLeague(
   league: League,
   fixtures: Fixture[],
   predictions: Record<string, Prediction>,
   runs = 5000,
-): TeamOutlook[] {
+  focus: Set<string> = new Set(),
+): { outlook: TeamOutlook[]; impact: Record<string, MatchImpact> } {
   const base = buildTable(fixtures, fixtures.flatMap((f) => [f.home, f.away]));
   const remaining = fixtures
     .filter((f) => f.status !== "finished")
@@ -43,12 +48,18 @@ export function simulateLeague(
   const n = base.length;
   const stats = new Map(base.map((r) => [r.team, { champion: 0, europe: 0, relegation: 0, points: 0, position: 0 }]));
   const rand = mulberry32(league.tsdb * 7919 + remaining.length);
+  // Per focus game: counts by its result (0 home win, 1 draw, 2 away win) of each side's season ending.
+  type Tally = { runs: number[]; home: number[][]; away: number[][] }; // [result][champion, europe, relegation]
+  const zero = () => [0, 1, 2].map(() => [0, 0, 0]);
+  const tallies = new Map<string, Tally>(remaining.filter((x) => focus.has(x.f.id)).map((x) => [x.f.id, { runs: [0, 0, 0], home: zero(), away: zero() }]));
+  const results = new Map<string, number>();
 
   for (let run = 0; run < runs; run++) {
     const rows = new Map<string, TableRow>(base.map((r) => [r.team, { ...r, form: [] }]));
     for (const { f, p } of remaining) {
       const hg = samplePoisson(p.lh, rand);
       const ag = samplePoisson(p.la, rand);
+      if (tallies.has(f.id)) results.set(f.id, hg > ag ? 0 : hg === ag ? 1 : 2);
       const h = rows.get(f.home)!;
       const a = rows.get(f.away)!;
       h.gf += hg;
@@ -63,6 +74,19 @@ export function simulateLeague(
       }
     }
     const order = [...rows.values()].sort((x, y) => compareRows(x, y) || (rand() < 0.5 ? -1 : 1));
+    const place = new Map(order.map((r, i) => [r.team, i]));
+    const ending = (team: string) => {
+      const i = place.get(team)!;
+      return [i === 0 ? 1 : 0, i < league.zones.europe ? 1 : 0, i >= n - league.zones.relegation ? 1 : 0];
+    };
+    for (const { f } of remaining) {
+      const t = tallies.get(f.id);
+      if (!t) continue;
+      const r = results.get(f.id)!;
+      t.runs[r]++;
+      ending(f.home).forEach((v, k) => (t.home[r][k] += v));
+      ending(f.away).forEach((v, k) => (t.away[r][k] += v));
+    }
     order.forEach((r, i) => {
       const s = stats.get(r.team)!;
       if (i === 0) s.champion++;
@@ -74,7 +98,17 @@ export function simulateLeague(
   }
 
   const r3 = (x: number) => Math.round(x * 1000) / 1000;
-  return [...stats.entries()]
+  const impact: Record<string, MatchImpact> = {};
+  for (const [id, t] of tallies) {
+    // Too few runs with one of the results to say anything reliable.
+    if (Math.min(...t.runs) < 150) continue;
+    const side = (c: number[][]) => {
+      const by = (k: number) => [0, 1, 2].map((r) => r3(c[r][k] / t.runs[r])) as [number, number, number];
+      return { champion: by(0), europe: by(1), relegation: by(2) };
+    };
+    impact[id] = { home: side(t.home), away: side(t.away) };
+  }
+  const outlook = [...stats.entries()]
     .map(([team, s]) => ({
       team,
       champion: r3(s.champion / runs),
@@ -84,4 +118,5 @@ export function simulateLeague(
       avgPosition: Math.round((s.position / runs) * 10) / 10,
     }))
     .sort((a, b) => a.avgPosition - b.avgPosition);
+  return { outlook, impact };
 }

@@ -379,6 +379,16 @@ const TR = {
     hubTitle: "İki takımı yan yana koy",
   },
   share: { button: "Paylaş", copied: "Bağlantı kopyalandı" },
+  stakes: {
+    title: "Bu maçın önemi",
+    win: "Kazanırsa",
+    draw: "Berabere",
+    loss: "Kaybederse",
+    champion: "Şampiyonluk",
+    top: (n: number) => `İlk ${n}`,
+    promotion: "Doğrudan yükselme",
+    relegation: "Küme düşme",
+  },
   calendar: {
     button: "Takvime ekle",
     google: "Google Takvim",
@@ -719,6 +729,16 @@ const EN: Dict = {
     hubTitle: "Put two teams side by side",
   },
   share: { button: "Share", copied: "Link copied" },
+  stakes: {
+    title: "What's at stake",
+    win: "Win",
+    draw: "Draw",
+    loss: "Loss",
+    champion: "Title",
+    top: (n) => `Top ${n}`,
+    promotion: "Automatic promotion",
+    relegation: "Relegation",
+  },
   calendar: {
     button: "Add to calendar",
     google: "Google Calendar",

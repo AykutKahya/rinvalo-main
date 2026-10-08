@@ -625,3 +625,15 @@ table.power td { vertical-align: middle; }
 .guess-all { align-self: center; font-size: 13px; font-weight: 700; color: var(--accent); }
 .footer a { font-weight: 600; color: var(--muted); }
 .footer a:hover { color: var(--accent); }
+
+/* ---------- Stakes ---------- */
+.stakes { display: flex; flex-direction: column; gap: 6px; }
+.stakes-head, .stakes-row { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 76px); align-items: center; gap: 8px; }
+.stakes-head span { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.stakes-row { padding: 8px 0; border-top: 1px solid var(--line); }
+.stakes-row .tname > span { display: flex; flex-direction: column; min-width: 0; }
+.stakes-row small { color: var(--muted); font-size: 12px; font-weight: 600; }
+.stakes-row b { text-align: center; font-family: var(--font-display); font-size: 19px; font-weight: 700; }
+.stakes-row b.good { color: var(--good); }
+.stakes-row b.bad { color: var(--bad); }
+@media (max-width: 560px) { .stakes-head, .stakes-row { grid-template-columns: minmax(0, 1fr) repeat(3, 52px); } .stakes-row b { font-size: 16px; } }

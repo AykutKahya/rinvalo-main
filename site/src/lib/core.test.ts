@@ -97,9 +97,12 @@ test("season simulation sums to one champion per run", () => {
   const league = LEAGUES[0];
   const fixtures = [fx("ab", "a", "b", null, null, "2026-11-01T18:00:00Z"), fx("ba", "b", "a", null, null, "2026-11-08T18:00:00Z")];
   const pred = (id: string) => ({ fixtureId: id, madeAt: "", model: "", lh: 1.5, la: 1.0, p: [0.5, 0.25, 0.25] as [number, number, number], score: [1, 0] as [number, number], top: [], over25: 0.5, btts: 0.5, grid: [] });
-  const out = simulateLeague(league, fixtures, { ab: pred("ab"), ba: pred("ba") }, 2000);
-  const total = out.reduce((s, r) => s + r.champion, 0);
+  const { outlook, impact } = simulateLeague(league, fixtures, { ab: pred("ab"), ba: pred("ba") }, 2000, new Set(["ab"]));
+  const total = outlook.reduce((s, r) => s + r.champion, 0);
   assert.ok(Math.abs(total - 1) < 0.002);
+  // Winning the first game must raise a's title odds above losing it.
+  const a = impact.ab.home.champion;
+  assert.ok(a[0] > a[2]);
 });
 
 test("openfootball lines with and without kick-off time are parsed", () => {
