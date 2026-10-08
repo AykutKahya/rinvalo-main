@@ -12,6 +12,7 @@
     "backtest": "python ../engine/backtest.py",
     "update": "tsx scripts/update.ts",
     "simulate": "tsx scripts/simulate.ts",
+    "cups": "tsx scripts/cups.ts",
     "stats": "tsx scripts/stats.ts current"
   },
   "dependencies": {

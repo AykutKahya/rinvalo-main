@@ -3,9 +3,10 @@ import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { MatchBrowser } from "@/components/MatchBrowser";
 import { ProbBar } from "@/components/ProbBar";
-import { accuracy, getEngineBacktest, getMatches, getSimulation, LEAGUES } from "@/lib/data";
+import { accuracy, getEngineBacktest, getMatches, getSimulation } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { dict, paths, type Lang } from "@/lib/i18n";
+import { competitions } from "@/lib/leagues";
 import { closestPicks, lite, matchOfTheWeek, surestPicks } from "@/lib/picks";
 import { team } from "@/lib/teams";
 
@@ -37,7 +38,7 @@ export function Home({ lang }: { lang: Lang }) {
 
   return (
     <div className="home-grid">
-      <MatchBrowser matches={window.map(lite)} leagues={LEAGUES} initialDay={initialDay} lang={lang} />
+      <MatchBrowser matches={window.map(lite)} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
 
       <aside className="side-stack" aria-label={h.highlights}>
         {motw && motw.prediction && (

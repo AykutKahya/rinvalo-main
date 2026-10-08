@@ -13,10 +13,10 @@ import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
 import { ShareButton } from "@/components/ShareButton";
 import { Form, StandingsTable } from "@/components/StandingsTable";
-import { getMarket, getMatch, getMatches, headToHead, leagueMatches, leagueTable } from "@/lib/data";
+import { getMarket, getMatch, getMatches, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { alternates, dict, paths, type Lang } from "@/lib/i18n";
-import { leagueByCode, nameLang } from "@/lib/leagues";
+import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
+import { competitionName, isCup, nameLang, zonesOf } from "@/lib/leagues";
 import { team } from "@/lib/teams";
 
 export function matchParams() {
@@ -47,10 +47,13 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
   const t = dict(lang);
   const tm = t.match;
   const path = paths(lang);
-  const league = leagueByCode(m.league)!;
+  const compName = competitionName(m.league, lang);
+  const cup = isCup(m.league);
   const h = team(m.home, lang);
   const a = team(m.away, lang);
   const nl = nameLang(m.league);
+  // Cup games mix countries, so each name gets the language of its own league.
+  const langOf = (slug: string) => (cup ? nameLang(teamLeague(slug) ?? "") : nl);
   const p = m.prediction;
   const finished = m.status === "finished";
   const actual: [number, number] | null = finished ? [m.hg!, m.ag!] : null;
@@ -75,7 +78,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
     eventStatus: m.status === "postponed" ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled",
     homeTeam: { "@type": "SportsTeam", name: h.name },
     awayTeam: { "@type": "SportsTeam", name: a.name },
-    superEvent: { "@type": "SportsEvent", name: league.name },
+    superEvent: { "@type": "SportsEvent", name: compName },
     ...(m.venue ? { location: { "@type": "Place", name: m.venue } } : {}),
   };
 
@@ -84,8 +87,8 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="card match-hero reveal" style={heroStyle}>
         <div className="mh-top">
-          <Link href={path.leagueOf(league.code)}>
-            {league.name} · {t.round(m.round)}
+          <Link href={path.leagueOf(m.league)}>
+            {compName} · {roundLabel(lang, m.league, m.round)}
           </Link>
           <span className="mh-meta">
             {f.longDay(m.kickoff)} · {f.time(m.kickoff)}
@@ -94,7 +97,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           </span>
         </div>
         <div className="mh-teams">
-          <Link href={path.teamOf(m.home)} className="mh-team" lang={nl}>
+          <Link href={path.teamOf(m.home)} className="mh-team" lang={langOf(m.home)}>
             <Crest slug={m.home} size="lg" />
             {h.name}
             {hi >= 0 && <small lang={lang}>{tm.position(hi + 1)}</small>}
@@ -121,7 +124,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
               </>
             )}
           </div>
-          <Link href={path.teamOf(m.away)} className="mh-team" lang={nl}>
+          <Link href={path.teamOf(m.away)} className="mh-team" lang={langOf(m.away)}>
             <Crest slug={m.away} size="lg" />
             {a.name}
             {ai >= 0 && <small lang={lang}>{tm.position(ai + 1)}</small>}
@@ -137,7 +140,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
 
       <div className="match-grid">
         <div className="stack">
-          {p && <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />}
+          {p && !cup && <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />}
           {p ? (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
@@ -249,9 +252,9 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
             <section className="card card-pad">
               <div className="section-title">
                 <h2 style={{ fontSize: 16 }}>{tm.table}</h2>
-                <Link href={path.leagueOf(league.code)}>{tm.fullTable}</Link>
+                <Link href={path.leagueOf(m.league)}>{tm.fullTable}</Link>
               </div>
-              <StandingsTable rows={table} league={league} highlight={[m.home, m.away]} only={near} compact lang={lang} />
+              <StandingsTable rows={table} zones={zonesOf(m.league)} highlight={[m.home, m.away]} only={near} compact lang={lang} />
             </section>
           )}
           {nextUp.length > 0 && (

@@ -4,15 +4,16 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { MatchView } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { dict, paths, type Lang } from "@/lib/i18n";
-import type { League } from "@/lib/leagues";
+import { dict, paths, roundLabel, type Lang } from "@/lib/i18n";
+
+type Comp = { code: string; name: string; accent: string };
 import { LeagueMark } from "./Crest";
 import { useFavorites } from "./favorites";
 import { MatchRow } from "./MatchRow";
 
 type Filter = "all" | "fav" | string;
 
-export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: MatchView[]; leagues: League[]; initialDay: string; lang: Lang }) {
+export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: MatchView[]; leagues: Comp[]; initialDay: string; lang: Lang }) {
   const { dayKey, dayNum, shortDay } = fmt(lang);
   const t = dict(lang);
   const b = t.browser;
@@ -105,7 +106,7 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
                   <LeagueMark code={l.code} accent={l.accent} size={20} />
                   {l.name}
                   <span className="muted" style={{ fontWeight: 600 }}>
-                    · {t.round(ms[0].round)}
+                    · {roundLabel(lang, l.code, ms[0].round)}
                   </span>
                 </Link>
                 <span>{t.colsPick}</span>

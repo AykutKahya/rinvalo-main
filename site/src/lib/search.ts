@@ -3,7 +3,7 @@ import type { SearchItem } from "@/components/Search";
 import { getMatches, LEAGUES, seasonTeams } from "./data";
 import { fmt } from "./format";
 import { paths, type Lang } from "./i18n";
-import { countryOf } from "./leagues";
+import { competitionName, countryOf, CUPS } from "./leagues";
 import { team } from "./teams";
 
 const DAY = 86_400_000;
@@ -12,10 +12,12 @@ const DAY = 86_400_000;
 export function searchIndex(lang: Lang, now = Date.now()): SearchItem[] {
   const f = fmt(lang);
   const p = paths(lang);
-  const leagueName = new Map(LEAGUES.map((l) => [l.code, l.name]));
-  const leagues: SearchItem[] = LEAGUES.map((l) => ({ kind: "league", label: l.name, sub: countryOf(l, lang), href: p.leagueOf(l.code), img: leagueSrc(l.code), imgBg: WHITE_LOGO.has(l.code) ? l.accent : undefined }));
+  const leagues: SearchItem[] = [
+    ...LEAGUES.map((l) => ({ code: l.code as string, label: l.name, sub: countryOf(l, lang), accent: l.accent })),
+    ...CUPS.map((c) => ({ code: c.code as string, label: competitionName(c.code, lang), sub: "UEFA", accent: c.accent })),
+  ].map((l) => ({ kind: "league", label: l.label, sub: l.sub, href: p.leagueOf(l.code), img: leagueSrc(l.code), imgBg: WHITE_LOGO.has(l.code) ? l.accent : undefined }));
   const teams: SearchItem[] = seasonTeams()
-    .map(({ slug, league }) => ({ kind: "team" as const, label: team(slug, lang).name, sub: leagueName.get(league) ?? "", href: p.teamOf(slug), img: crestSrc(slug) }))
+    .map(({ slug, league }) => ({ kind: "team" as const, label: team(slug, lang).name, sub: competitionName(league, lang), href: p.teamOf(slug), img: crestSrc(slug) }))
     .sort((a, b) => a.label.localeCompare(b.label, lang));
   const matches: SearchItem[] = getMatches()
     .filter((m) => m.status !== "finished" && Date.parse(m.kickoff) > now - DAY && Date.parse(m.kickoff) < now + 14 * DAY)
@@ -23,7 +25,7 @@ export function searchIndex(lang: Lang, now = Date.now()): SearchItem[] {
     .map((m) => ({
       kind: "match",
       label: `${team(m.home, lang).name} – ${team(m.away, lang).name}`,
-      sub: `${f.dayNum(m.kickoff)} ${f.shortDay(m.kickoff)} ${f.time(m.kickoff)} · ${leagueName.get(m.league)}`,
+      sub: `${f.dayNum(m.kickoff)} ${f.shortDay(m.kickoff)} ${f.time(m.kickoff)} · ${competitionName(m.league, lang)}`,
       href: p.matchOf(m.id),
       img: crestSrc(m.home),
     }));

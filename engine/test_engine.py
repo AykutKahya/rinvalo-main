@@ -77,5 +77,23 @@ class EngineTest(unittest.TestCase):
         self.assertLess(s["logloss"], 0.4)
 
 
+class EuropeTest(unittest.TestCase):
+    def test_league_strength_flows_through_cup_games(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from cups import HOME, EuroElo
+
+        elo = EuroElo()
+        for t in ("a1", "a2"):
+            elo.get(t, "2024-25", "strong")
+        for t in ("b1", "b2"):
+            elo.get(t, "2024-25", "weak")
+        for _ in range(20):
+            elo.update("a1", "b1", 2, 0, "2024-25", None, HOME, 28)
+            elo.update("b2", "a2", 0, 2, "2024-25", None, HOME, 28)
+        self.assertGreater(elo.league_mean("strong"), elo.league_mean("weak") + 50)
+        # A club we only meet in Europe starts below the tracked leagues.
+        self.assertLess(elo.get("outsider", "2024-25", None), 1500)
+
+
 if __name__ == "__main__":
     unittest.main()

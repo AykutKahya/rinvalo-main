@@ -11,7 +11,7 @@ import { Form } from "@/components/StandingsTable";
 import { accuracy, getMatches, getSimulation, leagueTable, seasonTeams } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
-import { leagueByCode, nameLang } from "@/lib/leagues";
+import { competitionName, leagueByCode, nameLang } from "@/lib/leagues";
 import { team } from "@/lib/teams";
 
 export function teamParams() {
@@ -32,7 +32,8 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
   const tt = d.team;
   const path = paths(lang);
   const t = team(slug, lang);
-  const league = leagueByCode(entry.league)!;
+  // Undefined for clubs we only see in a European cup.
+  const league = leagueByCode(entry.league);
   const matches = getMatches().filter((m) => m.home === slug || m.away === slug);
   const table = leagueTable(entry.league);
   const pos = table.findIndex((r) => r.team === slug);
@@ -53,37 +54,41 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
             {t.name}
           </h1>
           <p className="muted" style={{ margin: "2px 0 8px" }}>
-            <Link href={path.leagueOf(league.code)}>{league.name}</Link>
+            <Link href={path.leagueOf(entry.league)}>{competitionName(entry.league, lang)}</Link>
             {row ? tt.standing(pos + 1, row.points) : ""}
           </p>
           {row && <Form form={row.form} lang={lang} />}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <FavoriteButton slug={slug} name={t.name} lang={lang} />
-          <Link href={`${path.compare}?a=${slug}`} className="btn ghost">
-            {d.compare.cta}
-          </Link>
+          {league && (
+            <Link href={`${path.compare}?a=${slug}`} className="btn ghost">
+              {d.compare.cta}
+            </Link>
+          )}
         </div>
       </div>
 
-      <div className="stat-row" style={{ marginTop: 16 }}>
-        <div className="card stat">
-          <b>{outlook ? <CountUp value={outlook.champion} lang={lang} /> : "–"}</b>
-          <span>{tt.champion}</span>
+      {league && (
+        <div className="stat-row" style={{ marginTop: 16 }}>
+          <div className="card stat">
+            <b>{outlook ? <CountUp value={outlook.champion} lang={lang} /> : "–"}</b>
+            <span>{tt.champion}</span>
+          </div>
+          <div className="card stat">
+            <b>{outlook ? <CountUp value={outlook.europe} lang={lang} /> : "–"}</b>
+            <span>{tt.top(league.zones.europe)}</span>
+          </div>
+          <div className="card stat">
+            <b>{outlook ? <CountUp value={outlook.relegation} lang={lang} /> : "–"}</b>
+            <span>{tt.relegation}</span>
+          </div>
+          <div className="card stat">
+            <b>{outlook ? <CountUp value={Math.round(outlook.avgPoints)} kind="int" lang={lang} /> : "–"}</b>
+            <span>{tt.points}</span>
+          </div>
         </div>
-        <div className="card stat">
-          <b>{outlook ? <CountUp value={outlook.europe} lang={lang} /> : "–"}</b>
-          <span>{tt.top(league.zones.europe)}</span>
-        </div>
-        <div className="card stat">
-          <b>{outlook ? <CountUp value={outlook.relegation} lang={lang} /> : "–"}</b>
-          <span>{tt.relegation}</span>
-        </div>
-        <div className="card stat">
-          <b>{outlook ? <CountUp value={Math.round(outlook.avgPoints)} kind="int" lang={lang} /> : "–"}</b>
-          <span>{tt.points}</span>
-        </div>
-      </div>
+      )}
 
       <div className="match-grid">
         <div className="stack">

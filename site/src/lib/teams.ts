@@ -1,3 +1,5 @@
+import cupTeams from "../../data/cup-teams.json";
+
 /**
  * Team registry. Every source spells clubs differently (football-data.co.uk "Man United",
  * TheSportsDB "Manchester United", openfootball "Manchester United FC"), so each team has one
@@ -295,6 +297,13 @@ for (const [slug, name, short, c1, c2, ...aliases] of ROWS) {
   for (const alias of [slug.replace(/-/g, " "), name, ...aliases]) {
     BY_ALIAS.set(normalizeName(alias), slug);
   }
+}
+
+// Clubs from outside the tracked leagues that play in European cups, written by scripts/cups.ts.
+for (const [slug, [name, short]] of Object.entries(cupTeams as unknown as Record<string, [string, string]>)) {
+  if (BY_SLUG.has(slug)) continue;
+  BY_SLUG.set(slug, { slug, name, short, colors: ["#5b6b82", "#ffffff"] });
+  if (!BY_ALIAS.has(normalizeName(name))) BY_ALIAS.set(normalizeName(name), slug);
 }
 
 /** Resolve any source spelling to a slug, or null when the name is unknown. */

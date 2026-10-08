@@ -73,6 +73,15 @@ jobs:
         continue-on-error: true
         run: python ../engine/predict.py
 
+      - name: European cups
+        continue-on-error: true
+        run: npm run cups
+
+      - name: European cup predictions
+        # One Elo scale across the nine leagues and the cups; leaves league predictions untouched.
+        continue-on-error: true
+        run: python ../engine/cups.py
+
       - name: Season simulation
         run: npm run simulate
 

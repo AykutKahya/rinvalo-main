@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { cache } from "react";
-import { LEAGUES, type LeagueCode } from "./leagues";
+import { isCup, LEAGUES, type LeagueCode } from "./leagues";
 import { outcomeOf, pickOf } from "./model";
 import { buildTable } from "./table";
 import type { Fixture, HistoryFile, Prediction, PredictionsFile, SeasonFile, SimulationFile } from "./types";
@@ -60,36 +60,55 @@ export function toView(f: Fixture, predictions: Record<string, Prediction>): Mat
   };
 }
 
+/** European cup fixtures (scripts/cups.ts). */
+export const getCups = cache(() => read<{ updatedAt: string; fixtures: Fixture[] }>("cups.json", { updatedAt: "", fixtures: [] }).fixtures);
+
+/** Every fixture: the nine leagues and the European cups. */
 export const getMatches = cache((): MatchView[] => {
   const predictions = getPredictions();
-  return getSeason().fixtures.map((f) => toView(f, predictions));
+  return [...getSeason().fixtures, ...getCups()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)).map((f) => toView(f, predictions));
 });
 
 export function getMatch(id: string): MatchView | undefined {
   return getMatches().find((m) => m.id === id);
 }
 
-export function leagueMatches(code: LeagueCode): MatchView[] {
+/** Matches of one league or cup. */
+export function leagueMatches(code: string): MatchView[] {
   return getMatches().filter((m) => m.league === code);
 }
 
-export function leagueTable(code: LeagueCode) {
-  const ms = leagueMatches(code);
+export function leagueTable(code: string) {
+  // A cup table is its league phase only.
+  const ms = leagueMatches(code).filter((m) => !isCup(code) || m.round <= 8);
   return buildTable(ms, ms.flatMap((m) => [m.home, m.away]));
 }
 
 export function teamLeague(slug: string): LeagueCode | undefined {
-  return getMatches().find((m) => m.home === slug || m.away === slug)?.league;
+  return getSeason().fixtures.find((m) => m.home === slug || m.away === slug)?.league as LeagueCode | undefined;
 }
 
-export function seasonTeams(): { slug: string; league: LeagueCode }[] {
-  const seen = new Map<string, LeagueCode>();
-  for (const m of getMatches()) {
-    seen.set(m.home, m.league);
-    seen.set(m.away, m.league);
+/**
+ * Every club with a page: its domestic league, or the cup it plays in when we do not track its league.
+ */
+export const seasonTeams = cache((): { slug: string; league: string }[] => {
+  const seen = new Map<string, string>();
+  for (const f of getCups()) {
+    seen.set(f.home, f.league);
+    seen.set(f.away, f.league);
+  }
+  for (const f of getSeason().fixtures) {
+    seen.set(f.home, f.league);
+    seen.set(f.away, f.league);
   }
   return [...seen.entries()].map(([slug, league]) => ({ slug, league }));
+});
+
+export interface EuropeFile {
+  leagues: { league: string; rating: number }[];
+  clubs: { team: string; rating: number; league: string | null }[];
 }
+export const getEurope = cache(() => read<EuropeFile>("europe.json", { leagues: [], clubs: [] }));
 
 export interface Record_ {
   n: number;

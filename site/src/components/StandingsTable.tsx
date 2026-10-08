@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { dict, paths, type Lang } from "@/lib/i18n";
-import type { League } from "@/lib/leagues";
 import type { TableRow } from "@/lib/table";
 import { team } from "@/lib/teams";
 import { Crest } from "./Crest";
@@ -22,14 +21,15 @@ export function Form({ form, lang }: { form: TableRow["form"]; lang: Lang }) {
 /** Full or partial standings. `only` limits rows to the given positions (0-based). */
 export function StandingsTable({
   rows,
-  league,
+  zones,
   lang,
   highlight = [],
   only,
   compact = false,
 }: {
   rows: TableRow[];
-  league: League;
+  /** Coloured places at the top (Europe, promotion, cup knockout) and bottom (relegation, out). */
+  zones: { europe: number; relegation: number };
   lang: Lang;
   highlight?: string[];
   only?: number[];
@@ -64,7 +64,7 @@ export function StandingsTable({
             only && !only.includes(i) ? null : (
               <tr key={r.team} className={highlight.includes(r.team) ? "hl" : undefined}>
                 <td className="c">
-                  <span className={`pos${i < league.zones.europe ? " eu" : i >= n - league.zones.relegation ? " rel" : ""}`}>{i + 1}</span>
+                  <span className={`pos${i < zones.europe ? " eu" : i >= n - zones.relegation ? " rel" : ""}`}>{i + 1}</span>
                 </td>
                 <td>
                   <Link href={p.teamOf(r.team)} className="tname">

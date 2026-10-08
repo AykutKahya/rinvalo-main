@@ -91,6 +91,14 @@ const TR = {
   draw: "Beraberlik",
   drawShort: "Ber.",
   round: (n: number) => `${n}. hafta`,
+  cupStage: {
+    phase: (n: number) => `Lig aşaması ${n}. maç`,
+    32: "Play-off",
+    16: "Son 16",
+    125: "Çeyrek final",
+    150: "Yarı final",
+    200: "Final",
+  } as { phase: (n: number) => string } & Record<number, string>,
   roundCap: (n: number) => `${n}. Hafta`,
   colsPick: "1 · X · 2 \u00a0 Skor",
   today: "Bugün",
@@ -203,6 +211,11 @@ const TR = {
     outlook: "Sezon sonu",
     stats: "İstatistik",
     zones: (n: number) => `Mavi: ilk ${n} · Kırmızı: küme düşme hattı`,
+    cupFixtures: "Fikstür ve tahminler",
+    cupTable: "Lig aşaması",
+    cupZones: "Mavi: ilk 8 doğrudan son 16 · 9-24 play-off · Kırmızı: elenir",
+    cupPlayed: (a: number, b: number) => `${a}/${b} maç oynandı`,
+    europe: "Avrupa kupaları",
   },
   seasonEnd: {
     caption: (n: string) => `${n} sezon simülasyonuna göre beklenen final tablosu`,
@@ -274,6 +287,11 @@ const TR = {
     attackHint: "Ortalama rakibe karşı maç başı beklenen gol",
     defence: "Savunma",
     defenceHint: "Ortalama rakibe karşı maç başı beklenen yenilen gol",
+    europe: "Avrupa",
+    leagueStrength: "Lig gücü",
+    leagueStrengthNote: "Lig ve Avrupa kupası maçlarından tek ölçekte hesaplanan ortalama güç puanı",
+    clubs: "Avrupa'nın en güçlü kulüpleri",
+    other: "Diğer",
   },
   surprises: {
     title: "Haftanın sürprizleri",
@@ -389,6 +407,14 @@ const EN: Dict = {
   draw: "Draw",
   drawShort: "Draw",
   round: (n) => `Matchday ${n}`,
+  cupStage: {
+    phase: (n: number) => `League phase, matchday ${n}`,
+    32: "Play-off",
+    16: "Round of 16",
+    125: "Quarter-final",
+    150: "Semi-final",
+    200: "Final",
+  },
   roundCap: (n) => `Matchday ${n}`,
   colsPick: "1 · X · 2 \u00a0 Score",
   today: "Today",
@@ -500,6 +526,11 @@ const EN: Dict = {
     outlook: "Projection",
     stats: "Stats",
     zones: (n) => `Blue: top ${n} · Red: relegation zone`,
+    cupFixtures: "Fixtures and predictions",
+    cupTable: "League phase",
+    cupZones: "Blue: top 8 into the round of 16 · 9-24 play-off · Red: out",
+    cupPlayed: (a, b) => `${a}/${b} games played`,
+    europe: "European cups",
   },
   seasonEnd: {
     caption: (n) => `Expected final table from ${n} simulated seasons`,
@@ -571,6 +602,11 @@ const EN: Dict = {
     attackHint: "Expected goals scored per game against an average opponent",
     defence: "Defence",
     defenceHint: "Expected goals conceded per game against an average opponent",
+    europe: "Europe",
+    leagueStrength: "League strength",
+    leagueStrengthNote: "Average rating on one scale built from league and European cup games",
+    clubs: "Europe's strongest clubs",
+    other: "Other",
   },
   surprises: {
     title: "Surprises of the week",
@@ -666,4 +702,11 @@ function ordinal(n: number) {
 
 export function dict(lang: Lang): Dict {
   return lang === "en" ? EN : TR;
+}
+
+/** "7. hafta" for a league, "Son 16" / "Lig aşaması 3. maç" for a cup. */
+export function roundLabel(lang: Lang, competition: string, round: number): string {
+  const d = dict(lang);
+  if (["ucl", "uel", "uecl"].includes(competition)) return round <= 8 ? d.cupStage.phase(round) : (d.cupStage[round] ?? d.round(round));
+  return d.round(round);
 }

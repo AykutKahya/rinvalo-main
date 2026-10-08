@@ -134,3 +134,49 @@ export function countryOf(l: League, lang: "tr" | "en"): string {
 
 /** Uppercased team names need their own language: BEŞİKTAŞ keeps its dotted İ, LIVERPOOL does not get one. */
 export const nameLang = (league: string) => (league === "super-lig" ? "tr" : "en");
+
+
+/** UEFA club competitions. Fixtures live in data/cups.json, apart from the domestic season. */
+export type CupCode = "ucl" | "uel" | "uecl";
+
+export interface Cup {
+  code: CupCode;
+  name: string;
+  tsdb: number;
+  accent: string;
+  /** League phase table: direct to the round of 16 / play-off places. */
+  zones: { direct: number; playoff: number };
+}
+
+export const CUPS: Cup[] = [
+  { code: "ucl", name: "Şampiyonlar Ligi", tsdb: 4480, accent: "#0e1e5b", zones: { direct: 8, playoff: 24 } },
+  { code: "uel", name: "Avrupa Ligi", tsdb: 4481, accent: "#f26722", zones: { direct: 8, playoff: 24 } },
+  { code: "uecl", name: "Konferans Ligi", tsdb: 5071, accent: "#00b050", zones: { direct: 8, playoff: 24 } },
+];
+
+const CUP_EN: Record<CupCode, string> = { ucl: "Champions League", uel: "Europa League", uecl: "Conference League" };
+
+export const cupByCode = (code: string) => CUPS.find((c) => c.code === code);
+export const isCup = (code: string) => CUPS.some((c) => c.code === code);
+
+/** TheSportsDB round numbers: 1-8 league phase, 32 play-off, 16 round of 16, 125 quarter, 150 semi, 200 final. */
+export const CUP_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 32, 16, 125, 150, 200];
+
+/** Display name of a league or cup in the page language. */
+export function competitionName(code: string, lang: "tr" | "en"): string {
+  const cup = cupByCode(code);
+  if (cup) return lang === "en" ? CUP_EN[cup.code] : cup.name;
+  return leagueByCode(code)?.name ?? code;
+}
+
+/** Name, colour and code of any competition, for lists that mix leagues and cups. */
+export function competitions(lang: "tr" | "en") {
+  return [...LEAGUES.map((l) => ({ code: l.code as string, name: l.name, accent: l.accent })), ...CUPS.map((c) => ({ code: c.code as string, name: competitionName(c.code, lang), accent: c.accent }))];
+}
+
+/** Coloured table places for a league or a cup's league phase (8 direct, 9-24 play-off, 25-36 out). */
+export function zonesOf(code: string): { europe: number; relegation: number } {
+  const cup = cupByCode(code);
+  if (cup) return { europe: cup.zones.direct, relegation: 36 - cup.zones.playoff };
+  return leagueByCode(code)?.zones ?? { europe: 0, relegation: 0 };
+}

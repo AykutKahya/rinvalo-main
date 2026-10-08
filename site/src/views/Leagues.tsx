@@ -4,7 +4,7 @@ import { Crest, LeagueMark } from "@/components/Crest";
 import { getSimulation, leagueMatches, leagueTable, LEAGUES } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
-import { countryOf } from "@/lib/leagues";
+import { competitionName, countryOf, CUPS } from "@/lib/leagues";
 import { team } from "@/lib/teams";
 
 export function leaguesMetadata(lang: Lang): Metadata {
@@ -61,6 +61,43 @@ export function Leagues({ lang }: { lang: Lang }) {
                   </b>
                 </div>
               )}
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="section-title" style={{ marginTop: 28 }}>
+        <h2>{dict(lang).league.europe}</h2>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: 16 }}>
+        {CUPS.map((c) => {
+          const table = leagueTable(c.code).slice(0, 5);
+          const played = leagueMatches(c.code).filter((m) => m.status === "finished").length;
+          return (
+            <Link key={c.code} href={p.leagueOf(c.code)} className="card card-pad reveal" style={{ display: "flex", flexDirection: "column", gap: 12, borderTop: `4px solid ${c.accent}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <h2 style={{ fontSize: 19, display: "flex", alignItems: "center", gap: 10 }}>
+                  <LeagueMark code={c.code} accent={c.accent} size={30} />
+                  {competitionName(c.code, lang)}
+                </h2>
+                <span className="muted" style={{ fontSize: 13 }}>
+                  UEFA · {t.played(played)}
+                </span>
+              </div>
+              <div className="mini-list">
+                {table.map((r, i) => (
+                  <div key={r.team} className="mini-item">
+                    <span className="tname">
+                      <span className="muted num" style={{ width: 16 }}>
+                        {i + 1}
+                      </span>
+                      <Crest slug={r.team} size="sm" />
+                      {team(r.team, lang).name}
+                    </span>
+                    <b className="num">{r.points}</b>
+                  </div>
+                ))}
+              </div>
             </Link>
           );
         })}

@@ -1,4 +1,4 @@
-import type { LeagueCode } from "./leagues";
+import type { CupCode, LeagueCode } from "./leagues";
 
 /** [league, season, date YYYY-MM-DD, home slug, away slug, home goals, away goals] */
 export type HistoryMatch = [LeagueCode, string, string, string, string, number, number];
@@ -12,7 +12,7 @@ export type FixtureStatus = "scheduled" | "finished" | "postponed" | "live";
 
 export interface Fixture {
   id: string;
-  league: LeagueCode;
+  league: LeagueCode | CupCode;
   round: number;
   /** ISO timestamp in UTC. */
   kickoff: string;

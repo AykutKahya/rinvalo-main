@@ -8,13 +8,13 @@ import { resolveTeam } from "../../src/lib/teams";
 import type { Fixture, FixtureStatus } from "../../src/lib/types";
 
 const KEY = process.env.THESPORTSDB_KEY || "123";
-const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`;
+export const BASE = `https://www.thesportsdb.com/api/v1/json/${KEY}`;
 const GAP_MS = 2200;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let last = 0;
 
-async function getJson(url: string): Promise<unknown> {
+export async function getJson(url: string): Promise<unknown> {
   for (let attempt = 0; attempt < 4; attempt++) {
     const wait = last + GAP_MS - Date.now();
     if (wait > 0) await sleep(wait);
@@ -35,7 +35,7 @@ async function getJson(url: string): Promise<unknown> {
   throw new Error("TheSportsDB yanıt vermedi");
 }
 
-interface TsdbEvent {
+export interface TsdbEvent {
   idEvent: string;
   intRound: string | null;
   strTimestamp: string | null;
@@ -53,7 +53,7 @@ interface TsdbEvent {
   strLeagueBadge?: string | null;
 }
 
-function status(e: TsdbEvent, hasScore: boolean, kickoff: number): FixtureStatus {
+export function status(e: TsdbEvent, hasScore: boolean, kickoff: number): FixtureStatus {
   const s = (e.strStatus ?? "").toLowerCase();
   if (e.strPostponed === "yes" || /postp|pst|canc|abd|susp/.test(s)) return "postponed";
   if (/^(ft|aet|pen|match finished|finished)/.test(s) && hasScore) return "finished";
@@ -108,4 +108,10 @@ export async function fetchRound(league: League, round: number): Promise<RoundRe
     });
   }
   return { fixtures, unknownTeams, badges, leagueBadge };
+}
+
+/** Raw events of one round of any competition and season ("2026-2027"). */
+export async function fetchEvents(tsdbId: number, round: number, season: string): Promise<TsdbEvent[]> {
+  const data = (await getJson(`${BASE}/eventsround.php?id=${tsdbId}&r=${round}&s=${season}`)) as { events: TsdbEvent[] | null };
+  return data.events ?? [];
 }

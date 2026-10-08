@@ -22,7 +22,7 @@ export function Crest({ slug, size }: { slug: string; size?: "sm" | "md" | "lg" 
 }
 
 /** Leagues whose published logo is white-only; they are shown on their own colour. */
-export const WHITE_LOGO = new Set(["eredivisie", "primeira-liga"]);
+export const WHITE_LOGO = new Set(["eredivisie", "primeira-liga", "ucl", "uel", "uecl"]);
 
 /** League logo, or a coloured dot when none is stored. */
 export function LeagueMark({ code, accent, size = 18 }: { code: string; accent: string; size?: number }) {
