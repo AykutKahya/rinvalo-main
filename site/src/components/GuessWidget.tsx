@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { dict, type Lang } from "@/lib/i18n";
+import Link from "next/link";
+import { dict, paths, type Lang } from "@/lib/i18n";
 
 const KEY = "rinvalo:guesses";
 
@@ -103,6 +104,11 @@ export function GuessWidget(props: {
             {model ? `Rinvalo: ${model[0]}-${model[1]}` : ""}
           </p>
         </>
+      )}
+      {saved && (
+        <Link href={paths(lang).myPicks} className="guess-all">
+          {dict(lang).myPicks.link}
+        </Link>
       )}
     </div>
   );

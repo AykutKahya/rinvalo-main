@@ -67,6 +67,7 @@ export function Shell({ lang, children }: { lang: Lang; children: React.ReactNod
         <footer className="footer">
           <div className="shell">
             <span>{t.footer}</span>
+            <Link href={paths(lang).myPicks}>{t.myPicks.title}</Link>
           </div>
         </footer>
         <BottomNav lang={lang} />

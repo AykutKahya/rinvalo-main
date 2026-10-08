@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
+import { CalendarButton } from "@/components/CalendarButton";
 import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -61,6 +62,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <FavoriteButton slug={slug} name={t.name} lang={lang} />
+          <CalendarButton slug={slug} lang={lang} />
           {league && (
             <Link href={`${path.compare}?a=${slug}`} className="btn ghost">
               {d.compare.cta}
