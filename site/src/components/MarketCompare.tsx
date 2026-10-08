@@ -36,9 +36,6 @@ export function MarketCompare({
     <section className="card card-pad market">
       <div className="section-title" style={{ margin: 0 }}>
         <h2>Piyasa ne diyor?</h2>
-        <span className="muted" style={{ fontSize: 12.5 }}>
-          Bahis oranlarından, kâr payı çıkarılarak
-        </span>
       </div>
       <div className="mk-grid" role="table" aria-label="Rinvalo ve piyasa olasılıkları" lang={lang}>
         <span role="columnheader" />
@@ -72,18 +69,18 @@ export function MarketCompare({
             <Bar p={market} />
           </>
         ) : (
-          <span className="mk-wait">{finished ? "Bu maç için oran kaydı yok." : "Oranlar genelde maçtan 2-5 gün önce açıklanır."}</span>
+          <span className="mk-wait">{finished ? "Oran verisi yok." : "Oranlar henüz açıklanmadı."}</span>
         )}
       </div>
       {market && (
         <p className={`mk-verdict ${same ? "same" : "differ"}`}>
           {same ? (
             <>
-              ✓ <b>Uyumlu:</b> ikisi de {name(rp)} diyor.
+              ✓ <b>Uyumlu</b> · ikisi de {name(rp)}
             </>
           ) : (
             <>
-              ⚠ <b>Ayrışma:</b> Rinvalo {name(rp)} ({pct(rinvalo[rp])}), piyasa {name(mp)} ({pct(market[mp])}) diyor. Bu yüzden güven seviyesi düşürüldü.
+              ⚠ <b>Ayrışma</b> · Rinvalo {name(rp)} {pct(rinvalo[rp])}, piyasa {name(mp)} {pct(market[mp])}
             </>
           )}
         </p>

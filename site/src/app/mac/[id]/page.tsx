@@ -38,25 +38,6 @@ export async function generateMetadata({ params }: PageProps<"/mac/[id]">): Prom
   };
 }
 
-function ExplainPick({ home, away, lh, la, p }: { home: string; away: string; lh: number; la: number; p: [number, number, number] }) {
-  const pick = pickOf(p);
-  const sure = Math.max(...p);
-  const strength = sure > 0.6 ? "net bir favori" : sure > 0.45 ? "hafif favori" : "çok dengeli bir maç";
-  const who = pick === 0 ? home : pick === 2 ? away : "beraberlik";
-  return (
-    <p style={{ margin: 0, color: "var(--ink-2)" }}>
-      Model {home} için <b>{lh.toFixed(2).replace(".", ",")}</b>, {away} için <b>{la.toFixed(2).replace(".", ",")}</b> gol bekliyor.{" "}
-      {sure > 0.45 ? (
-        <>
-          {who} {strength} ({pct(sure)}).
-        </>
-      ) : (
-        <>Bu {strength}: hiçbir sonuç %45&apos;i geçmiyor.</>
-      )}
-    </p>
-  );
-}
-
 export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
   const { id } = await params;
   const m = getMatch(id);
@@ -140,12 +121,11 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
                 <h2>Tahmin</h2>
-                {finished && <span className="muted" style={{ fontSize: 13 }}>Tahmin {p.score[0]}-{p.score[1]} idi</span>}
+                {finished && <span className="muted" style={{ fontSize: 13 }}>Tahmin: {p.score[0]}-{p.score[1]}</span>}
               </div>
-              <ExplainPick home={h.name} away={a.name} lh={p.lh} la={p.la} p={p.p} />
               {p.reasons && p.reasons.length > 0 && (
                 <div className="why-box">
-                  <div className="eyebrow">Neden bu tahmin?</div>
+                  <div className="eyebrow">Öne çıkanlar</div>
                   <ul>
                     {p.reasons.map((r) => (
                       <li key={r}>{r}</li>
@@ -181,20 +161,14 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
               </div>
               <div>
                 <div className="eyebrow" style={{ marginBottom: 8 }}>
-                  Skor olasılıkları (%) · bir kutuya dokun
+                  Skor olasılıkları (%)
                 </div>
                 <ScoreGrid grid={p.grid} home={h.name} away={a.name} actual={actual} />
               </div>
-              <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
-                {finished || Date.parse(m.kickoff) < Date.now()
-                  ? `Bu tahmin maçtan önce, ${fullDate(p.madeAt)} tarihinde donduruldu ve sonradan değiştirilmedi.`
-                  : `Tahmin her güncellemede yeni sonuçlarla yenilenir ve maç başladığında dondurulur. Son güncelleme: ${fullDate(p.madeAt)}.`}
-              </p>
             </section>
           ) : (
             <section className="card empty">
-              <b>Bu maç için tahmin yapılmadı</b>
-              Rinvalo bu sezon yalnız oynanmadan önce tahmin ettiği maçları sayar; bu maç bot devreye girmeden oynandı.
+              <b>Tahmin yok</b>
             </section>
           )}
 

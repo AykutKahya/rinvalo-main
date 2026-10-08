@@ -58,10 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <footer className="footer">
           <div className="shell">
-            <span>Rinvalo tahminleri istatistik modelinden üretilir; kesin sonuç değildir.</span>
-            <span>
-              <Link href="/nasil">Model nasıl çalışıyor?</Link>
-            </span>
+            <span>Tahminler istatistiksel modele dayanır; kesinlik taşımaz.</span>
           </div>
         </footer>
         <BottomNav />

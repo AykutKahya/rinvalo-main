@@ -89,7 +89,7 @@ export function GuessWidget(props: {
       </div>
       {locked ? (
         <p className="muted" style={{ margin: 0, fontSize: 13.5, textAlign: "center" }}>
-          {verdict ?? (saved ? `Tahminin ${saved[0]}-${saved[1]}. Maç bitince kimin bildiğini burada görürsün.` : "Bu maç için tahmin süresi doldu.")}
+          {verdict ?? (saved ? `Tahminin: ${saved[0]}-${saved[1]}` : "Tahmin süresi doldu.")}
         </p>
       ) : (
         <>
@@ -97,7 +97,7 @@ export function GuessWidget(props: {
             {saved ? "Tahminimi güncelle" : "Tahminimi kaydet"}
           </button>
           <p className="muted" style={{ margin: 0, fontSize: 12.5, textAlign: "center" }}>
-            {model ? `Rinvalo ${model[0]}-${model[1]} diyor. ` : ""}Tahminin yalnız bu tarayıcıda saklanır.
+            {model ? `Rinvalo: ${model[0]}-${model[1]}` : ""}
           </p>
         </>
       )}

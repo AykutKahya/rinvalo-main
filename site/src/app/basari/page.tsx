@@ -7,15 +7,13 @@ import { accuracy, getEngineBacktest, getMarket, getMatches, LEAGUES } from "@/l
 import { pct } from "@/lib/format";
 import { outcomeOf } from "@/lib/model";
 
-export const metadata: Metadata = { title: "Tahmin başarısı", description: "Rinvalo tahminlerinin bu sezonki ve geçmiş sezon testindeki isabeti, piyasayla karşılaştırması." };
+export const metadata: Metadata = { title: "Tahmin başarısı", description: "Rinvalo tahminlerinin isabet oranları." };
 
 const CONF = { high: "Yüksek güven", medium: "Orta güven", low: "Düşük güven" } as const;
-const ROW_NOTE: Record<string, string> = {
-  "Eski model (yalnız skorlar)": "Sitenin ilk sürümü",
-  "Rinvalo modeli": "Şu an yayındaki motor",
-  "Piyasa (maç öncesi oranlar)": "Kıyas: bahis şirketleri",
-  "Piyasa (kapanış oranları)": "Kıyas: maç başlarken",
-};
+const ROWS: [string, string][] = [
+  ["Rinvalo modeli", "Rinvalo"],
+  ["Piyasa (maç öncesi oranlar)", "Bahis piyasası"],
+];
 
 export default function AccuracyPage() {
   const all = getMatches();
@@ -37,27 +35,27 @@ export default function AccuracyPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Tahminlerimiz ne kadar tutuyor?</h1>
-          <p>Her tahmin maç başlamadan önce dondurulur, sonradan değiştirilmez. Burada hepsi açıkça sayılır.</p>
+          <h1>Tahmin başarısı</h1>
+          <p>Tahminler maç başlamadan kilitlenir.</p>
         </div>
       </div>
 
       <div className="stat-row">
         <div className="card stat">
           <b>{record.n}</b>
-          <span>Bu sezon sonuçlanan tahmin</span>
+          <span>Sonuçlanan tahmin</span>
         </div>
         <div className="card stat">
           <b style={{ color: "var(--good)" }}>{record.n ? pct(record.hits / record.n) : "–"}</b>
-          <span>Bu sezon 1-X-2 isabeti</span>
+          <span>Bu sezon isabet</span>
         </div>
         <div className="card stat">
           <b>{eb ? <CountUp value={eb.byConfidence.high.accuracy} /> : "–"}</b>
-          <span>Yüksek güvenli tahminlerde isabet (test)</span>
+          <span>Yüksek güven isabeti</span>
         </div>
         <div className="card stat">
           <b>{eb ? <CountUp value={eb.overall["Rinvalo modeli"].accuracy} /> : "–"}</b>
-          <span>Son 3 sezon testinde isabet</span>
+          <span>Son 3 sezon isabet</span>
         </div>
       </div>
 
@@ -66,59 +64,50 @@ export default function AccuracyPage() {
           {eb && (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div className="section-title" style={{ margin: 0 }}>
-                <h2>Son 3 sezonun testi</h2>
+                <h2>Son 3 sezon</h2>
                 <span className="muted" style={{ fontSize: 13 }}>
                   {eb.seasons[0]} – {eb.seasons[eb.seasons.length - 1]} · {eb.overall["Rinvalo modeli"].matches.toLocaleString("tr-TR")} maç
                 </span>
               </div>
-              <p className="muted" style={{ margin: 0, fontSize: 14 }}>
-                Her sezon, model yalnız o sezondan önceki maçlarla kuruldu ve her maç yalnız başlamadan önceki bilgilerle tahmin edildi. Log loss olasılıkların ne kadar isabetli olduğunu ölçer; düşük olan daha iyidir.
-              </p>
               <div className="table-wrap">
                 <table className="std">
                   <thead>
                     <tr>
                       <th>Yöntem</th>
-                      <th className="c">1-X-2 isabeti</th>
+                      <th className="c">İsabet</th>
                       <th className="c">Log loss</th>
                       <th className="c">Brier</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(eb.overall).map(([name, s]) => (
-                      <tr key={name} className={name === "Rinvalo modeli" ? "hl" : undefined}>
-                        <td>
-                          <b>{name}</b>
-                          <div className="muted" style={{ fontSize: 12 }}>
-                            {ROW_NOTE[name]}
-                          </div>
-                        </td>
-                        <td className="c num">{pct(s.accuracy, 1)}</td>
-                        <td className="c num">{s.logloss.toFixed(4).replace(".", ",")}</td>
-                        <td className="c num">{s.brier.toFixed(4).replace(".", ",")}</td>
-                      </tr>
-                    ))}
+                    {ROWS.map(([key, label]) => {
+                      const r = eb.overall[key];
+                      return r ? (
+                        <tr key={key} className={key === "Rinvalo modeli" ? "hl" : undefined}>
+                          <td>
+                            <b>{label}</b>
+                          </td>
+                          <td className="c num">{pct(r.accuracy, 1)}</td>
+                          <td className="c num">{r.logloss.toFixed(4).replace(".", ",")}</td>
+                          <td className="c num">{r.brier.toFixed(4).replace(".", ",")}</td>
+                        </tr>
+                      ) : null;
+                    })}
                   </tbody>
                 </table>
               </div>
-              <p style={{ margin: 0, fontSize: 14, color: "var(--ink-2)" }}>
-                Bahis piyasası sakatlık, ilk 11 ve kadro haberlerini fiyatlar; Rinvalo yalnız skor, şut, xG ve form verisinden öğrenir. O yüzden piyasa birkaç puan önde. İkisinin farklı sonuç beklediği {eb.disagreement.matches} maçta piyasa {pct(eb.disagreement.marketRight)}, Rinvalo {pct(eb.disagreement.rinvaloRight)} haklı çıktı; bu maçlarda güven etiketi otomatik düşer.
-              </p>
             </section>
           )}
 
           <section className="card group" style={{ margin: 0 }}>
             <div className="group-head">
-              <span>Bu sezon sonuçlanan tahminler</span>
+              <span>Sonuçlanan tahminler</span>
               <span>Tahmin · Skor</span>
             </div>
             {graded.length ? (
               graded.slice(0, 60).map((m) => <MatchRow key={m.id} m={m} showDate />)
             ) : (
-              <div className="empty">
-                <b>İlk sonuçlar bu hafta sonu geliyor</b>
-                Rinvalo bu sezon yalnız maç oynanmadan önce yaptığı tahminleri sayar. Maçlar oynandıkça liste burada dolacak.
-              </div>
+              <div className="empty">Henüz sonuçlanan tahmin yok.</div>
             )}
           </section>
         </div>
@@ -126,7 +115,7 @@ export default function AccuracyPage() {
         <aside className="stack">
           {eb && (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <h2 style={{ fontSize: 18 }}>Güven etiketi ne kadar doğru?</h2>
+              <h2 style={{ fontSize: 18 }}>Güven seviyesine göre</h2>
               <div className="mini-list">
                 {(["high", "medium", "low"] as const).map((k) => (
                   <div key={k} className="mini-item">
@@ -150,10 +139,12 @@ export default function AccuracyPage() {
 
           {eb && (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <h2 style={{ fontSize: 18 }}>Olasılıklar gerçeği yansıtıyor mu?</h2>
-              <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-                Rinvalo bir sonuca belli bir yüzde verdiğinde o sonuç gerçekte ne sıklıkla gerçekleşti:
-              </p>
+              <h2 style={{ fontSize: 18 }}>Kalibrasyon</h2>
+              <div className="calib-row muted" style={{ fontSize: 12 }}>
+                <span>Tahmin</span>
+                <span />
+                <span>Gerçek</span>
+              </div>
               <div className="calib">
                 {eb.calibration.map((c) => (
                   <div key={c.bin} className="calib-row">
@@ -166,9 +157,6 @@ export default function AccuracyPage() {
                   </div>
                 ))}
               </div>
-              <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                Çubuk gerçekleşen oranı, çizgi tahmin edilen oranı gösterir. Çizgiyle çubuğun ucu ne kadar yakınsa olasılıklar o kadar güvenilir.
-              </p>
             </section>
           )}
 
@@ -211,7 +199,7 @@ export default function AccuracyPage() {
 
           {vs.length > 0 && (
             <section className="card card-pad">
-              <h2 style={{ fontSize: 18, marginBottom: 8 }}>Bu sezon: Rinvalo vs piyasa</h2>
+              <h2 style={{ fontSize: 18, marginBottom: 8 }}>Bu sezon: Rinvalo – piyasa</h2>
               <div className="kv-grid">
                 <div className="kv">
                   <small>Rinvalo</small>
@@ -223,14 +211,11 @@ export default function AccuracyPage() {
                 </div>
               </div>
               <p className="muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
-                Aynı {vs.length} maçta 1-X-2 isabeti.
+                {vs.length} maç
               </p>
             </section>
           )}
 
-          <Link href="/nasil" className="btn ghost">
-            Model nasıl çalışıyor?
-          </Link>
         </aside>
       </div>
     </>

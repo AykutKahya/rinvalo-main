@@ -80,7 +80,7 @@ export default function Home() {
 
         <div className="card card-pad">
           <div className="section-title">
-            <h2 style={{ fontSize: 15 }}>Modelin en emin olduğu</h2>
+            <h2 style={{ fontSize: 15 }}>En net tahminler</h2>
           </div>
           <div className="mini-list">
             {surest.map((m) => {
@@ -143,14 +143,12 @@ export default function Home() {
           {record.n >= 10 ? (
             <>
               <b>{pct(record.hits / record.n)}</b>
-              <span>
-                Bu sezon {record.n} maçın {record.hits} tanesinde sonucu bildik
-              </span>
+              <span>Bu sezon {record.n} maçta isabet</span>
             </>
           ) : (
             <>
               <b>{eb ? pct(eb.byConfidence.high.accuracy) : "–"}</b>
-              <span>Son 3 sezon testinde yüksek güvenli tahminlerin isabeti</span>
+              <span>Yüksek güvenli tahminlerde isabet</span>
             </>
           )}
         </Link>

@@ -12,7 +12,7 @@ import s from "./manset.module.css";
 const anton = Anton({ subsets: ["latin", "latin-ext"], weight: "400", variable: "--font-anton", display: "swap" });
 const archivo = Archivo({ subsets: ["latin", "latin-ext"], weight: ["400", "600", "800"], variable: "--font-archivo", display: "swap" });
 
-export const metadata: Metadata = { title: "Manşet", description: "Haftanın maçları, tahminleri ve geçen haftanın karnesi, gazete manşeti gibi." };
+export const metadata: Metadata = { title: "Manşet", description: "Haftanın maçları ve tahminleri." };
 
 function headline(m: MatchView) {
   const p = m.prediction!;
@@ -110,7 +110,7 @@ export default function HeadlinePage() {
                 <div className={s.pct}>
                   {recentHits}/{recent.length}
                 </div>
-                <p>Son {recent.length} maçın {recentHits} tanesinde sonucu bildik.</p>
+                <p>Son {recent.length} maç</p>
                 <ol>
                   {recent.map((m) => (
                     <li key={m.id}>
@@ -127,9 +127,7 @@ export default function HeadlinePage() {
             ) : (
               <>
                 <div className={s.pct}>{bt ? pct(bt.accuracy) : "–"}</div>
-                <p>
-                  Karne bu hafta sonu başlıyor. O zamana kadar: son 3 sezonun {bt?.matches.toLocaleString("tr-TR")} maçlık testinde model 1-X-2&apos;yi {bt ? pct(bt.accuracy) : "–"} bildi.
-                </p>
+                <p>Son 3 sezon isabeti</p>
                 <Link href="/basari" className={s.ok} style={{ alignSelf: "flex-start" }}>
                   KARNEYİ GÖR →
                 </Link>

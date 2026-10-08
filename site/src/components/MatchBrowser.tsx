@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { MatchView } from "@/lib/data";
-import { dayKey, dayNum, longDay, shortDay } from "@/lib/format";
+import { dayKey, dayNum, shortDay } from "@/lib/format";
 import type { League } from "@/lib/leagues";
 import { LeagueMark } from "./Crest";
 import { useFavorites } from "./favorites";
@@ -118,8 +118,8 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
           <div className="card empty">
             <b>{filter === "fav" ? (favorites.length ? "Favori takımlarının bu gün maçı yok" : "Henüz favori takımın yok") : "Bu gün maç yok"}</b>
             {filter === "fav" && !favorites.length
-              ? "Bir takım sayfasında ☆ simgesine dokunarak favori ekleyebilirsin."
-              : `${longDay(days.find(([k]) => k === day)?.[1] ?? new Date().toISOString())} için başka bir gün seç.`}
+              ? "Takım sayfalarından favori ekleyebilirsin."
+              : ""}
           </div>
         )}
       </section>

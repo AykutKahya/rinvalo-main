@@ -1,8 +1,8 @@
 const LABEL = { high: "Yüksek güven", medium: "Orta güven", low: "Düşük güven" } as const;
 const HINT = {
-  high: "Modeller aynı sonucu gösteriyor ve fark büyük. Geçmiş testte bu maçların %65'i tuttu.",
-  medium: "Bir taraf önde ama fark net değil. Geçmiş testte bu maçların %49'u tuttu.",
-  low: "Sonuç çok açık değil ya da modeller/piyasa ayrışıyor. Geçmiş testte bu maçların %36'sı tuttu.",
+  high: "Son 3 sezonda bu seviyedeki tahminlerin %65'i tuttu.",
+  medium: "Son 3 sezonda bu seviyedeki tahminlerin %49'u tuttu.",
+  low: "Son 3 sezonda bu seviyedeki tahminlerin %36'sı tuttu.",
 } as const;
 
 export type Level = keyof typeof LABEL;

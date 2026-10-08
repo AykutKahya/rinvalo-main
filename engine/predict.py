@@ -47,36 +47,36 @@ def reasons(f: dict, p: np.ndarray, market: np.ndarray | None, names: dict[str, 
 
     if side and abs(f["elo_diff"]) >= 60 and np.sign(f["elo_diff"]) == side:
         t = hn if side > 0 else an
-        out.append((abs(f["elo_diff"]) / 60, f"{t} güç puanında {round(abs(f['elo_diff']))} puan önde (Elo)."))
+        out.append((abs(f["elo_diff"]) / 60, f"{t} güç puanında {round(abs(f['elo_diff']))} puan önde."))
     for tag, team, other in (("h", hn, an), ("a", an, hn)):
         sgn = 1 if tag == "h" else -1
         if side != sgn:
             continue
         o = "a" if tag == "h" else "h"
         if pd.notna(f[f"ppg5_{tag}"]) and pd.notna(f[f"ppg5_{o}"]) and f[f"ppg5_{tag}"] - f[f"ppg5_{o}"] >= 0.8:
-            out.append((f[f"ppg5_{tag}"] - f[f"ppg5_{o}"], f"{team} son 5 maçta maç başı {num(f[f'ppg5_{tag}'])} puan topladı, {other} {num(f[f'ppg5_{o}'])}."))
+            out.append((f[f"ppg5_{tag}"] - f[f"ppg5_{o}"], f"Son 5 maç: {team} maç başı {num(f[f'ppg5_{tag}'])} puan, {other} {num(f[f'ppg5_{o}'])}."))
         if pd.notna(f[f"xgd10_{tag}"]) and pd.notna(f[f"xgd10_{o}"]) and f[f"xgd10_{tag}"] - f[f"xgd10_{o}"] >= 0.5:
-            out.append((f[f"xgd10_{tag}"] - f[f"xgd10_{o}"], f"{team} son 10 maçta pozisyon üretiminde üstün (maç başı xG farkı {num(f[f'xgd10_{tag}'])}, rakibinin {num(f[f'xgd10_{o}'])})."))
+            out.append((f[f"xgd10_{tag}"] - f[f"xgd10_{o}"], f"Son 10 maç xG farkı: {team} {num(f[f'xgd10_{tag}'])}, {other} {num(f[f'xgd10_{o}'])}."))
     if side > 0 and pd.notna(f["venue_ppg_h"]) and f["venue_ppg_h"] >= 2.0:
-        out.append((f["venue_ppg_h"] - 1.5, f"{hn} evinde son maçlarında maç başı {num(f['venue_ppg_h'])} puan aldı."))
+        out.append((f["venue_ppg_h"] - 1.5, f"{hn} iç sahada maç başı {num(f['venue_ppg_h'])} puan."))
     if side < 0 and pd.notna(f["venue_ppg_a"]) and f["venue_ppg_a"] >= 1.8:
-        out.append((f["venue_ppg_a"] - 1.3, f"{an} deplasmanda son maçlarında maç başı {num(f['venue_ppg_a'])} puan aldı."))
+        out.append((f["venue_ppg_a"] - 1.3, f"{an} deplasmanda maç başı {num(f['venue_ppg_a'])} puan."))
     if abs(f["rest_h"] - f["rest_a"]) >= 3 and min(f["rest_h"], f["rest_a"]) <= 4:
         fresh, tired = (hn, an) if f["rest_h"] > f["rest_a"] else (an, hn)
-        out.append((0.8, f"{fresh} daha dinlenmiş: rakibi {tired} {int(min(f['rest_h'], f['rest_a']))} gün önce maç oynadı."))
+        out.append((0.8, f"{tired} {int(min(f['rest_h'], f['rest_a']))} gün önce maç oynadı; {fresh} daha dinlenmiş."))
     if pick == 1:
-        out.append((1.0, f"İki takımın gücü birbirine yakın; hiçbir sonuç {pct(max(p))} üstüne çıkmıyor."))
+        out.append((1.0, f"Güçler dengeli; hiçbir sonuç {pct(max(p))} üzerinde değil."))
     if f["derby"]:
-        out.append((0.5, "Derbi: bu maçlarda sürpriz ihtimali her zamankinden yüksektir."))
+        out.append((0.5, "Derbi maçı."))
 
     out.sort(key=lambda x: -x[0])
     lines = [t for _, t in out[:3]]
     if market is not None:
         mk_pick = int(np.argmax(market))
         if mk_pick == pick:
-            lines.append(f"Bahis piyasası da {OUTCOME[pick]} tarafında ({pct(market[pick])}).")
+            lines.append(f"Piyasa da {OUTCOME[pick]} tarafında ({pct(market[pick])}).")
         else:
-            lines.append(f"Bahis piyasası farklı düşünüyor: {OUTCOME[mk_pick]} {pct(market[mk_pick])}.")
+            lines.append(f"Piyasa farklı: {OUTCOME[mk_pick]} {pct(market[mk_pick])}.")
     return lines
 
 

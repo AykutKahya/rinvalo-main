@@ -17,9 +17,7 @@ function Bar({ v, color }: { v: number; color: string }) {
 export function OutlookTable({ rows, league, runs }: { rows: TeamOutlook[]; league: League; runs: number }) {
   return (
     <div className="card card-pad">
-      <p className="muted" style={{ marginTop: 0, fontSize: 13.5 }}>
-        Kalan maçlar modelin tahminleriyle {runs.toLocaleString("tr-TR")} kez oynatıldı. Yüzdeler, bu simülasyonlarda takımın kaç kez o sonuca ulaştığını gösterir.
-      </p>
+      <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>{runs.toLocaleString("tr-TR")} sezon simülasyonu</p>
       <div className="table-wrap">
         <table className="std">
           <thead>

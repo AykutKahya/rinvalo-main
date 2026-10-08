@@ -14,7 +14,6 @@ export default function LeaguesPage() {
       <div className="page-head">
         <div>
           <h1>Ligler</h1>
-          <p>Beş ligin puan durumu, fikstürü ve şampiyonluk yarışı.</p>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: 16 }}>
