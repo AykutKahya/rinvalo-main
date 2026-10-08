@@ -1,4 +1,4 @@
-export type LeagueCode = "super-lig" | "premier-league" | "la-liga" | "serie-a" | "bundesliga";
+export type LeagueCode = "super-lig" | "premier-league" | "la-liga" | "serie-a" | "bundesliga" | "ligue-1" | "eredivisie" | "primeira-liga" | "championship";
 
 export interface League {
   code: LeagueCode;
@@ -72,6 +72,51 @@ export const LEAGUES: League[] = [
     zones: { europe: 4, relegation: 2 },
     accent: "#d20515",
   },
+  {
+    code: "ligue-1",
+    name: "Ligue 1",
+    country: "Fransa",
+    csv: "F1",
+    tsdb: 4334,
+    rounds: 34,
+    openfootball: null,
+    zones: { europe: 4, relegation: 2 },
+    accent: "#091c3e",
+  },
+  {
+    code: "eredivisie",
+    name: "Eredivisie",
+    country: "Hollanda",
+    csv: "N1",
+    tsdb: 4337,
+    rounds: 34,
+    openfootball: null,
+    zones: { europe: 3, relegation: 2 },
+    accent: "#e4022d",
+  },
+  {
+    code: "primeira-liga",
+    name: "Primeira Liga",
+    country: "Portekiz",
+    csv: "P1",
+    tsdb: 4344,
+    rounds: 34,
+    openfootball: null,
+    zones: { europe: 3, relegation: 2 },
+    accent: "#00a650",
+  },
+  {
+    code: "championship",
+    name: "Championship",
+    country: "İngiltere",
+    csv: "E1",
+    tsdb: 4329,
+    rounds: 46,
+    openfootball: "england/master/2026-27/2-championship.txt",
+    // Top 2 go up automatically; "europe" is the promotion line here.
+    zones: { europe: 2, relegation: 3 },
+    accent: "#1d2b6b",
+  },
 ];
 
 export const SEASON = "2026-27";
@@ -81,7 +126,7 @@ export function leagueByCode(code: string): League | undefined {
   return LEAGUES.find((l) => l.code === code);
 }
 
-const COUNTRY_EN: Record<string, string> = { Türkiye: "Türkiye", İngiltere: "England", İspanya: "Spain", İtalya: "Italy", Almanya: "Germany" };
+const COUNTRY_EN: Record<string, string> = { Türkiye: "Türkiye", İngiltere: "England", İspanya: "Spain", İtalya: "Italy", Almanya: "Germany", Fransa: "France", Hollanda: "Netherlands", Portekiz: "Portugal" };
 
 export function countryOf(l: League, lang: "tr" | "en"): string {
   return lang === "en" ? (COUNTRY_EN[l.country] ?? l.country) : l.country;

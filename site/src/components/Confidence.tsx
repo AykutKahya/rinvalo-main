@@ -2,7 +2,7 @@ import { fmt } from "@/lib/format";
 import { dict, type Lang } from "@/lib/i18n";
 
 /** Hit rates per level over the last three seasons (engine backtest). */
-const RATE = { high: 0.65, medium: 0.49, low: 0.36 } as const;
+const RATE = { high: 0.66, medium: 0.48, low: 0.37 } as const;
 
 export type Level = keyof typeof RATE;
 

@@ -1,4 +1,4 @@
-import { crestSrc, leagueSrc } from "@/components/Crest";
+import { crestSrc, leagueSrc, WHITE_LOGO } from "@/components/Crest";
 import type { SearchItem } from "@/components/Search";
 import { getMatches, LEAGUES, seasonTeams } from "./data";
 import { fmt } from "./format";
@@ -13,7 +13,7 @@ export function searchIndex(lang: Lang, now = Date.now()): SearchItem[] {
   const f = fmt(lang);
   const p = paths(lang);
   const leagueName = new Map(LEAGUES.map((l) => [l.code, l.name]));
-  const leagues: SearchItem[] = LEAGUES.map((l) => ({ kind: "league", label: l.name, sub: countryOf(l, lang), href: p.leagueOf(l.code), img: leagueSrc(l.code) }));
+  const leagues: SearchItem[] = LEAGUES.map((l) => ({ kind: "league", label: l.name, sub: countryOf(l, lang), href: p.leagueOf(l.code), img: leagueSrc(l.code), imgBg: WHITE_LOGO.has(l.code) ? l.accent : undefined }));
   const teams: SearchItem[] = seasonTeams()
     .map(({ slug, league }) => ({ kind: "team" as const, label: team(slug, lang).name, sub: leagueName.get(league) ?? "", href: p.teamOf(slug), img: crestSrc(slug) }))
     .sort((a, b) => a.label.localeCompare(b.label, lang));

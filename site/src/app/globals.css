@@ -372,6 +372,7 @@ table.std .c { text-align: center; }
 .crest.img.lg { width: 64px; height: 64px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12)); }
 .crest.img.sm { width: 20px; height: 20px; }
 .league-img { flex: none; object-fit: contain; }
+.league-img.chip { border-radius: 22%; box-sizing: border-box; }
 
 /* ---------- motion ---------- */
 .page-enter { animation: pageIn .4s cubic-bezier(.2, .8, .2, 1) both; }

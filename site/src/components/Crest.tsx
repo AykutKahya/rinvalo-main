@@ -21,11 +21,24 @@ export function Crest({ slug, size }: { slug: string; size?: "sm" | "md" | "lg" 
   return <span className={`crest${size ? ` ${size}` : ""}`} style={style} aria-hidden="true" />;
 }
 
+/** Leagues whose published logo is white-only; they are shown on their own colour. */
+export const WHITE_LOGO = new Set(["eredivisie", "primeira-liga"]);
+
 /** League logo, or a coloured dot when none is stored. */
 export function LeagueMark({ code, accent, size = 18 }: { code: string; accent: string; size?: number }) {
   if (HAS_LEAGUE.has(code)) {
-    // eslint-disable-next-line @next/next/no-img-element -- tiny local PNGs
-    return <img className="league-img" src={`/leagues/${code}.png`} alt="" width={size} height={size} />;
+    const chip = WHITE_LOGO.has(code);
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- tiny local PNGs
+      <img
+        className={`league-img${chip ? " chip" : ""}`}
+        src={`/leagues/${code}.png`}
+        alt=""
+        width={size}
+        height={size}
+        style={chip ? { background: accent, padding: Math.max(2, Math.round(size * 0.14)) } : undefined}
+      />
+    );
   }
   return <span className="league-dot" style={{ background: accent, width: Math.max(8, size / 2), height: Math.max(8, size / 2) }} />;
 }

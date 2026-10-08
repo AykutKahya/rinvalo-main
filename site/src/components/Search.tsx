@@ -10,6 +10,8 @@ export interface SearchItem {
   sub: string;
   href: string;
   img?: string;
+  /** Background for white-only logos. */
+  imgBg?: string;
 }
 
 /** Lower-case and strip Turkish/Latin accents so "fener", "FENERBAHÇE" and "fenerbahce" all match. */
@@ -118,7 +120,7 @@ export function Search({ lang }: { lang: Lang }) {
               {results.map((it, i) => (
                 <li key={it.href} id={`sr-${i}`} role="option" aria-selected={i === sel} onMouseEnter={() => setSel(i)} onClick={() => go(it)}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- local crest */}
-                  {it.img ? <img src={it.img} alt="" width={22} height={22} /> : <span className="sr-dot" />}
+                  {it.img ? <img src={it.img} alt="" width={22} height={22} style={it.imgBg ? { background: it.imgBg, borderRadius: 5, padding: 2 } : undefined} /> : <span className="sr-dot" />}
                   <span className="sr-text">
                     <b>{it.label}</b>
                     <small>{it.sub}</small>

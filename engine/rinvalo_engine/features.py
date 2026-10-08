@@ -26,11 +26,17 @@ DERBIES = {
         ("real-madrid", "barcelona"), ("real-madrid", "atletico"), ("sevilla", "betis"), ("athletic", "sociedad"),
         ("inter", "milan"), ("roma", "lazio"), ("juventus", "torino"), ("juventus", "inter"),
         ("dortmund", "schalke"), ("bayern", "dortmund"), ("hamburg", "werder"),
+        ("psg", "marseille"), ("lyon", "saint-etienne"), ("marseille", "lyon"), ("nice", "monaco"),
+        ("ajax", "feyenoord"), ("ajax", "psv"), ("feyenoord", "psv"),
+        ("benfica", "sporting"), ("benfica", "porto"), ("porto", "sporting"), ("braga", "guimaraes"),
+        ("sheffield-united", "sheffield-wednesday"), ("birmingham", "west-brom"), ("cardiff", "swansea"),
+        ("bristol-city", "cardiff"), ("millwall", "west-ham"),
     ]
 }
 
-ZONES = {  # (europe places, relegation places, teams)
+ZONES = {  # (europe or promotion places, relegation places)
     "super-lig": (4, 4), "premier-league": (4, 3), "la-liga": (4, 3), "serie-a": (4, 3), "bundesliga": (4, 2),
+    "ligue-1": (4, 2), "eredivisie": (3, 2), "primeira-liga": (3, 2), "championship": (2, 3),
 }
 
 FEATURES = [
