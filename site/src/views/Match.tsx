@@ -8,7 +8,7 @@ import { Countdown } from "@/components/Countdown";
 import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { GuessWidget } from "@/components/GuessWidget";
-import { LiveOdds } from "@/components/LiveOdds";
+import { LiveMatch } from "@/components/LiveMatch";
 import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
@@ -143,8 +143,8 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
 
       <div className="match-grid">
         <div className="stack">
-          {m.status === "live" && p && m.hg !== null && m.ag !== null && (
-            <LiveOdds kickoff={m.kickoff} lh={p.lh} la={p.la} hg={m.hg} ag={m.ag} home={h.short} away={a.short} lang={lang} />
+          {p && !finished && (
+            <LiveMatch id={m.id} kickoff={m.kickoff} lh={p.lh} la={p.la} status={m.status} hg={m.hg} ag={m.ag} home={h.short} away={a.short} lang={lang} />
           )}
           {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
           {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}

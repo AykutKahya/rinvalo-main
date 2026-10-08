@@ -10,6 +10,7 @@ type Comp = { code: string; name: string; accent: string };
 import { LeagueMark } from "./Crest";
 import { useFavorites } from "./favorites";
 import { MatchRow } from "./MatchRow";
+import { inPlayWindow, useLive } from "./useLive";
 
 type Filter = "all" | "fav" | string;
 
@@ -43,7 +44,16 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
     return [...map.entries()].sort((x, y) => x[0].localeCompare(y[0]));
   }, [matches, dayKey]);
 
-  const visible = matches.filter((m) => {
+  // Live scores for the chosen day's games that are on, without rebuilding the site.
+  const [clock, setClock] = useState<number | null>(null);
+  useEffect(() => setClock(Date.now()), [day]);
+  const live = useLive(clock !== null && matches.some((m) => dayKey(m.kickoff) === day && m.status !== "finished" && inPlayWindow(m.kickoff, clock)));
+  const withLive = matches.map((m) => {
+    const s = live[m.id];
+    return s && s.status !== "scheduled" ? { ...m, status: s.status, hg: s.hg, ag: s.ag } : m;
+  });
+
+  const visible = withLive.filter((m) => {
     if (dayKey(m.kickoff) !== day) return false;
     if (filter === "all") return true;
     if (filter === "fav") return favorites.includes(m.home) || favorites.includes(m.away);
