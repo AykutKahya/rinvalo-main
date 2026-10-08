@@ -136,6 +136,11 @@ export function Headlines({ lang }: { lang: Lang }) {
   const lead = matchOfTheWeek(all, sim, now);
   const recent = recentResults(all, now, 7).slice(0, 6);
   const recentHits = recent.filter((m) => m.hit).length;
+  // Report card: every graded game of the last week, its boldest right call and its biggest miss.
+  const graded = recentResults(all, now, 7);
+  const sure = (m: MatchView) => Math.max(...m.prediction!.p);
+  const bold = graded.filter((m) => m.hit).sort((a, b) => sure(a) - sure(b))[0];
+  const miss = graded.filter((m) => !m.hit).sort((a, b) => sure(b) - sure(a))[0];
   const bt = getEngineBacktest()?.overall["Rinvalo modeli"];
   const week = upcoming(all, now, 7);
   const race = (sim.leagues["super-lig"] ?? []).slice().sort((x, y) => y.champion - x.champion).slice(0, 3);
@@ -226,6 +231,42 @@ export function Headlines({ lang }: { lang: Lang }) {
             )}
           </aside>
         </div>
+
+        {graded.length >= 5 && (
+          <div className={s.report}>
+            <span className={s.raceHead}>{t.card}</span>
+            <div>
+              <b>{f.pct(graded.filter((m) => m.hit).length / graded.length)}</b>
+              <span>
+                {t.cardHits} · {graded.filter((m) => m.hit).length}/{graded.length}
+              </span>
+            </div>
+            <div>
+              <b>{graded.filter((m) => m.exact).length}</b>
+              <span>{t.cardExact}</span>
+            </div>
+            {bold && (
+              <Link href={path.matchOf(bold.id)}>
+                <em lang={nameLang(bold.league)}>
+                  {name(bold.home)} {bold.hg}-{bold.ag} {name(bold.away)}
+                </em>
+                <span>
+                  {t.cardBold} · {t.cardChance(f.pct(sure(bold)))}
+                </span>
+              </Link>
+            )}
+            {miss && (
+              <Link href={path.matchOf(miss.id)}>
+                <em lang={nameLang(miss.league)}>
+                  {name(miss.home)} {miss.hg}-{miss.ag} {name(miss.away)}
+                </em>
+                <span>
+                  {t.cardMiss} · {t.cardChance(f.pct(sure(miss)))}
+                </span>
+              </Link>
+            )}
+          </div>
+        )}
 
         {race.length > 0 && (
           <div className={s.race}>

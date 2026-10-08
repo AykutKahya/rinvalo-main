@@ -76,3 +76,17 @@
   .race { grid-template-columns: 1fr; }
   .race a { border-right: 0; border-bottom: 2px solid var(--ink); flex-direction: row; align-items: baseline; justify-content: space-between; }
 }
+
+/* Last week's report card */
+.report { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 3px solid var(--ink); }
+.report > div, .report > a { padding: 16px 22px; border-right: 2px solid var(--ink); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.report > :last-child { border-right: 0; }
+.report > a:hover { background: #f0efe8; }
+.report b { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; font-size: clamp(36px, 5vw, 54px); line-height: 1; }
+.report em { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-style: normal; text-transform: uppercase; font-size: 21px; line-height: 1.1; }
+.report span { font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; color: var(--mut); }
+@media (max-width: 860px) {
+  .report { grid-template-columns: 1fr 1fr; }
+  .report > :nth-child(3) { border-right: 0; }
+  .report > a { grid-column: 1 / -1; border-right: 0; border-top: 2px solid var(--ink); }
+}
