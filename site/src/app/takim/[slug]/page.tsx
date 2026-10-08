@@ -45,7 +45,9 @@ export default async function TeamPage({ params }: PageProps<"/takim/[slug]">) {
       <div className="card team-head reveal" style={{ "--c1": t.colors[0], "--c2": t.colors[1] } as CSSProperties}>
         <Crest slug={slug} size="lg" />
         <div style={{ flex: 1, minWidth: 200 }}>
-          <h1 style={{ fontSize: "clamp(24px,4vw,32px)", fontWeight: 800 }}>{t.name}</h1>
+          <h1 style={{ fontSize: "clamp(24px,4vw,32px)", fontWeight: 800 }} lang={entry.league === "super-lig" ? "tr" : "en"}>
+            {t.name}
+          </h1>
           <p className="muted" style={{ margin: "2px 0 8px" }}>
             <Link href={`/lig/${league.code}`}>{league.name}</Link>
             {row ? ` · ${pos + 1}. sıra · ${row.points} puan` : ""}

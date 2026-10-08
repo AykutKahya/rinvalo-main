@@ -38,7 +38,7 @@ export default async function LeaguePage({ params }: PageProps<"/lig/[code]">) {
       <div className="page-head">
         <LeagueMark code={league.code} accent={league.accent} size={52} />
         <div>
-          <h1>{league.name}</h1>
+          <h1 lang={league.code === "super-lig" ? "tr" : "en"}>{league.name}</h1>
           <p>
             {league.country} · 2026-27 · {played}/{matches.length} maç oynandı
             {record.n > 0 ? ` · bu sezon tahmin isabeti ${pct(record.hits / record.n)} (${record.n} maç)` : ""}

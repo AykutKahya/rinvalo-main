@@ -88,7 +88,7 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
           </span>
         </div>
         <div className="mh-teams">
-          <Link href={`/takim/${m.home}`} className="mh-team">
+          <Link href={`/takim/${m.home}`} className="mh-team" lang={m.league === "super-lig" ? "tr" : "en"}>
             <Crest slug={m.home} size="lg" />
             {h.name}
             {hi >= 0 && <small>{hi + 1}. sırada</small>}
@@ -114,7 +114,7 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
               </>
             )}
           </div>
-          <Link href={`/takim/${m.away}`} className="mh-team">
+          <Link href={`/takim/${m.away}`} className="mh-team" lang={m.league === "super-lig" ? "tr" : "en"}>
             <Crest slug={m.away} size="lg" />
             {a.name}
             {ai >= 0 && <small>{ai + 1}. sırada</small>}
