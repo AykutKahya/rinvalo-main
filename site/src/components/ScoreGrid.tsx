@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { pct } from "@/lib/format";
+import { fmt } from "@/lib/format";
+import { dict, type Lang } from "@/lib/i18n";
 
 /** Interactive heat map of every scoreline up to 5-5. */
-export function ScoreGrid({ grid, home, away, actual }: { grid: number[][]; home: string; away: string; actual: [number, number] | null }) {
+export function ScoreGrid({ grid, home, away, actual, lang }: { grid: number[][]; home: string; away: string; actual: [number, number] | null; lang: Lang }) {
+  const t = dict(lang).grid;
+  const { pct } = fmt(lang);
   const max = Math.max(...grid.flat());
   let best: [number, number] = [0, 0];
   grid.forEach((row, h) => row.forEach((p, a) => p === max && (best = [h, a])));
@@ -13,16 +16,16 @@ export function ScoreGrid({ grid, home, away, actual }: { grid: number[][]; home
 
   return (
     <div>
-      <div className="heat" role="grid" aria-label="Skor olasılıkları">
+      <div className="heat" role="grid" aria-label={t.aria}>
         <span className="hd" aria-hidden="true" />
         {grid[0].map((_, a) => (
-          <span key={a} className="hd" title={`${away} golü`}>
+          <span key={a} className="hd" title={t.goals(away)}>
             {a}
           </span>
         ))}
         {grid.map((row, h) => (
           <div key={h} style={{ display: "contents" }} role="row">
-            <span className="hd" title={`${home} golü`}>
+            <span className="hd" title={t.goals(home)}>
               {h}
             </span>
             {row.map((v, a) => {
@@ -48,14 +51,14 @@ export function ScoreGrid({ grid, home, away, actual }: { grid: number[][]; home
       </div>
       <div className="heat-cap">
         <span>
-          Satır: {home} · Sütun: {away}
+          {t.axes(home, away)}
         </span>
         <span>
           <b style={{ color: "var(--ink)" }}>
             {sel[0]}-{sel[1]}
           </b>{" "}
-          olasılığı {pct(p, 1)}
-          {actual && actual[0] === sel[0] && actual[1] === sel[1] ? " · gerçek skor" : ""}
+          {t.chance} {pct(p, 1)}
+          {actual && actual[0] === sel[0] && actual[1] === sel[1] ? t.actual : ""}
         </span>
       </div>
     </div>

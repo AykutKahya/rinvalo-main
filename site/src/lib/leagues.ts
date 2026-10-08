@@ -80,3 +80,12 @@ export const TSDB_SEASON = "2026-2027";
 export function leagueByCode(code: string): League | undefined {
   return LEAGUES.find((l) => l.code === code);
 }
+
+const COUNTRY_EN: Record<string, string> = { Türkiye: "Türkiye", İngiltere: "England", İspanya: "Spain", İtalya: "Italy", Almanya: "Germany" };
+
+export function countryOf(l: League, lang: "tr" | "en"): string {
+  return lang === "en" ? (COUNTRY_EN[l.country] ?? l.country) : l.country;
+}
+
+/** Uppercased team names need their own language: BEŞİKTAŞ keeps its dotted İ, LIVERPOOL does not get one. */
+export const nameLang = (league: string) => (league === "super-lig" ? "tr" : "en");

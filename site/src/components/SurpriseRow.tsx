@@ -1,18 +1,20 @@
 import Link from "next/link";
 import type { MatchView } from "@/lib/data";
-import { dayNum, shortDay, time } from "@/lib/format";
+import { fmt } from "@/lib/format";
+import { dict, paths, type Lang } from "@/lib/i18n";
 import { team } from "@/lib/teams";
 import { Crest } from "./Crest";
 
 /** A compact match line with one highlighted figure on the right. */
-export function SurpriseRow({ m, figure, note, tone }: { m: MatchView; figure: string; note: string; tone: "plain" | "bad" | "warn" }) {
+export function SurpriseRow({ m, lang, figure, note, tone }: { m: MatchView; lang: Lang; figure: string; note: string; tone: "plain" | "bad" | "warn" }) {
+  const f = fmt(lang);
   const done = m.status === "finished" && m.hg !== null;
   return (
-    <Link href={`/mac/${m.id}`} className="srow">
+    <Link href={paths(lang).matchOf(m.id)} className="srow">
       <span className="srow-when">
-        {done ? "MS" : time(m.kickoff)}
+        {done ? dict(lang).row.ft : f.time(m.kickoff)}
         <small>
-          {dayNum(m.kickoff)} {shortDay(m.kickoff)}
+          {f.dayNum(m.kickoff)} {f.shortDay(m.kickoff)}
         </small>
       </span>
       <span className="srow-teams">
@@ -22,7 +24,7 @@ export function SurpriseRow({ m, figure, note, tone }: { m: MatchView; figure: s
         ].map(([slug, g]) => (
           <span key={slug as string}>
             <Crest slug={slug as string} size="sm" />
-            <span className="nm">{team(slug as string).name}</span>
+            <span className="nm">{team(slug as string, lang).name}</span>
             {done && <b className="num">{g as number}</b>}
           </span>
         ))}

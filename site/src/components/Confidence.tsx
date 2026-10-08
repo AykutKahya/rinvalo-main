@@ -1,27 +1,24 @@
-const LABEL = { high: "Yüksek güven", medium: "Orta güven", low: "Düşük güven" } as const;
-const HINT = {
-  high: "Son 3 sezonda bu seviyedeki tahminlerin %65'i tuttu.",
-  medium: "Son 3 sezonda bu seviyedeki tahminlerin %49'u tuttu.",
-  low: "Son 3 sezonda bu seviyedeki tahminlerin %36'sı tuttu.",
-} as const;
+import { fmt } from "@/lib/format";
+import { dict, type Lang } from "@/lib/i18n";
 
-export type Level = keyof typeof LABEL;
+/** Hit rates per level over the last three seasons (engine backtest). */
+const RATE = { high: 0.65, medium: 0.49, low: 0.36 } as const;
 
-export function ConfidencePill({ level }: { level?: Level }) {
+export type Level = keyof typeof RATE;
+
+export function ConfidencePill({ level, lang }: { level?: Level; lang: Lang }) {
   if (!level) return null;
+  const t = dict(lang).conf;
   return (
-    <span className={`conf conf-${level}`} title={HINT[level]}>
+    <span className={`conf conf-${level}`} title={t.hint(fmt(lang).pct(RATE[level]))}>
       <i aria-hidden="true" />
-      {LABEL[level]}
+      {t[level]}
     </span>
   );
 }
 
-export function ConfidenceDot({ level }: { level?: Level }) {
+export function ConfidenceDot({ level, lang }: { level?: Level; lang: Lang }) {
   if (!level) return null;
-  return <i className={`conf-dot conf-${level}`} title={LABEL[level]} aria-label={LABEL[level]} />;
-}
-
-export function confidenceHint(level: Level) {
-  return HINT[level];
+  const label = dict(lang).conf[level];
+  return <i className={`conf-dot conf-${level}`} title={label} aria-label={label} />;
 }

@@ -559,3 +559,7 @@ table.power td { vertical-align: middle; }
 .move.up, td.up { color: var(--good); }
 .move.down, td.down { color: var(--bad); }
 @media (max-width: 640px) { .hide-sm, .power-bar { display: none; } .power-cell { min-width: 0; } }
+
+/* ---------- Language switch ---------- */
+.lang-switch { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .04em; transition: background .15s, color .15s; }
+.lang-switch:hover { background: var(--card-2); color: var(--accent); }

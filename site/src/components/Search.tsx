@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { dict, type Lang } from "@/lib/i18n";
 
 export interface SearchItem {
   kind: "team" | "league" | "match";
@@ -11,14 +12,13 @@ export interface SearchItem {
   img?: string;
 }
 
-const KIND = { team: "Takım", league: "Lig", match: "Maç" } as const;
-
 /** Lower-case and strip Turkish/Latin accents so "fener", "FENERBAHÇE" and "fenerbahce" all match. */
 function fold(s: string) {
   return s.toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
-export function Search() {
+export function Search({ lang }: { lang: Lang }) {
+  const t = dict(lang).search;
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<SearchItem[]>([]);
   const [q, setQ] = useState("");
@@ -49,20 +49,27 @@ export function Search() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Load the index once the page is idle (or right away when the box opens), so results are ready.
   useEffect(() => {
-    if (open && !items.length) {
-      fetch("/search-index.json")
+    if (items.length) return;
+    let done = false;
+    const load = () => {
+      if (done) return;
+      done = true;
+      fetch(lang === "en" ? "/en/search-index.json" : "/search-index.json")
         .then((r) => r.json())
         .then(setItems)
-        .catch(() => {});
-    }
-  }, [open, items.length]);
+        .catch(() => (done = false));
+    };
+    if (open) load();
+    const id = setTimeout(load, 2500);
+    return () => clearTimeout(id);
+  }, [open, items.length, lang]);
 
   useEffect(() => {
     if (open) {
       setQ("");
       setSel(0);
-      requestAnimationFrame(() => input.current?.focus());
     }
   }, [open]);
 
@@ -74,21 +81,22 @@ export function Search() {
 
   return (
     <>
-      <button type="button" className="search-btn" onClick={() => setOpen(true)} aria-label="Ara" title="Ara (Ctrl+K)">
+      <button type="button" className="search-btn" onClick={() => setOpen(true)} aria-label={t.open} title={t.hint}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-4-4" />
         </svg>
-        <span className="search-hint">Ara</span>
+        <span className="search-hint">{t.open}</span>
       </button>
       {open && (
         <div className="search-layer" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && setOpen(false)}>
-          <div className="search-box" role="dialog" aria-modal="true" aria-label="Ara">
+          <div className="search-box" role="dialog" aria-modal="true" aria-label={t.open}>
             <input
               ref={input}
+              autoFocus
               value={q}
-              placeholder="Takım, lig veya maç ara"
-              aria-label="Arama"
+              placeholder={t.placeholder}
+              aria-label={t.results}
               aria-controls="search-results"
               aria-activedescendant={results[sel] ? `sr-${sel}` : undefined}
               onChange={(e) => {
@@ -115,10 +123,10 @@ export function Search() {
                     <b>{it.label}</b>
                     <small>{it.sub}</small>
                   </span>
-                  <span className="sr-kind">{KIND[it.kind]}</span>
+                  <span className="sr-kind">{t.kind[it.kind]}</span>
                 </li>
               ))}
-              {!results.length && <li className="sr-empty">{items.length ? "Sonuç yok" : "Yükleniyor…"}</li>}
+              {!results.length && <li className="sr-empty">{items.length ? t.none : t.loading}</li>}
             </ul>
           </div>
         </div>

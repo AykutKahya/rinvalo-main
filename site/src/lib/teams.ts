@@ -193,15 +193,17 @@ export function resolveTeam(sourceName: string): string | null {
   return BY_ALIAS.get(normalizeName(sourceName)) ?? null;
 }
 
-export function team(slug: string): Team {
-  return (
-    BY_SLUG.get(slug) ?? {
-      slug,
-      name: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      short: slug.slice(0, 3).toUpperCase(),
-      colors: ["#8a93a6", "#ffffff"],
-    }
-  );
+/** English names, only where the Turkish display name differs. */
+const EN_NAMES: Record<string, string> = { bayern: "Bayern Munich" };
+
+export function team(slug: string, lang: "tr" | "en" = "tr"): Team {
+  const t = BY_SLUG.get(slug) ?? {
+    slug,
+    name: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    short: slug.slice(0, 3).toUpperCase(),
+    colors: ["#8a93a6", "#ffffff"] as [string, string],
+  };
+  return lang === "en" && EN_NAMES[slug] ? { ...t, name: EN_NAMES[slug] } : t;
 }
 
 export function allTeams(): Team[] {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { dict, type Lang } from "@/lib/i18n";
 
 const KEY = "rinvalo:theme";
 
@@ -11,7 +12,8 @@ function effectiveTheme(): "light" | "dark" {
 }
 
 /** Day/night switch. Starts from the device theme; a choice is remembered in this browser. */
-export function ThemeToggle() {
+export function ThemeToggle({ lang }: { lang: Lang }) {
+  const t = dict(lang).theme;
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
   useEffect(() => setTheme(effectiveTheme()), []);
 
@@ -26,7 +28,7 @@ export function ThemeToggle() {
 
   const dark = theme === "dark";
   return (
-    <button type="button" className="theme-toggle" onClick={toggle} aria-label={dark ? "Gündüz temasına geç" : "Gece temasına geç"} title={dark ? "Gündüz" : "Gece"}>
+    <button type="button" className="theme-toggle" onClick={toggle} aria-label={dark ? t.toDay : t.toNight} title={dark ? t.day : t.night}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         {dark ? (
           <>

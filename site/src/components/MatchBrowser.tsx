@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { MatchView } from "@/lib/data";
-import { dayKey, dayNum, shortDay } from "@/lib/format";
+import { fmt } from "@/lib/format";
+import { dict, paths, type Lang } from "@/lib/i18n";
 import type { League } from "@/lib/leagues";
 import { LeagueMark } from "./Crest";
 import { useFavorites } from "./favorites";
@@ -11,7 +12,10 @@ import { MatchRow } from "./MatchRow";
 
 type Filter = "all" | "fav" | string;
 
-export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchView[]; leagues: League[]; initialDay: string }) {
+export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: MatchView[]; leagues: League[]; initialDay: string; lang: Lang }) {
+  const { dayKey, dayNum, shortDay } = fmt(lang);
+  const t = dict(lang);
+  const b = t.browser;
   const { favorites } = useFavorites();
   const [day, setDay] = useState(initialDay);
   const [filter, setFilter] = useState<Filter>("all");
@@ -27,7 +31,7 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
       const next = [...days].sort().find((d) => d >= t);
       if (next) setDay(next);
     }
-  }, [matches]);
+  }, [matches, dayKey]);
 
   const days = useMemo(() => {
     const map = new Map<string, string>();
@@ -35,8 +39,8 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
       const k = dayKey(m.kickoff);
       if (!map.has(k)) map.set(k, m.kickoff);
     }
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [matches]);
+    return [...map.entries()].sort((x, y) => x[0].localeCompare(y[0]));
+  }, [matches, dayKey]);
 
   const visible = matches.filter((m) => {
     if (dayKey(m.kickoff) !== day) return false;
@@ -50,9 +54,9 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
 
   return (
     <>
-      <nav className="card league-nav" aria-label="Lig filtresi">
+      <nav className="card league-nav" aria-label={b.filter}>
         <button aria-pressed={filter === "all"} onClick={() => setFilter("all")}>
-          <span>Tüm ligler</span>
+          <span>{b.all}</span>
           <span className="count">{[...counts.values()].reduce((a, b) => a + b, 0)}</span>
         </button>
         {leagues.map((l) => (
@@ -65,13 +69,13 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
           </button>
         ))}
         <button aria-pressed={filter === "fav"} onClick={() => setFilter("fav")}>
-          <span>★ Favorilerim</span>
+          <span>{b.favs}</span>
           <span className="count">{favorites.length}</span>
         </button>
       </nav>
 
-      <section aria-label="Maçlar" style={{ minWidth: 0 }}>
-        <div className="days" role="group" aria-label="Gün seçimi">
+      <section aria-label={b.matches} style={{ minWidth: 0 }}>
+        <div className="days" role="group" aria-label={b.days}>
           {days.map(([k, iso]) => (
             <button
               key={k}
@@ -83,7 +87,7 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
                 if (el && rail && k === day) rail.scrollLeft = el.offsetLeft - rail.clientWidth / 2 + el.clientWidth / 2;
               }}
             >
-              {k === today ? "Bugün" : shortDay(iso)}
+              {k === today ? t.today : shortDay(iso)}
               <b>{dayNum(iso)}</b>
               {k === today && <span className="today-dot" />}
             </button>
@@ -97,17 +101,17 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
           .map(({ l, ms }) => (
             <div key={l.code} className="card group reveal">
               <div className="group-head">
-                <Link href={`/lig/${l.code}`}>
+                <Link href={paths(lang).leagueOf(l.code)}>
                   <LeagueMark code={l.code} accent={l.accent} size={20} />
                   {l.name}
                   <span className="muted" style={{ fontWeight: 600 }}>
-                    · {ms[0].round}. hafta
+                    · {t.round(ms[0].round)}
                   </span>
                 </Link>
-                <span>1 · X · 2 &nbsp; Skor</span>
+                <span>{t.colsPick}</span>
               </div>
               {ms.map((m) => (
-                <MatchRow key={m.id} m={m} favorites={favorites} />
+                <MatchRow key={m.id} m={m} favorites={favorites} lang={lang} />
               ))}
             </div>
           ))}
@@ -116,10 +120,8 @@ export function MatchBrowser({ matches, leagues, initialDay }: { matches: MatchV
 
         {visible.length === 0 && (
           <div className="card empty">
-            <b>{filter === "fav" ? (favorites.length ? "Favori takımlarının bu gün maçı yok" : "Henüz favori takımın yok") : "Bu gün maç yok"}</b>
-            {filter === "fav" && !favorites.length
-              ? "Takım sayfalarından favori ekleyebilirsin."
-              : ""}
+            <b>{filter === "fav" ? (favorites.length ? b.noFavGames : b.noFavs) : b.noGames}</b>
+            {filter === "fav" && !favorites.length ? b.addFavs : ""}
           </div>
         )}
       </section>

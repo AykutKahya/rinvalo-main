@@ -1,4 +1,5 @@
-import { pct } from "@/lib/format";
+import { fmt } from "@/lib/format";
+import { dict, type Lang } from "@/lib/i18n";
 import { CountUp } from "./CountUp";
 
 function Bar({ p }: { p: [number, number, number] }) {
@@ -19,15 +20,20 @@ export function MarketCompare({
   away,
   finished,
   lang,
+  nameLang,
 }: {
   rinvalo: [number, number, number];
   market: [number, number, number] | null | undefined;
   home: string;
   away: string;
   finished: boolean;
-  lang: "tr" | "en";
+  lang: Lang;
+  /** Language of the team names, for correct upper-casing. */
+  nameLang: "tr" | "en";
 }) {
-  const name = (i: number) => (i === 0 ? home : i === 2 ? away : "beraberlik");
+  const t = dict(lang).market;
+  const { pct } = fmt(lang);
+  const name = (i: number) => (i === 0 ? home : i === 2 ? away : dict(lang).draw.toLocaleLowerCase(dict(lang).locale));
   const rp = rinvalo.indexOf(Math.max(...rinvalo));
   const mp = market ? market.indexOf(Math.max(...market)) : -1;
   const same = market && rp === mp;
@@ -35,15 +41,15 @@ export function MarketCompare({
   return (
     <section className="card card-pad market">
       <div className="section-title" style={{ margin: 0 }}>
-        <h2>Piyasa ne diyor?</h2>
+        <h2>{t.title}</h2>
       </div>
-      <div className="mk-grid" role="table" aria-label="Rinvalo ve piyasa olasılıkları" lang={lang}>
+      <div className="mk-grid" role="table" aria-label={t.aria} lang={nameLang}>
         <span role="columnheader" />
         <span role="columnheader" className="mk-h">
           {home}
         </span>
         <span role="columnheader" className="mk-h">
-          Ber.
+          {t.drawCol}
         </span>
         <span role="columnheader" className="mk-h">
           {away}
@@ -53,34 +59,34 @@ export function MarketCompare({
         <span className="mk-name">Rinvalo</span>
         {rinvalo.map((v, i) => (
           <b key={i} className={`mk-v${i === rp ? " pick" : ""}`}>
-            <CountUp value={v} />
+            <CountUp value={v} lang={lang} />
           </b>
         ))}
         <Bar p={rinvalo} />
 
-        <span className="mk-name">Piyasa</span>
+        <span className="mk-name">{t.market}</span>
         {market ? (
           <>
             {market.map((v, i) => (
               <b key={i} className={`mk-v${i === mp ? " pick" : ""}`}>
-                <CountUp value={v} />
+                <CountUp value={v} lang={lang} />
               </b>
             ))}
             <Bar p={market} />
           </>
         ) : (
-          <span className="mk-wait">{finished ? "Oran verisi yok." : "Oranlar henüz açıklanmadı."}</span>
+          <span className="mk-wait">{finished ? t.noOdds : t.notYet}</span>
         )}
       </div>
       {market && (
         <p className={`mk-verdict ${same ? "same" : "differ"}`}>
           {same ? (
             <>
-              ✓ <b>Uyumlu</b> · ikisi de {name(rp)}
+              ✓ <b>{t.agree}</b> · {t.both(name(rp))}
             </>
           ) : (
             <>
-              ⚠ <b>Ayrışma</b> · Rinvalo {name(rp)} {pct(rinvalo[rp])}, piyasa {name(mp)} {pct(market[mp])}
+              ⚠ <b>{t.differ}</b> · {t.split(name(rp), pct(rinvalo[rp]), name(mp), pct(market[mp]))}
             </>
           )}
         </p>

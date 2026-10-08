@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * Counts a number up from zero when it scrolls into view. The server renders the final value,
  * so the page is complete without JavaScript and for reduced-motion visitors.
  */
-export function CountUp({ value, kind = "pct", digits = 0 }: { value: number; kind?: "pct" | "int"; digits?: number }) {
+export function CountUp({ value, lang, kind = "pct", digits = 0 }: { value: number; lang: Lang; kind?: "pct" | "int"; digits?: number }) {
   const target = kind === "pct" ? value * 100 : value;
   const [shown, setShown] = useState(target);
   const ref = useRef<HTMLSpanElement>(null);
@@ -38,10 +39,10 @@ export function CountUp({ value, kind = "pct", digits = 0 }: { value: number; ki
     };
   }, [target]);
 
-  const text = shown.toFixed(digits).replace(".", ",");
+  const text = lang === "tr" ? shown.toFixed(digits).replace(".", ",") : shown.toFixed(digits);
   return (
     <span ref={ref} className="num">
-      {kind === "pct" ? `%${text}` : text}
+      {kind === "pct" ? (lang === "tr" ? `%${text}` : `${text}%`) : text}
     </span>
   );
 }

@@ -59,6 +59,7 @@ export interface Prediction {
   /** Engine-only fields (absent on fallback predictions). */
   confidence?: "high" | "medium" | "low";
   reasons?: string[];
+  reasonsEn?: string[];
   /** Margin-free betting market probabilities, when odds were published. */
   market?: [number, number, number] | null;
   components?: { goals: [number, number, number]; shots: [number, number, number]; elo: number };

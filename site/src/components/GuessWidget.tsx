@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { dict, type Lang } from "@/lib/i18n";
 
 const KEY = "rinvalo:guesses";
 
@@ -26,8 +27,10 @@ export function GuessWidget(props: {
   kickoff: string;
   model: [number, number] | null;
   actual: [number, number] | null;
+  lang: Lang;
 }) {
-  const { id, home, away, kickoff, model, actual } = props;
+  const { id, home, away, kickoff, model, actual, lang } = props;
+  const t = dict(lang).guess;
   const [h, setH] = useState(1);
   const [a, setA] = useState(1);
   const [saved, setSaved] = useState<[number, number] | null>(null);
@@ -55,11 +58,11 @@ export function GuessWidget(props: {
 
   const stepper = (value: number, set: (n: number) => void, label: string) => (
     <div className="stepper">
-      <button type="button" onClick={() => set(Math.min(value + 1, 9))} disabled={locked} aria-label={`${label} golünü artır`}>
+      <button type="button" onClick={() => set(Math.min(value + 1, 9))} disabled={locked} aria-label={t.up(label)}>
         +
       </button>
       <output aria-live="polite">{value}</output>
-      <button type="button" onClick={() => set(Math.max(value - 1, 0))} disabled={locked} aria-label={`${label} golünü azalt`}>
+      <button type="button" onClick={() => set(Math.max(value - 1, 0))} disabled={locked} aria-label={t.down(label)}>
         −
       </button>
     </div>
@@ -67,16 +70,16 @@ export function GuessWidget(props: {
 
   let verdict: string | null = null;
   if (actual && saved) {
-    const you = saved[0] === actual[0] && saved[1] === actual[1] ? "tam skor" : outcome(...saved) === outcome(...actual) ? "sonuç" : null;
-    const bot = model && model[0] === actual[0] && model[1] === actual[1] ? "tam skor" : model && outcome(...model) === outcome(...actual) ? "sonuç" : null;
-    verdict = `Sen: ${you ? `${you} ✓` : "tutmadı"} · Rinvalo: ${bot ? `${bot} ✓` : "tutmadı"}`;
+    const you = saved[0] === actual[0] && saved[1] === actual[1] ? t.exact : outcome(...saved) === outcome(...actual) ? t.result : null;
+    const bot = model && model[0] === actual[0] && model[1] === actual[1] ? t.exact : model && outcome(...model) === outcome(...actual) ? t.result : null;
+    verdict = `${t.you}: ${you ? `${you} ✓` : t.miss} · Rinvalo: ${bot ? `${bot} ✓` : t.miss}`;
   }
 
   return (
     <div className="card card-pad guess">
       <div className="section-title" style={{ margin: 0 }}>
-        <h2 style={{ fontSize: 16 }}>Sen de tahmin et</h2>
-        {saved && !actual && <span className="pill good">Kaydedildi</span>}
+        <h2 style={{ fontSize: 16 }}>{t.title}</h2>
+        {saved && !actual && <span className="pill good">{t.saved}</span>}
       </div>
       <div className="guess-row">
         <span className="guess-team">{home}</span>
@@ -89,12 +92,12 @@ export function GuessWidget(props: {
       </div>
       {locked ? (
         <p className="muted" style={{ margin: 0, fontSize: 13.5, textAlign: "center" }}>
-          {verdict ?? (saved ? `Tahminin: ${saved[0]}-${saved[1]}` : "Tahmin süresi doldu.")}
+          {verdict ?? (saved ? t.yours(`${saved[0]}-${saved[1]}`) : t.closed)}
         </p>
       ) : (
         <>
           <button className="btn accent" type="button" onClick={save}>
-            {saved ? "Tahminimi güncelle" : "Tahminimi kaydet"}
+            {saved ? t.update : t.save}
           </button>
           <p className="muted" style={{ margin: 0, fontSize: 12.5, textAlign: "center" }}>
             {model ? `Rinvalo: ${model[0]}-${model[1]}` : ""}

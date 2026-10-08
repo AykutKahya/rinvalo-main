@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { dict, type Lang } from "@/lib/i18n";
 
-export function Countdown({ to }: { to: string }) {
+export function Countdown({ to, lang }: { to: string; lang: Lang }) {
+  const t = dict(lang).countdown;
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     setNow(Date.now());
@@ -11,16 +13,16 @@ export function Countdown({ to }: { to: string }) {
   }, []);
   if (now === null) return <div className="countdown" style={{ minHeight: 48 }} />;
   const ms = Date.parse(to) - now;
-  if (ms <= 0) return <span className="mh-label">Maç başladı</span>;
+  if (ms <= 0) return <span className="mh-label">{t.started}</span>;
   const s = Math.floor(ms / 1000);
   const parts = [
-    [Math.floor(s / 86400), "gün"],
-    [Math.floor((s % 86400) / 3600), "saat"],
-    [Math.floor((s % 3600) / 60), "dk"],
-    [s % 60, "sn"],
+    [Math.floor(s / 86400), t.units[0]],
+    [Math.floor((s % 86400) / 3600), t.units[1]],
+    [Math.floor((s % 3600) / 60), t.units[2]],
+    [s % 60, t.units[3]],
   ] as const;
   return (
-    <div className="countdown" aria-label="Maça kalan süre">
+    <div className="countdown" aria-label={t.aria}>
       {parts.map(([v, l]) => (
         <div key={l}>
           <b key={v} className="tick">
