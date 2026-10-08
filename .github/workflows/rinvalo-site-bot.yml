@@ -1,0 +1,65 @@
+# Rinvalo v2 bot: refreshes fixtures, results, predictions and season odds for site/ and
+# commits the JSON files. Each commit to main triggers a new Vercel build.
+#
+# Cost: about 6 runs a day x 1-2 minutes, plus one ~7 minute full refresh, so roughly
+# 400 GitHub Actions minutes a month. The free plan includes 2,000.
+name: Rinvalo site bot
+
+on:
+  schedule:
+    # UTC. Istanbul is UTC+3: 05:23 full refresh, then 11:23, 15:23, 18:23, 21:23, 00:23.
+    - cron: '23 2 * * *'
+    - cron: '23 8,12,15,18,21 * * *'
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Refetch the whole season
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: rinvalo-site-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - name: Check out
+        # v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Test
+        run: npm test
+
+      - name: Update data
+        env:
+          FULL: ${{ (github.event.schedule == '23 2 * * *' || inputs.full) && '1' || '0' }}
+        run: npm run update
+
+      - name: Commit changed data
+        run: |
+          git config user.name "rinvalo-bot"
+          git config user.email "rinvalo-bot@users.noreply.github.com"
+          git add data/season.json data/predictions.json data/simulation.json data/overrides.json data/crests.json public/crests public/leagues
+          if git diff --cached --quiet; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git commit -m "Veri güncellemesi $(date -u +'%Y-%m-%d %H:%M') UTC"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

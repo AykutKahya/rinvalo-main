@@ -1,0 +1,78 @@
+/* Manşet: Turkish sports-tabloid page. A deliberate single look (newsprint), in both OS themes. */
+.paper {
+  --paper: #fbfbf8;
+  --ink: #111111;
+  --red: #e10600;
+  --mut: #575757;
+  --yel: #ffe14d;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-archivo), "Arial Narrow", Arial, sans-serif;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color-scheme: light;
+}
+.display { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; }
+
+.mast { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 16px 22px 10px; border-bottom: 6px solid var(--ink); flex-wrap: wrap; }
+.logo { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(44px, 8vw, 72px); line-height: 0.88; color: var(--red); letter-spacing: 0.01em; }
+.date { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; text-align: right; }
+
+.menu { display: flex; background: var(--ink); color: #fff; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; overflow-x: auto; scrollbar-width: none; }
+.menu a { padding: 10px 16px; border-right: 1px solid #333; white-space: nowrap; }
+.menu a:hover { background: #2a2a2a; }
+.menu a:first-child { background: var(--red); }
+
+.front { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); border-bottom: 3px solid var(--ink); }
+.lead { padding: 22px; border-right: 3px solid var(--ink); display: flex; flex-direction: column; gap: 14px; }
+.tag { align-self: flex-start; background: var(--yel); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 8px; }
+.headline { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(40px, 6.6vw, 82px); line-height: 0.92; margin: 0; text-wrap: balance; }
+.headline em { font-style: normal; color: var(--red); }
+.lead p { margin: 0; font-size: 16.5px; line-height: 1.45; max-width: 56ch; }
+.lead a.more { align-self: flex-start; font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: 0.06em; border-bottom: 3px solid var(--red); padding-bottom: 2px; }
+.bignums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+.bignums div { padding: 10px 12px; border-right: 2px solid var(--ink); min-width: 0; }
+.bignums div:last-child { border-right: 0; }
+.bignums b { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; display: block; font-size: clamp(36px, 5.4vw, 58px); line-height: 1; font-variant-numeric: tabular-nums; }
+.bignums .hot b { color: var(--red); }
+.bignums span { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rail { padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--ink); color: #fff; }
+.rail h2 { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 32px; line-height: 1; margin: 0; letter-spacing: 0; }
+.pct { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(80px, 11vw, 112px); line-height: 0.85; color: var(--yel); }
+.rail p { margin: 0; font-size: 14px; color: #ddd; }
+.rail ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
+.rail li a { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 7px; }
+.rail li a:hover span:first-child { text-decoration: underline; }
+.ok { color: #7be08f; font-weight: 800; white-space: nowrap; }
+.no { color: #ff8a80; font-weight: 800; white-space: nowrap; }
+
+.race { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 3px solid var(--ink); }
+.race a { padding: 16px 22px; border-right: 2px solid var(--ink); display: flex; flex-direction: column; gap: 2px; }
+.race a:last-child { border-right: 0; }
+.race a:hover { background: #f0efe8; }
+.race b { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(40px, 6vw, 64px); line-height: 1; }
+.race span { font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: 0.05em; }
+.raceHead { grid-column: 1 / -1; padding: 12px 22px 0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; color: var(--red); border-right: 0 !important; }
+
+.prog { padding: 18px 22px 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 22px; }
+.prog h2 { grid-column: 1 / -1; font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 36px; margin: 10px 0 6px; letter-spacing: 0; scroll-margin-top: 80px; }
+.prog h2:first-child { margin-top: 0; }
+.m { border-top: 3px solid var(--ink); padding: 10px 0 14px; display: flex; flex-direction: column; gap: 6px; }
+.m:hover .nm { color: var(--red); }
+.meta { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--mut); }
+.meta b { color: var(--red); }
+.line { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.nm { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 23px; line-height: 1.05; min-width: 0; }
+.sc { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 36px; line-height: 1; color: var(--red); white-space: nowrap; }
+.why { font-size: 13.5px; color: var(--mut); margin: 0; }
+
+@media (max-width: 860px) {
+  .front { grid-template-columns: 1fr; }
+  .lead { border-right: 0; border-bottom: 3px solid var(--ink); }
+  .prog { grid-template-columns: 1fr; }
+  .race { grid-template-columns: 1fr; }
+  .race a { border-right: 0; border-bottom: 2px solid var(--ink); flex-direction: row; align-items: baseline; justify-content: space-between; }
+}

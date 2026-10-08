@@ -1,0 +1,209 @@
+/**
+ * Team registry. Every source spells clubs differently (football-data.co.uk "Man United",
+ * TheSportsDB "Manchester United", openfootball "Manchester United FC"), so each team has one
+ * slug and a list of aliases. Aliases are compared after `normalizeName`.
+ *
+ * Row: [slug, display name, short code, primary colour, secondary colour, ...aliases]
+ */
+type Row = [string, string, string, string, string, ...string[]];
+
+const ROWS: Row[] = [
+  // Süper Lig
+  ["galatasaray", "Galatasaray", "GS", "#a90432", "#fdb912"],
+  ["fenerbahce", "Fenerbahçe", "FB", "#0d1d4a", "#ffed00"],
+  ["besiktas", "Beşiktaş", "BJK", "#111111", "#ffffff"],
+  ["trabzonspor", "Trabzonspor", "TS", "#6d0a2b", "#62b5e5"],
+  ["basaksehir", "Başakşehir", "İBFK", "#f26522", "#1d2a5c", "Buyuksehyr", "İstanbul Başakşehir", "Istanbul Basaksehir"],
+  ["samsunspor", "Samsunspor", "SAM", "#e30613", "#ffffff"],
+  ["goztepe", "Göztepe", "GÖZ", "#ffd200", "#c8102e", "Goztep"],
+  ["kasimpasa", "Kasımpaşa", "KAS", "#0b2d6b", "#ffffff"],
+  ["eyupspor", "Eyüpspor", "EYP", "#6a2c91", "#ffd100"],
+  ["alanyaspor", "Alanyaspor", "ALN", "#f47920", "#00843d"],
+  ["gaziantep", "Gaziantep FK", "GFK", "#d71920", "#111111", "Gaziantep"],
+  ["konyaspor", "Konyaspor", "KON", "#00843d", "#ffffff"],
+  ["rizespor", "Rizespor", "RİZ", "#0a7a3b", "#003da5", "Caykur Rizespor"],
+  ["kocaelispor", "Kocaelispor", "KOC", "#006a3a", "#111111"],
+  ["genclerbirligi", "Gençlerbirliği", "GB", "#c8102e", "#111111"],
+  ["amed", "Amed SK", "AMD", "#009a44", "#d50032", "Amed", "Amedspor"],
+  ["erzurumspor", "Erzurumspor", "ERZ", "#0055a4", "#ffffff", "Erzurum BB"],
+  ["corum", "Çorum FK", "ÇOR", "#c8102e", "#ffffff", "Corum", "Çorum"],
+  ["antalyaspor", "Antalyaspor", "ANT", "#e30613", "#ffffff"],
+  ["kayserispor", "Kayserispor", "KAY", "#e2001a", "#ffd200"],
+  ["karagumruk", "Karagümrük", "FKG", "#c8102e", "#111111", "Fatih Karagumruk"],
+  ["sivasspor", "Sivasspor", "SİV", "#e30613", "#ffffff"],
+  ["hatayspor", "Hatayspor", "HTY", "#7a1e3c", "#ffffff"],
+  ["adana-demirspor", "Adana Demirspor", "ADS", "#0b4ea2", "#5ec4f0", "Ad. Demirspor"],
+  ["ankaragucu", "Ankaragücü", "ANK", "#002f6c", "#ffd200", "Ankaragucu"],
+  ["istanbulspor", "İstanbulspor", "İST", "#ffd200", "#111111", "Istanbulspor"],
+  ["pendikspor", "Pendikspor", "PEN", "#e30613", "#ffffff"],
+  ["bodrumspor", "Bodrum FK", "BOD", "#00843d", "#ffffff", "Bodrumspor"],
+  ["giresunspor", "Giresunspor", "GİR", "#00843d", "#ffffff"],
+  ["umraniyespor", "Ümraniyespor", "ÜMR", "#e30613", "#ffffff", "Umraniyespor"],
+  ["altay", "Altay", "ALT", "#111111", "#ffffff"],
+  ["yeni-malatyaspor", "Yeni Malatyaspor", "YMS", "#ffd200", "#111111"],
+  // Premier League
+  ["arsenal", "Arsenal", "ARS", "#ef0107", "#ffffff"],
+  ["aston-villa", "Aston Villa", "AVL", "#670e36", "#95bfe5"],
+  ["bournemouth", "Bournemouth", "BOU", "#da291c", "#111111", "AFC Bournemouth"],
+  ["brentford", "Brentford", "BRE", "#e30613", "#ffffff"],
+  ["brighton", "Brighton", "BHA", "#0057b8", "#ffffff", "Brighton and Hove Albion", "Brighton & Hove Albion"],
+  ["chelsea", "Chelsea", "CHE", "#034694", "#ffffff"],
+  ["coventry", "Coventry City", "COV", "#59cbe8", "#ffffff", "Coventry"],
+  ["crystal-palace", "Crystal Palace", "CRY", "#1b458f", "#c4122e"],
+  ["everton", "Everton", "EVE", "#003399", "#ffffff"],
+  ["fulham", "Fulham", "FUL", "#ffffff", "#111111"],
+  ["hull", "Hull City", "HUL", "#f5a12d", "#111111", "Hull", "Hull City AFC"],
+  ["ipswich", "Ipswich Town", "IPS", "#0044a9", "#ffffff", "Ipswich"],
+  ["leeds", "Leeds United", "LEE", "#ffffff", "#1d428a", "Leeds"],
+  ["liverpool", "Liverpool", "LIV", "#c8102e", "#00b2a9"],
+  ["man-city", "Manchester City", "MCI", "#6cabdd", "#ffffff", "Man City"],
+  ["man-united", "Manchester United", "MUN", "#da291c", "#fbe122", "Man United", "Man Utd"],
+  ["newcastle", "Newcastle United", "NEW", "#241f20", "#ffffff", "Newcastle"],
+  ["nottingham-forest", "Nottingham Forest", "NFO", "#dd0000", "#ffffff", "Nott'm Forest"],
+  ["sunderland", "Sunderland", "SUN", "#eb172b", "#ffffff"],
+  ["tottenham", "Tottenham", "TOT", "#132257", "#ffffff", "Tottenham Hotspur"],
+  ["west-ham", "West Ham", "WHU", "#7a263a", "#1bb1e7", "West Ham United"],
+  ["wolves", "Wolverhampton", "WOL", "#fdb913", "#231f20", "Wolves", "Wolverhampton Wanderers"],
+  ["burnley", "Burnley", "BUR", "#6c1d45", "#99d6ea"],
+  ["leicester", "Leicester City", "LEI", "#003090", "#fdbe11", "Leicester"],
+  ["luton", "Luton Town", "LUT", "#f78f1e", "#002d62", "Luton"],
+  ["norwich", "Norwich City", "NOR", "#fff200", "#00a650", "Norwich"],
+  ["sheffield-united", "Sheffield United", "SHU", "#ee2737", "#ffffff"],
+  ["southampton", "Southampton", "SOU", "#d71920", "#ffffff"],
+  ["watford", "Watford", "WAT", "#fbee23", "#ed2127"],
+  // La Liga
+  ["athletic", "Athletic Bilbao", "ATH", "#ee2523", "#ffffff", "Ath Bilbao", "Athletic Club"],
+  ["atletico", "Atlético Madrid", "ATM", "#cb3524", "#ffffff", "Ath Madrid", "Atletico Madrid", "Club Atlético de Madrid"],
+  ["barcelona", "Barcelona", "BAR", "#a50044", "#004d98", "FC Barcelona"],
+  ["celta", "Celta Vigo", "CEL", "#8ac3ee", "#ffffff", "Celta", "RC Celta", "RC Celta de Vigo"],
+  ["alaves", "Alavés", "ALA", "#0761af", "#ffffff", "Alaves", "Deportivo Alavés"],
+  ["deportivo", "Deportivo", "DEP", "#0066b3", "#ffffff", "Deportivo de A Coruña", "Deportivo La Coruna", "RC Deportivo", "RC Deportivo La Coruña"],
+  ["elche", "Elche", "ELC", "#05642c", "#ffffff"],
+  ["espanyol", "Espanyol", "ESP", "#007fc8", "#ffffff", "Espanol", "RCD Espanyol", "RCD Espanyol de Barcelona"],
+  ["getafe", "Getafe", "GET", "#005999", "#ffffff"],
+  ["levante", "Levante", "LEV", "#b4053f", "#004b97"],
+  ["malaga", "Málaga", "MAL", "#00a0e2", "#ffffff", "Malaga"],
+  ["osasuna", "Osasuna", "OSA", "#d91a21", "#0a346f", "CA Osasuna"],
+  ["racing", "Racing Santander", "RAC", "#00843d", "#ffffff", "Racing de Santander", "Santander", "Real Racing Club de Santander"],
+  ["rayo", "Rayo Vallecano", "RAY", "#e53027", "#ffffff", "Vallecano", "Rayo Vallecano de Madrid"],
+  ["betis", "Real Betis", "BET", "#00954c", "#ffffff", "Betis"],
+  ["real-madrid", "Real Madrid", "RMA", "#ffffff", "#febe10"],
+  ["sociedad", "Real Sociedad", "RSO", "#0067b1", "#ffffff", "Sociedad", "Real Sociedad de Fútbol"],
+  ["sevilla", "Sevilla", "SEV", "#ffffff", "#d81e05", "Sevilla FC"],
+  ["valencia", "Valencia", "VAL", "#ffffff", "#ee3524", "Valencia CF"],
+  ["villarreal", "Villarreal", "VIL", "#ffe667", "#005187", "Villarreal CF"],
+  ["almeria", "Almería", "ALM", "#ee1119", "#ffffff", "Almeria"],
+  ["cadiz", "Cádiz", "CAD", "#ffe500", "#0045a7", "Cadiz"],
+  ["girona", "Girona", "GIR", "#cd2534", "#ffffff"],
+  ["granada", "Granada", "GRA", "#c31632", "#ffffff"],
+  ["las-palmas", "Las Palmas", "LPA", "#ffe400", "#0047ab"],
+  ["leganes", "Leganés", "LEG", "#0047ab", "#ffffff", "Leganes"],
+  ["mallorca", "Mallorca", "MLL", "#e20613", "#111111", "RCD Mallorca"],
+  ["oviedo", "Real Oviedo", "OVI", "#0047ab", "#ffffff", "Oviedo"],
+  ["valladolid", "Valladolid", "VLL", "#921b88", "#ffffff", "Real Valladolid"],
+  // Serie A
+  ["milan", "Milan", "MIL", "#fb090b", "#111111", "AC Milan"],
+  ["atalanta", "Atalanta", "ATA", "#1e71b8", "#111111"],
+  ["bologna", "Bologna", "BOL", "#1a2f48", "#a21c26"],
+  ["cagliari", "Cagliari", "CAG", "#002350", "#b01028"],
+  ["como", "Como", "COM", "#003da5", "#ffffff", "Como 1907"],
+  ["fiorentina", "Fiorentina", "FIO", "#482e92", "#ffffff"],
+  ["frosinone", "Frosinone", "FRO", "#ffd200", "#0047ab"],
+  ["genoa", "Genoa", "GEN", "#a61c33", "#002855"],
+  ["inter", "Inter", "INT", "#0068a8", "#111111", "Inter Milan", "Internazionale", "FC Internazionale Milano"],
+  ["juventus", "Juventus", "JUV", "#111111", "#ffffff"],
+  ["lazio", "Lazio", "LAZ", "#87d8f7", "#ffffff"],
+  ["lecce", "Lecce", "LEC", "#ffd200", "#da291c"],
+  ["monza", "Monza", "MON", "#e30613", "#ffffff"],
+  ["napoli", "Napoli", "NAP", "#12a0d7", "#ffffff", "SSC Napoli"],
+  ["parma", "Parma", "PAR", "#ffd200", "#0047ab"],
+  ["roma", "Roma", "ROM", "#8e1f2f", "#f0bc42", "AS Roma"],
+  ["sassuolo", "Sassuolo", "SAS", "#00a752", "#111111"],
+  ["torino", "Torino", "TOR", "#8a1e03", "#ffffff"],
+  ["udinese", "Udinese", "UDI", "#111111", "#ffffff"],
+  ["venezia", "Venezia", "VEN", "#ff6a13", "#00713d"],
+  ["cremonese", "Cremonese", "CRE", "#e30613", "#a5a5a5"],
+  ["empoli", "Empoli", "EMP", "#0047ab", "#ffffff"],
+  ["pisa", "Pisa", "PIS", "#0047ab", "#111111"],
+  ["salernitana", "Salernitana", "SAL", "#7a1e3c", "#ffffff"],
+  ["sampdoria", "Sampdoria", "SAM", "#0047ab", "#ffffff"],
+  ["spezia", "Spezia", "SPE", "#ffffff", "#111111"],
+  ["verona", "Hellas Verona", "VER", "#ffd200", "#002f6c", "Verona"],
+  // Bundesliga
+  ["augsburg", "Augsburg", "FCA", "#ba3733", "#46714d", "FC Augsburg"],
+  ["leverkusen", "Leverkusen", "B04", "#e32221", "#111111", "Bayer Leverkusen"],
+  ["bayern", "Bayern Münih", "FCB", "#dc052d", "#ffffff", "Bayern Munich", "Bayern München", "FC Bayern München"],
+  ["dortmund", "Dortmund", "BVB", "#fde100", "#111111", "Borussia Dortmund"],
+  ["gladbach", "M'gladbach", "BMG", "#111111", "#00b04f", "Borussia Mönchengladbach", "Borussia Monchengladbach"],
+  ["frankfurt", "Eintracht Frankfurt", "SGE", "#e1000f", "#111111", "Ein Frankfurt"],
+  ["elversberg", "Elversberg", "SVE", "#111111", "#ffffff", "SV Elversberg"],
+  ["freiburg", "Freiburg", "SCF", "#111111", "#e2001a", "SC Freiburg"],
+  ["hamburg", "Hamburg", "HSV", "#0a3f86", "#ffffff", "Hamburger SV"],
+  ["hoffenheim", "Hoffenheim", "TSG", "#1961b5", "#ffffff", "TSG Hoffenheim"],
+  ["koln", "Köln", "KOE", "#ed1c24", "#ffffff", "FC Koln", "1. FC Köln", "Koln"],
+  ["mainz", "Mainz", "M05", "#c3141e", "#ffffff", "Mainz 05", "1. FSV Mainz 05"],
+  ["paderborn", "Paderborn", "SCP", "#0047ab", "#111111", "SC Paderborn 07"],
+  ["leipzig", "RB Leipzig", "RBL", "#dd0741", "#ffffff"],
+  ["schalke", "Schalke 04", "S04", "#004d9d", "#ffffff", "FC Schalke 04"],
+  ["stuttgart", "Stuttgart", "VFB", "#e32219", "#ffffff", "VfB Stuttgart"],
+  ["union-berlin", "Union Berlin", "FCU", "#eb1923", "#ffd200", "1. FC Union Berlin"],
+  ["werder", "Werder Bremen", "SVW", "#1d9053", "#ffffff"],
+  ["bielefeld", "Bielefeld", "DSC", "#004e95", "#111111", "Arminia Bielefeld"],
+  ["bochum", "Bochum", "BOC", "#005ca9", "#ffffff", "VfL Bochum"],
+  ["darmstadt", "Darmstadt", "D98", "#004e9f", "#ffffff", "Darmstadt 98"],
+  ["greuther-furth", "Greuther Fürth", "SGF", "#009a3d", "#ffffff", "Greuther Furth"],
+  ["heidenheim", "Heidenheim", "HDH", "#e2001a", "#003b79", "1. FC Heidenheim"],
+  ["hertha", "Hertha Berlin", "BSC", "#005ca9", "#ffffff", "Hertha"],
+  ["holstein-kiel", "Holstein Kiel", "KSV", "#0b3f8b", "#ffffff"],
+  ["st-pauli", "St. Pauli", "STP", "#5e3a1c", "#ffffff", "St Pauli", "FC St. Pauli"],
+  ["wolfsburg", "Wolfsburg", "WOB", "#65b32e", "#ffffff", "VfL Wolfsburg"],
+];
+
+export interface Team {
+  slug: string;
+  name: string;
+  short: string;
+  colors: [string, string];
+}
+
+export function normalizeName(raw: string): string {
+  return raw
+    .toLocaleLowerCase("tr")
+    .replace(/ı/g, "i")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\b(fc|cf|cfc|afc|sk|fk|ac|acf|as|ss|ssc|us|bc|rc|cd|ud|sd|rcd|sv|vfl|vfb|tsg|calcio|balompie)\b/g, " ")
+    .replace(/\b\d+\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const BY_SLUG = new Map<string, Team>();
+const BY_ALIAS = new Map<string, string>();
+
+for (const [slug, name, short, c1, c2, ...aliases] of ROWS) {
+  BY_SLUG.set(slug, { slug, name, short, colors: [c1, c2] });
+  for (const alias of [slug.replace(/-/g, " "), name, ...aliases]) {
+    BY_ALIAS.set(normalizeName(alias), slug);
+  }
+}
+
+/** Resolve any source spelling to a slug, or null when the name is unknown. */
+export function resolveTeam(sourceName: string): string | null {
+  return BY_ALIAS.get(normalizeName(sourceName)) ?? null;
+}
+
+export function team(slug: string): Team {
+  return (
+    BY_SLUG.get(slug) ?? {
+      slug,
+      name: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      short: slug.slice(0, 3).toUpperCase(),
+      colors: ["#8a93a6", "#ffffff"],
+    }
+  );
+}
+
+export function allTeams(): Team[] {
+  return [...BY_SLUG.values()];
+}
