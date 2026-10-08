@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import Link from "next/link";
 import { BottomNav, LangSwitch, TopNav } from "@/components/Nav";
+import { RegisterSW } from "@/components/RegisterSW";
 import { Search } from "@/components/Search";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Ticker } from "@/components/Ticker";
@@ -71,6 +72,7 @@ export function Shell({ lang, children }: { lang: Lang; children: React.ReactNod
           </div>
         </footer>
         <BottomNav lang={lang} />
+        <RegisterSW />
       </body>
     </html>
   );

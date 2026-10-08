@@ -35,3 +35,8 @@ export function liveOdds(lh: number, la: number, hg: number, ag: number, minute:
   const total = win + draw + loss;
   return [win / total, draw / total, loss / total];
 }
+
+/** Median minute of the opening goal when goals arrive at λh+λa per 90, capped. */
+export function firstGoalMinute(lh: number, la: number): number {
+  return Math.min(60, Math.round((Math.LN2 * 90) / Math.max(lh + la, 0.5)));
+}

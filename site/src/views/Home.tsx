@@ -23,7 +23,7 @@ export function Home({ lang }: { lang: Lang }) {
   const sim = getSimulation();
   const window = all.filter((m) => {
     const k = Date.parse(m.kickoff);
-    return k > now - 10 * DAY && k < now + 21 * DAY;
+    return k > now - 4 * DAY && k < now + 14 * DAY;
   });
   const days = [...new Set(window.map((m) => f.dayKey(m.kickoff)))].sort();
   const today = f.dayKey(now);

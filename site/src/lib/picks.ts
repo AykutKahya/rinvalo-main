@@ -37,7 +37,10 @@ export function recentResults(matches: MatchView[], now: number, days = 7): Matc
 
 /** Drop the heavy probability grid for list views sent to the browser. */
 export function lite(m: MatchView): MatchView {
-  return m.prediction ? { ...m, prediction: { ...m.prediction, grid: [], top: [] } } : m;
+  if (!m.prediction) return { ...m, venue: null };
+  // Rows only show the 1-X-2, the score pick and the confidence dot.
+  const { p, score, confidence, fixtureId } = m.prediction;
+  return { ...m, venue: null, prediction: { fixtureId, p, score, confidence, madeAt: "", model: "", lh: 0, la: 0, top: [], over25: 0, btts: 0, grid: [] } };
 }
 
 const top = (p: [number, number, number]) => p.indexOf(Math.max(...p));

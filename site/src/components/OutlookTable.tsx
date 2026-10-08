@@ -23,6 +23,7 @@ export function OutlookTable({
   runs,
   lang,
   current,
+  schedule,
 }: {
   rows: TeamOutlook[];
   league: League;
@@ -30,6 +31,8 @@ export function OutlookTable({
   lang: Lang;
   /** Team → [current position (1-based), current points]. */
   current: Map<string, [number, number]>;
+  /** Team → remaining opponents' average rating minus the league average. */
+  schedule?: Map<string, number>;
 }) {
   const d = dict(lang);
   const t = d.outlook;
@@ -50,6 +53,11 @@ export function OutlookTable({
               <th>{d.table.team}</th>
               <th className="c">{d.seasonEnd.now}</th>
               <th className="c">{d.seasonEnd.projected}</th>
+              {schedule && (
+                <th className="c" title={d.seasonEnd.scheduleHint}>
+                  {d.seasonEnd.schedule}
+                </th>
+              )}
               <th>{t.champion}</th>
               <th>{t.top(league.zones.europe)}</th>
               <th>{t.relegation}</th>
@@ -75,6 +83,11 @@ export function OutlookTable({
                   <td className="c num">
                     <b>{r.avgPoints.toFixed(0)}</b>
                   </td>
+                  {schedule && (
+                    <td className={`c num ${(schedule.get(r.team) ?? 0) >= 15 ? "down" : (schedule.get(r.team) ?? 0) <= -15 ? "up" : "muted"}`}>
+                      {schedule.has(r.team) ? `${schedule.get(r.team)! > 0 ? "+" : ""}${Math.round(schedule.get(r.team)!)}` : "–"}
+                    </td>
+                  )}
                   <td style={{ minWidth: 110 }}>
                     <Bar v={r.champion} color="var(--warn)" lang={lang} />
                   </td>

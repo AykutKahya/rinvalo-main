@@ -168,6 +168,9 @@ const TR = {
     table: "Puan durumu",
     fullTable: "Tam tablo",
     others: "Haftanın diğer maçları",
+    scenarios: "Senaryolar",
+    firstGoal: (t: string, p: string) => `İlk golü ${t} atarsa kazanma ihtimali ${p}`,
+    goalless: (p: string) => `Golsüz bitme ihtimali ${p}`,
   },
   countdown: { started: "Maç başladı", aria: "Maça kalan süre", units: ["gün", "saat", "dk", "sn"] as [string, string, string, string] },
   market: {
@@ -229,6 +232,8 @@ const TR = {
     caption: (n: string) => `${n} sezon simülasyonuna göre beklenen final tablosu`,
     now: "Şu an",
     projected: "Beklenen",
+    schedule: "Kalan fikstür",
+    scheduleHint: "Kalan rakiplerin ortalama güç puanı, lig ortalamasına göre (+ daha zor)",
   },
   xg: {
     caption: "Gol beklentisi (xG) tablosu",
@@ -536,6 +541,9 @@ const EN: Dict = {
     table: "Standings",
     fullTable: "Full table",
     others: "Other games this matchday",
+    scenarios: "Scenarios",
+    firstGoal: (t, p) => `If ${t} score first, they win ${p} of the time`,
+    goalless: (p) => `Chance of a goalless draw ${p}`,
   },
   countdown: { started: "Kicked off", aria: "Time to kick-off", units: ["days", "hrs", "min", "sec"] },
   market: {
@@ -597,6 +605,8 @@ const EN: Dict = {
     caption: (n) => `Expected final table from ${n} simulated seasons`,
     now: "Now",
     projected: "Projected",
+    schedule: "Run-in",
+    scheduleHint: "Average rating of remaining opponents against the league average (+ is harder)",
   },
   xg: {
     caption: "Expected goals (xG) table",

@@ -20,6 +20,7 @@ import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
 import { stakesOf } from "@/lib/stakes";
+import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
 
 export function matchParams() {
@@ -169,6 +170,15 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   </ul>
                 </div>
               )}
+              <ul className="scenarios" aria-label={tm.scenarios}>
+                {[
+                  [h.name, liveOdds(p.lh, p.la, 1, 0, firstGoalMinute(p.lh, p.la))[0]],
+                  [a.name, liveOdds(p.lh, p.la, 0, 1, firstGoalMinute(p.lh, p.la))[2]],
+                ].map(([n, v]) => (
+                  <li key={n as string}>{tm.firstGoal(n as string, f.pct(v as number))}</li>
+                ))}
+                <li>{tm.goalless(f.pct(p.grid[0]?.[0] ?? Math.exp(-p.lh - p.la)))}</li>
+              </ul>
               <div className="kv-grid four">
                 <div className="kv">
                   <small>{tm.xg}</small>
