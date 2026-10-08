@@ -114,3 +114,16 @@ export function headToHead(a: string, b: string, limit = 6) {
 }
 
 export { LEAGUES };
+
+export interface TeamRating {
+  team: string;
+  /** Elo now, and how much the team's last game moved it. */
+  elo: number;
+  last: number;
+  /** Goals and xG for/against per game against an average opponent. */
+  gf: number;
+  ga: number;
+  xgf: number;
+  xga: number;
+}
+export const getRatings = cache(() => read<{ at: string; leagues: Record<string, TeamRating[]> }>("ratings.json", { at: "", leagues: {} }));

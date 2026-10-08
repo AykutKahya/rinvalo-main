@@ -2,14 +2,14 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import Link from "next/link";
 import { BottomNav, TopNav } from "@/components/Nav";
+import { Search } from "@/components/Search";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Ticker } from "@/components/Ticker";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const body = Barlow({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
 const display = Barlow_Condensed({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700", "800"], variable: "--font-display-face", display: "swap" });
-
-const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -48,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <TopNav />
             <div className="topbar-right">
+              <Search />
               <ThemeToggle />
             </div>
           </div>

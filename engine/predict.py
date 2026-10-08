@@ -25,7 +25,7 @@ from rinvalo_engine.data import _season_of as season_of  # noqa: E402
 from rinvalo_engine.features import Engine, build_training, fit_shot_coef  # noqa: E402
 from rinvalo_engine.metrics import confidence  # noqa: E402
 from rinvalo_engine.model import VERSION, fit, rates_for  # noqa: E402
-from rinvalo_engine.ratings import score_grid  # noqa: E402
+from rinvalo_engine.ratings import Elo, Strengths, score_grid  # noqa: E402
 
 OUTCOME = ["ev sahibi", "beraberlik", "deplasman"]
 
@@ -78,6 +78,45 @@ def reasons(f: dict, p: np.ndarray, market: np.ndarray | None, names: dict[str, 
         else:
             lines.append(f"Piyasa farklı: {OUTCOME[mk_pick]} {pct(market[mk_pick])}.")
     return lines
+
+
+def per_game(s: Strengths, team: str) -> tuple[float, float]:
+    """Goals for/against per game against an average opponent, home and away averaged."""
+    att, dfc = s.attack.get(team, s.prior[0]), s.defence.get(team, s.prior[1])
+    gf = (np.exp(s.mu + s.home + att) + np.exp(s.mu + att)) / 2
+    ga = (np.exp(s.mu - dfc) + np.exp(s.mu + s.home - dfc)) / 2
+    return round(float(gf), 2), round(float(ga), 2)
+
+
+def ratings(engine: Engine, fixtures: list[dict], now: pd.Timestamp) -> dict:
+    """Per-league power ranking: Elo, its change in the last game, and goal-model attack/defence."""
+    out: dict[str, list[dict]] = {}
+    for league in sorted({f["league"] for f in fixtures}):
+        season = season_of(max(f["kickoff"] for f in fixtures if f["league"] == league))
+        teams = sorted({t for f in fixtures if f["league"] == league for t in (f["home"], f["away"])})
+        # Replay the league to see how much each team's last game moved its rating.
+        replay, last = Elo(), {}
+        for d, s, h, a, hg, ag, *_ in engine.history[league]:
+            before = (replay.get(h, s), replay.get(a, s))
+            replay.update(h, a, hg, ag, s)
+            last[h], last[a] = replay.r[h] - before[0], replay.r[a] - before[1]
+        goals, qual = engine.strengths(league, season, now.normalize())
+        rows = []
+        for t in teams:
+            gf, ga = per_game(goals, t)
+            xgf, xga = per_game(qual, t)
+            rows.append({
+                "team": t,
+                "elo": round(engine.elo[league].get(t, season), 1),
+                "last": round(last.get(t, 0.0), 1),
+                "gf": gf,
+                "ga": ga,
+                "xgf": xgf,
+                "xga": xga,
+            })
+        rows.sort(key=lambda r: -r["elo"])
+        out[league] = rows
+    return out
 
 
 def main() -> None:
@@ -138,6 +177,10 @@ def main() -> None:
 
     store["model"] = VERSION
     pred_path.write_text(json.dumps(store, ensure_ascii=False, separators=(",", ":")) + "\n", "utf-8")
+
+    (DATA / "ratings.json").write_text(
+        json.dumps({"at": made_at, "leagues": ratings(engine, fixtures, now)}, ensure_ascii=False, separators=(",", ":")) + "\n", "utf-8"
+    )
 
     # Pre-match market view of finished current-season games, for the "Rinvalo vs market" record.
     current = df[df["season"] == df["season"].max()]

@@ -104,11 +104,7 @@ export default function AccuracyPage() {
               <span>Sonuçlanan tahminler</span>
               <span>Tahmin · Skor</span>
             </div>
-            {graded.length ? (
-              graded.slice(0, 60).map((m) => <MatchRow key={m.id} m={m} showDate />)
-            ) : (
-              <div className="empty">Henüz sonuçlanan tahmin yok.</div>
-            )}
+            {graded.length ? graded.slice(0, 60).map((m) => <MatchRow key={m.id} m={m} showDate />) : <div className="empty">Henüz sonuçlanan tahmin yok.</div>}
           </section>
         </div>
 
@@ -215,7 +211,6 @@ export default function AccuracyPage() {
               </p>
             </section>
           )}
-
         </aside>
       </div>
     </>

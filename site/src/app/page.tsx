@@ -139,7 +139,7 @@ export default function Home() {
           </div>
         )}
 
-        <Link href="/basari" className="acc-box">
+        <Link href="/analiz/basari" className="acc-box">
           {record.n >= 10 ? (
             <>
               <b>{pct(record.hits / record.n)}</b>

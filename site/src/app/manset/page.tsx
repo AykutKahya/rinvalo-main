@@ -73,7 +73,7 @@ export default function HeadlinePage() {
               {l.name}
             </a>
           ))}
-          <Link href="/basari">Tuttu mu?</Link>
+          <Link href="/analiz/basari">Tuttu mu?</Link>
         </nav>
 
         <div className={s.front}>
@@ -128,7 +128,7 @@ export default function HeadlinePage() {
               <>
                 <div className={s.pct}>{bt ? pct(bt.accuracy) : "–"}</div>
                 <p>Son 3 sezon isabeti</p>
-                <Link href="/basari" className={s.ok} style={{ alignSelf: "flex-start" }}>
+                <Link href="/analiz/basari" className={s.ok} style={{ alignSelf: "flex-start" }}>
                   KARNEYİ GÖR →
                 </Link>
               </>

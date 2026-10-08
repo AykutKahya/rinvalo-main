@@ -6,6 +6,9 @@ const HAS_CREST = new Set<string>(manifest.teams);
 const HAS_LEAGUE = new Set<string>(manifest.leagues);
 const PX = { sm: 20, md: 36, lg: 64 } as const;
 
+export const crestSrc = (slug: string) => (HAS_CREST.has(slug) ? `/crests/${slug}.png` : undefined);
+export const leagueSrc = (code: string) => (HAS_LEAGUE.has(code) ? `/leagues/${code}.png` : undefined);
+
 /** Club logo when the bot has stored one, otherwise a badge in the club's colours. */
 export function Crest({ slug, size }: { slug: string; size?: "sm" | "md" | "lg" }) {
   const px = PX[size ?? "sm"] ?? 22;

@@ -58,8 +58,23 @@ export default async function MatchPage({ params }: PageProps<"/mac/[id]">) {
 
   const heroStyle = { "--hc": h.colors[0] === "#ffffff" ? h.colors[1] : h.colors[0], "--ac": a.colors[0] === "#ffffff" ? a.colors[1] : a.colors[0] } as CSSProperties;
 
+  // Structured data so search engines can show the fixture as a sports event.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${h.name} – ${a.name}`,
+    startDate: m.kickoff,
+    sport: "Football",
+    eventStatus: m.status === "postponed" ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled",
+    homeTeam: { "@type": "SportsTeam", name: h.name },
+    awayTeam: { "@type": "SportsTeam", name: a.name },
+    superEvent: { "@type": "SportsEvent", name: league.name },
+    ...(m.venue ? { location: { "@type": "Place", name: m.venue } } : {}),
+  };
+
   return (
     <article>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="card match-hero reveal" style={heroStyle}>
         <div className="mh-top">
           <Link href={`/lig/${league.code}`}>
