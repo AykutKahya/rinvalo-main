@@ -9,6 +9,10 @@ on:
     # UTC. Istanbul is UTC+3: 05:23 full refresh, then 11:23, 15:23, 18:23, 21:23, 00:23.
     - cron: '23 2 * * *'
     - cron: '23 8,12,15,18,21 * * *'
+    # Match days: every 30 minutes while games finish (weekends 13:00-23:59, midweek evenings).
+    # A run commits only when a score, fixture or prediction really changed.
+    - cron: '7,37 13-23 * * 5,6,0,1'
+    - cron: '7,37 18-22 * * 2,3,4'
   workflow_dispatch:
     inputs:
       full:
@@ -76,11 +80,12 @@ jobs:
         run: |
           git config user.name "rinvalo-bot"
           git config user.email "rinvalo-bot@users.noreply.github.com"
-          git add data public/crests public/leagues
-          if git diff --cached --quiet; then
+          if ! npx tsx scripts/meaningful.ts; then
+            git checkout -- data
             echo "Değişiklik yok."
             exit 0
           fi
+          git add data public/crests public/leagues
           git commit -m "Veri güncellemesi $(date -u +'%Y-%m-%d %H:%M') UTC"
           for i in 1 2 3; do
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
