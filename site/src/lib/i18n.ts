@@ -391,6 +391,11 @@ const TR = {
     hubTitle: "İki takımı yan yana koy",
   },
   share: { button: "Paylaş", copied: "Bağlantı kopyalandı" },
+  live: {
+    title: "Canlı ihtimal",
+    minute: (n: number) => `~${n}. dk`,
+    note: "Skor yaklaşık 30 dakikada bir güncellenir; ihtimal her dakika kalan süreye göre yeniden hesaplanır.",
+  },
   chart: { title: "Sezon grafiği", rating: "Güç puanı", position: "Sıra", xg: "xG", xgFor: "Attığı xG", xgAgainst: "Yediği xG", rolling: "Son 3 maç ortalaması" },
   stakes: {
     title: "Bu maçın önemi",
@@ -754,6 +759,11 @@ const EN: Dict = {
     hubTitle: "Put two teams side by side",
   },
   share: { button: "Share", copied: "Link copied" },
+  live: {
+    title: "Live odds",
+    minute: (n: number) => `~${n}'`,
+    note: "The score refreshes about every 30 minutes; the odds are recalculated every minute from the time left.",
+  },
   chart: { title: "Season chart", rating: "Rating", position: "Position", xg: "xG", xgFor: "xG for", xgAgainst: "xG against", rolling: "Rolling 3-game average" },
   stakes: {
     title: "What's at stake",

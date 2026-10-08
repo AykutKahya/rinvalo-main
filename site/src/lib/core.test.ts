@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseOpenfootball } from "../../scripts/sources/openfootball";
 import { fit, outcomeOf, pickOf, predict, type ModelMatch } from "./model";
+import { liveOdds, minutePlayed } from "./live";
 import { simulateLeague, tieOdds } from "./simulate";
 import { buildTable } from "./table";
 import { resolveTeam } from "./teams";
@@ -127,4 +128,13 @@ test("a 3-0 first-leg win makes going through very likely", () => {
   ];
   const odds = tieOdds(legs, "a", 4000)!;
   assert.ok(odds > 0.9 && odds < 1);
+});
+
+test("live odds: a two-goal lead late on is nearly safe, level at kick-off matches the pre-match model", () => {
+  const late = liveOdds(1.5, 1.2, 2, 0, 85);
+  assert.ok(late[0] > 0.97);
+  const start = liveOdds(1.5, 1.2, 0, 0, 0);
+  assert.ok(start[0] > start[2] && Math.abs(start.reduce((a, b) => a + b, 0) - 1) < 1e-9);
+  assert.equal(minutePlayed("2026-10-10T18:00:00Z", Date.parse("2026-10-10T18:50:00Z")), 45);
+  assert.equal(minutePlayed("2026-10-10T18:00:00Z", Date.parse("2026-10-10T19:30:00Z")), 75);
 });
