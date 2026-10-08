@@ -58,7 +58,12 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
           </p>
           {row && <Form form={row.form} lang={lang} />}
         </div>
-        <FavoriteButton slug={slug} name={t.name} lang={lang} />
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <FavoriteButton slug={slug} name={t.name} lang={lang} />
+          <Link href={`${path.compare}?a=${slug}`} className="btn ghost">
+            {d.compare.cta}
+          </Link>
+        </div>
       </div>
 
       <div className="stat-row" style={{ marginTop: 16 }}>

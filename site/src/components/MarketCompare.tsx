@@ -56,7 +56,9 @@ export function MarketCompare({
         </span>
         <span role="columnheader" />
 
-        <span className="mk-name">Rinvalo</span>
+        <span className="mk-name" lang="en">
+          Rinvalo
+        </span>
         {rinvalo.map((v, i) => (
           <b key={i} className={`mk-v${i === rp ? " pick" : ""}`}>
             <CountUp value={v} lang={lang} />

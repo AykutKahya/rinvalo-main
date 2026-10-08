@@ -51,7 +51,7 @@ export function Surprises({ lang }: { lang: Lang }) {
             <section className="card group" style={{ margin: 0 }}>
               <div className="group-head">
                 <span>{t.diff}</span>
-                <span>Rinvalo</span>
+                <span lang="en">Rinvalo</span>
               </div>
               {diff.map((m) => {
                 const p = m.prediction!;

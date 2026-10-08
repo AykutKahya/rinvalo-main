@@ -104,6 +104,17 @@ export function Analysis({ lang }: { lang: Lang }) {
           {record.n > 0 && <p className="muted">{t.season(record.n, f.pct(record.hits / record.n))}</p>}
           <span className="hub-more">{t.details}</span>
         </Link>
+
+        <Link href={p.compare} className="card card-pad hub-card reveal">
+          <span className="eyebrow">{dict(lang).compare.title}</span>
+          <h2>{dict(lang).compare.hubTitle}</h2>
+          <div className="cmp-teaser" aria-hidden="true">
+            <Crest slug="galatasaray" size="lg" />
+            <span>VS</span>
+            <Crest slug="fenerbahce" size="lg" />
+          </div>
+          <span className="hub-more">{dict(lang).compare.cta} →</span>
+        </Link>
       </div>
     </>
   );

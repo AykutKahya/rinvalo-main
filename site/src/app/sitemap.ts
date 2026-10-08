@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page(tr.power, en.power, 0.6),
     page(tr.surprises, en.surprises, 0.6),
     page(tr.accuracy, en.accuracy, 0.5),
+    page(tr.compare, en.compare, 0.5),
     ...LEAGUES.map((l) => page(tr.leagueOf(l.code), en.leagueOf(l.code), 0.7)),
     ...seasonTeams().map((t) => page(tr.teamOf(t.slug), en.teamOf(t.slug), 0.5)),
     ...getMatches().map((m) => page(tr.matchOf(m.id), en.matchOf(m.id), m.status === "finished" ? 0.3 : 0.6)),

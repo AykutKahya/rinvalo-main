@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
+import { withBrand } from "@/components/Brand";
 import { ConfidencePill } from "@/components/Confidence";
 import { Countdown } from "@/components/Countdown";
 import { CountUp } from "@/components/CountUp";
@@ -10,6 +11,7 @@ import { GuessWidget } from "@/components/GuessWidget";
 import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
+import { ShareButton } from "@/components/ShareButton";
 import { Form, StandingsTable } from "@/components/StandingsTable";
 import { getMarket, getMatch, getMatches, headToHead, leagueMatches, leagueTable } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -33,6 +35,8 @@ export function matchMetadata(id: string, lang: Lang): Metadata {
     title: t.title(h, a),
     description: p ? t.description(h, a, `${p.score[0]}-${p.score[1]}`, pct(p.p[0]), pct(p.p[1]), pct(p.p[2])) : t.descriptionNone(h, a),
     alternates: alternates(lang, "match", `/${id}`),
+    openGraph: { images: [{ url: `/og/${lang}/${id}`, width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", images: [`/og/${lang}/${id}`] },
   };
 }
 
@@ -83,9 +87,10 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           <Link href={path.leagueOf(league.code)}>
             {league.name} · {t.round(m.round)}
           </Link>
-          <span>
+          <span className="mh-meta">
             {f.longDay(m.kickoff)} · {f.time(m.kickoff)}
             {m.venue ? ` · ${m.venue}` : ""}
+            <ShareButton title={tm.title(h.name, a.name)} lang={lang} />
           </span>
         </div>
         <div className="mh-teams">
@@ -110,7 +115,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
               </>
             ) : (
               <>
-                <span className="mh-label">{tm.prediction}</span>
+                <span className="mh-label">{withBrand(tm.prediction)}</span>
                 <span className="mh-score">{p ? `${p.score[0]}-${p.score[1]}` : "–"}</span>
                 <ConfidencePill level={p?.confidence} lang={lang} />
               </>
@@ -195,9 +200,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           <section className="card card-pad">
             <div className="section-title">
               <h2>{tm.form}</h2>
-              <span className="muted" style={{ fontSize: 13 }}>
-                {tm.formSub}
-              </span>
+              <Link href={`${path.compare}?a=${m.home}&b=${m.away}`}>{t.compare.cta} →</Link>
             </div>
             <div style={{ display: "grid", gap: 10 }}>
               {[hi, ai].map((i, k) =>
