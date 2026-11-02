@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CountUp } from "@/components/CountUp";
 import { LeagueMark } from "@/components/Crest";
 import { MatchRow } from "@/components/MatchRow";
-import { accuracy, getEngineBacktest, getMarket, getMatches, LEAGUES } from "@/lib/data";
+import { accuracy, getEngineBacktest, getMarket, getMatches, getTracking, LEAGUES } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
 import { outcomeOf } from "@/lib/model";
@@ -26,6 +26,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
   const graded = all.filter((m) => m.hit !== null).sort((a, b) => b.kickoff.localeCompare(a.kickoff));
   const record = accuracy(all);
   const eb = getEngineBacktest();
+  const tracking = getTracking();
   const market = getMarket();
   const rows: [string, string][] = [
     [MODEL, t.rinvalo],
@@ -185,6 +186,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
                   {LEAGUES.map((l) => {
                     const r = accuracy(all.filter((m) => m.league === l.code));
                     const b = eb?.perLeague[l.code];
+                    const tr = tracking.leagues[l.code];
                     return (
                       <tr key={l.code}>
                         <td>
@@ -193,7 +195,17 @@ export function Accuracy({ lang }: { lang: Lang }) {
                             {l.name}
                           </Link>
                         </td>
-                        <td className="c">{r.n ? `${f.pct(r.hits / r.n)} (${r.n})` : "–"}</td>
+                        <td className="c">
+                          {r.n ? `${f.pct(r.hits / r.n)} (${r.n})` : "–"}
+                          {tr && (
+                            <span
+                              className={`track-dot ${tr.status}`}
+                              role="img"
+                              aria-label={t.statusLabel[tr.status]}
+                              title={`${t.statusLabel[tr.status]} · ${t.lossTitle(f.dec(tr.logloss), tr.test ? f.dec(tr.test) : "–")}`}
+                            />
+                          )}
+                        </td>
                         <td className="c">{b ? f.pct(b.rinvalo.accuracy) : "–"}</td>
                         <td className="c muted">{b ? f.pct(b.market.accuracy) : "–"}</td>
                       </tr>
@@ -202,6 +214,9 @@ export function Accuracy({ lang }: { lang: Lang }) {
                 </tbody>
               </table>
             </div>
+            <p className="muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
+              {t.statusNote}
+            </p>
           </section>
 
           {vs.length > 0 && (

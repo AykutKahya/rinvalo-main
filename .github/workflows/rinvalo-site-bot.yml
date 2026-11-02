@@ -100,6 +100,11 @@ jobs:
       - name: Season simulation
         run: npm run simulate
 
+      - name: Model tracking
+        # This season's accuracy per league; a drifting league becomes a warning on the run page.
+        continue-on-error: true
+        run: python ../engine/track.py
+
       - name: Upload changed data
         id: push
         env:

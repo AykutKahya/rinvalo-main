@@ -46,9 +46,20 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
   - Avrupa kupaları dahil ortak Elo farkı (`engine/cups.py`): ek olarak 0,9829, Elo yerine 0,9828.
   - Kupa yorgunluğu (son 4 günde Avrupa maçı, kupa dahil dinlenme): 0,9839 (kötü).
 
-  Hiçbiri gürültüden büyük değil; model değiştirilmedi. Maçların %25,8'i berabere bitse de
+  Hiçbiri gürültüden büyük değil; model değiştirilmedi.
+- **Kasım 2026, sonradan kalibrasyon (2023-26, walk-forward, ayar yalnız önceki sezonların
+  tahminleriyle; temel log loss 0,9831):** genel sıcaklık 0,9832, genel sıcaklık + sınıf kayması
+  0,9832, lig başına sıcaklık 0,9842, lig başına sıcaklık + kayma 0,9858. Model zaten kalibre;
+  lig başına ayar ezberliyor. Değiştirilmedi. Maçların %25,8'i berabere bitse de
   beraberlik neredeyse hiç en olası sonuç olmuyor: piyasa 10.300 maçın yalnız 5'inde beraberliği
   favori gösteriyor.
+
+## Canlı izleme
+
+`engine/track.py` her bot koşusunda bu sezonun dondurulmuş tahminlerini sonuçlarla karşılaştırır ve
+`site/data/tracking.json`'a lig lig isabet, log loss ve piyasa log loss'u yazar. Bir ligin bu sezonki
+log loss'u testtekinden iki standart hatadan fazla kötüyse (en az 30 maç) lig "izleniyor" olur:
+başarı sayfasında görünür ve GitHub Actions koşusunda uyarı çıkar.
 
 ## Çalıştırma
 
@@ -57,4 +68,5 @@ python -m pip install -r engine/requirements.txt
 python -m unittest discover -s engine
 python engine/backtest.py
 python engine/predict.py
+python engine/track.py
 ```

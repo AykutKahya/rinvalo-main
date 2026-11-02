@@ -366,6 +366,9 @@ const TR = {
     test: "Test",
     marketShort: "Piyasa",
     vs: "Bu sezon: Rinvalo – piyasa",
+    statusLabel: { ok: "Normal", watch: "İzleniyor", few: "Az maç" },
+    lossTitle: (now: string, test: string) => `Log loss bu sezon ${now}, testte ${test} (düşük daha iyi)`,
+    statusNote: "Nokta, bu sezonki hata payının geriye dönük testtekiyle kıyası: yeşil normal, kırmızı izleniyor (fark iki standart hatayı aşıyor), gri henüz 30 maç yok.",
   },
   headlines: {
     title: "Manşet",
@@ -829,6 +832,9 @@ const EN: Dict = {
     test: "Test",
     marketShort: "Market",
     vs: "This season: Rinvalo vs market",
+    statusLabel: { ok: "Normal", watch: "Watching", few: "Too few" },
+    lossTitle: (now: string, test: string) => `Log loss this season ${now}, in testing ${test} (lower is better)`,
+    statusNote: "The dot compares this season's error with the walk-forward test: green normal, red on watch (the gap exceeds two standard errors), grey fewer than 30 games.",
   },
   headlines: {
     title: "Headlines",

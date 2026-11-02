@@ -40,6 +40,12 @@ export interface EngineBacktest {
 }
 export const getEngineBacktest = cache(() => read<EngineBacktest | null>("engine-backtest.json", null));
 
+/** This season's frozen predictions against results, per league (engine/track.py). */
+export interface Tracking {
+  leagues: Record<string, { matches: number; accuracy: number; logloss: number; test: number | null; market: number | null; status: "ok" | "watch" | "few" }>;
+}
+export const getTracking = cache(() => read<Tracking>("tracking.json", { leagues: {} }));
+
 
 /** A fixture joined with its frozen or live prediction. */
 export interface MatchView extends Fixture {

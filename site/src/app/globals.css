@@ -688,3 +688,6 @@ table.power td { vertical-align: middle; }
 .badge-list li small { font-size: 12px; }
 .badge-list li.on { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
 .badge-list li.on small { color: var(--accent); font-weight: 700; }
+.track-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; vertical-align: middle; background: var(--muted); opacity: .5; }
+.track-dot.ok { background: var(--accent); opacity: 1; }
+.track-dot.watch { background: var(--bad); opacity: 1; }
