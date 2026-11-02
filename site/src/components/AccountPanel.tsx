@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { dict, type Lang } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
+import { Badges } from "./Badges";
 import type { Account } from "./useAccount";
 
 const NAME = /^[A-Za-z0-9_.çğıöşüÇĞİÖŞÜ-]{3,20}$/;
@@ -28,7 +29,8 @@ export function AccountPanel({ account, lang }: { account: Account; lang: Lang }
         <p className="muted" style={{ margin: 0 }}>
           {t.signedInNote}
         </p>
-        <button className="btn ghost" type="button" onClick={() => sb.auth.signOut()}>
+        <Badges lang={lang} />
+        <button className="btn ghost" type="button" onClick={() => sb.auth.signOut()} style={{ alignSelf: "flex-start" }}>
           {t.signOut}
         </button>
       </section>

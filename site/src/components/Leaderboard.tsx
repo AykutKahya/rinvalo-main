@@ -5,10 +5,16 @@ import { fmt } from "@/lib/format";
 import { dict, type Lang } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 
-type Row = { username: string; points: number; exact: number; results: number; played: number };
-type Period = "week" | "month" | "season";
+export type Row = {
+  username: string;
+  points: number;
+  exact: number;
+  results: number;
+  played: number;
+};
+export type Period = "week" | "month" | "season";
 
-function since(p: Period): string | null {
+export function since(p: Period): string | null {
   const d = new Date();
   if (p === "week") d.setDate(d.getDate() - 7);
   else if (p === "month") d.setDate(d.getDate() - 30);
@@ -19,7 +25,6 @@ function since(p: Period): string | null {
 /** League standings over settled games, from the database. */
 export function Leaderboard({ lang, me }: { lang: Lang; me: string | null }) {
   const t = dict(lang).league2;
-  const f = fmt(lang);
   const [period, setPeriod] = useState<Period>("week");
   const [rows, setRows] = useState<Row[] | null>(null);
   const sb = supabase();
@@ -35,14 +40,32 @@ export function Leaderboard({ lang, me }: { lang: Lang; me: string | null }) {
     <section className="card card-pad">
       <div className="section-title" style={{ margin: 0 }}>
         <h2 style={{ fontSize: 16 }}>{t.standings}</h2>
-        <div className="seg" role="tablist">
-          {(["week", "month", "season"] as Period[]).map((p) => (
-            <button key={p} role="tab" aria-selected={period === p} onClick={() => setPeriod(p)}>
-              {t[p]}
-            </button>
-          ))}
-        </div>
+        <PeriodPicker period={period} onChange={setPeriod} lang={lang} />
       </div>
+      <BoardTable rows={rows} me={me} lang={lang} />
+    </section>
+  );
+}
+
+export function PeriodPicker({ period, onChange, lang }: { period: Period; onChange: (p: Period) => void; lang: Lang }) {
+  const t = dict(lang).league2;
+  return (
+    <div className="seg" role="tablist">
+      {(["week", "month", "season"] as Period[]).map((p) => (
+        <button key={p} role="tab" aria-selected={period === p} onClick={() => onChange(p)}>
+          {t[p]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Points table shared by the public standings and friend leagues. */
+export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string | null; lang: Lang }) {
+  const t = dict(lang).league2;
+  const f = fmt(lang);
+  return (
+    <>
       {rows === null ? (
         <div className="empty" style={{ minHeight: 120 }} />
       ) : rows.length ? (
@@ -79,6 +102,6 @@ export function Leaderboard({ lang, me }: { lang: Lang; me: string | null }) {
       ) : (
         <div className="empty">{t.empty}</div>
       )}
-    </section>
+    </>
   );
 }

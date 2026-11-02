@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { dict, type Lang } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { AccountPanel } from "./AccountPanel";
+import { Groups } from "./Groups";
 import { Leaderboard } from "./Leaderboard";
 import { MyPicks } from "./MyPicks";
 import { useAccount } from "./useAccount";
 
-type Tab = "standings" | "mine" | "account";
+type Tab = "standings" | "groups" | "mine" | "account";
 
 /** Prediction league: standings, the visitor's picks, and their account, on one page. */
 export function LeagueHub({ lang }: { lang: Lang }) {
@@ -19,7 +20,7 @@ export function LeagueHub({ lang }: { lang: Lang }) {
 
   useEffect(() => {
     const h = window.location.hash.slice(1) as Tab;
-    if (["standings", "mine", "account"].includes(h)) setTab(h);
+    if (["standings", "groups", "mine", "account"].includes(h)) setTab(h);
   }, []);
 
   // Picks saved to the account join the ones kept in this browser.
@@ -34,11 +35,16 @@ export function LeagueHub({ lang }: { lang: Lang }) {
   const tabs: [Tab, string][] = account.enabled
     ? [
         ["standings", t.standings],
+        ["groups", dict(lang).groups.title],
         ["mine", t.mine],
         ["account", account.session ? (account.username ?? t.account) : t.signIn],
       ]
     : [["mine", t.mine]];
   const current = account.enabled ? tab : "mine";
+  const open = (id: Tab) => {
+    setTab(id);
+    history.replaceState(null, "", `${window.location.search}#${id}`);
+  };
 
   return (
     <div className="stack">
@@ -48,16 +54,14 @@ export function LeagueHub({ lang }: { lang: Lang }) {
             key={id}
             role="tab"
             aria-selected={current === id}
-            onClick={() => {
-              setTab(id);
-              history.replaceState(null, "", `#${id}`);
-            }}
+            onClick={() => open(id)}
           >
             {label}
           </button>
         ))}
       </div>
       {current === "standings" && <Leaderboard lang={lang} me={account.username} />}
+      {current === "groups" && <Groups account={account} lang={lang} onSignIn={() => open("account")} />}
       {current === "mine" && <MyPicks lang={lang} cloud={cloud} />}
       {current === "account" && <AccountPanel account={account} lang={lang} />}
     </div>
