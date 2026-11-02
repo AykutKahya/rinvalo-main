@@ -10,6 +10,7 @@ import { crumbs, JsonLd } from "@/components/JsonLd";
 import { NotifyButton } from "@/components/NotifyButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { MatchRow } from "@/components/MatchRow";
+import { Paged } from "@/components/Pager";
 import { ProbBar } from "@/components/ProbBar";
 import { Form } from "@/components/StandingsTable";
 import { accuracy, getMatches, getSimulation, leagueTable, seasonTeams } from "@/lib/data";
@@ -135,7 +136,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
               <span>{tt.played}</span>
               <span>{record.n > 0 ? tt.hits(record.hits, record.n) : ""}</span>
             </div>
-            {played.length ? played.map((m) => <MatchRow key={m.id} m={m} showDate lang={lang} />) : <div className="empty">{tt.none}</div>}
+            <Paged items={played.map((m) => <MatchRow key={m.id} m={m} showDate lang={lang} />)} per={10} lang={lang} empty={<div className="empty">{tt.none}</div>} />
           </section>
         </div>
         <aside className="stack">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fmt } from "@/lib/format";
 import { dict, paths, type Lang } from "@/lib/i18n";
+import { Pager, usePage } from "./Pager";
 
 type Data = {
   names: Record<string, [string, string]>;
@@ -78,46 +79,72 @@ export function MyPicks({ lang, cloud = {} }: { lang: Lang; cloud?: Record<strin
           <span>{t.played}</span>
         </div>
       </div>
-      <section className="card card-pad">
-        <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-          {t.rule}
-        </p>
-        <div className="table-wrap">
-          <table className="std">
-            <thead>
-              <tr>
-                <th>{t.match}</th>
-                <th className="c">{t.yours}</th>
-                <th className="c">Rinvalo</th>
-                <th className="c">{t.final}</th>
-                <th className="c">{t.points}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id}>
-                  <td>
-                    <Link href={p.matchOf(r.id)} className="tname" style={{ flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
-                      <span>
-                        {name(r.home)} – {name(r.away)}
-                      </span>
-                      <small className="muted">{f.fullDate(r.kickoff)}</small>
-                    </Link>
-                  </td>
-                  <td className="c num">
-                    <b>
-                      {r.pick[0]}-{r.pick[1]}
-                    </b>
-                  </td>
-                  <td className="c num muted">{r.rinvalo ? `${r.rinvalo[0]}-${r.rinvalo[1]}` : "–"}</td>
-                  <td className="c num">{r.done ? `${r.hg}-${r.ag}` : t.pending}</td>
-                  <td className={`c num ${r.done ? (r.you ? "up" : "down") : "muted"}`}>{r.done ? `${r.you} · ${r.bot}` : "–"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <PicksTable rows={rows} name={name} lang={lang} />
     </div>
+  );
+}
+
+type PickRow = {
+  id: string;
+  kickoff: string;
+  home: string;
+  away: string;
+  hg: number | null;
+  ag: number | null;
+  pick: [number, number];
+  rinvalo: [number, number] | null;
+  done: boolean;
+  you: number;
+  bot: number;
+};
+
+/** The picks, newest first, twenty to a page. */
+function PicksTable({ rows, name, lang }: { rows: PickRow[]; name: (slug: string) => string; lang: Lang }) {
+  const t = dict(lang).myPicks;
+  const f = fmt(lang);
+  const p = paths(lang);
+  const pg = usePage(rows.length, 20);
+  return (
+    <section className="card card-pad">
+      <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+        {t.rule}
+      </p>
+      <div className="table-wrap">
+        <table className="std">
+          <thead>
+            <tr>
+              <th>{t.match}</th>
+              <th className="c">{t.yours}</th>
+              <th className="c">Rinvalo</th>
+              <th className="c">{t.final}</th>
+              <th className="c">{t.points}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.slice(pg.from, pg.to).map((r) => (
+              <tr key={r.id}>
+                <td>
+                  <Link href={p.matchOf(r.id)} className="tname" style={{ flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
+                    <span>
+                      {name(r.home)} – {name(r.away)}
+                    </span>
+                    <small className="muted">{f.fullDate(r.kickoff)}</small>
+                  </Link>
+                </td>
+                <td className="c num">
+                  <b>
+                    {r.pick[0]}-{r.pick[1]}
+                  </b>
+                </td>
+                <td className="c num muted">{r.rinvalo ? `${r.rinvalo[0]}-${r.rinvalo[1]}` : "–"}</td>
+                <td className="c num">{r.done ? `${r.hg}-${r.ag}` : t.pending}</td>
+                <td className={`c num ${r.done ? (r.you ? "up" : "down") : "muted"}`}>{r.done ? `${r.you} · ${r.bot}` : "–"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Pager {...pg} total={rows.length} onChange={pg.setPage} lang={lang} />
+    </section>
   );
 }

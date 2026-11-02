@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Paged } from "@/components/Pager";
 import { SurpriseRow } from "@/components/SurpriseRow";
 import { getMatches, type MatchView } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -53,12 +54,16 @@ export function Surprises({ lang }: { lang: Lang }) {
                 <span>{t.diff}</span>
                 <span lang="en">Rinvalo</span>
               </div>
-              {diff.map((m) => {
-                const p = m.prediction!;
-                const r = top(p.p);
-                const k = top(p.market!);
-                return <SurpriseRow key={m.id} m={m} lang={lang} figure={`${side(m, r)} ${pct(p.p[r])}`} note={t.market(`${side(m, k)} ${pct(p.market![k])}`)} tone="plain" />;
-              })}
+              <Paged
+                items={diff.map((m) => {
+                  const p = m.prediction!;
+                  const r = top(p.p);
+                  const k = top(p.market!);
+                  return <SurpriseRow key={m.id} m={m} lang={lang} figure={`${side(m, r)} ${pct(p.p[r])}`} note={t.market(`${side(m, k)} ${pct(p.market![k])}`)} tone="plain" />;
+                })}
+                per={12}
+                lang={lang}
+              />
             </section>
           )}
 

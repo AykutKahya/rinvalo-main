@@ -139,6 +139,7 @@ const TR = {
     addFavs: "Takım sayfalarından favori ekleyebilirsin.",
   },
   rounds: { prev: "Önceki hafta", next: "Sonraki hafta", empty: "Bu haftanın fikstürü henüz açıklanmadı.", page: "Haftanın tahmin sayfası →" },
+  pager: { label: "Sayfalar", prev: "Önceki sayfa", next: "Sonraki sayfa", count: (a: number, b: number, n: number) => `${a}–${b} / ${n}` },
   week: {
     title: (comp: string, round: string) => `${comp} ${round} tahminleri`,
     description: (comp: string, round: string, n: number) => `${comp} ${round}: ${n} maçın skor ve sonuç tahmini, kazanma ihtimalleri ve haftanın öne çıkanları.`,
@@ -521,6 +522,11 @@ const TR = {
     deleteConfirm: "Hesabın, tahminlerin ve lig üyeliklerin kalıcı olarak silinecek.",
     deleteYes: "Evet, sil",
     cancel: "Vazgeç",
+    working: "Lütfen bekle…",
+    signedIn: "Giriş yaptın.",
+    signedUp: (n: string) => `Hesabın oluşturuldu, hoş geldin ${n}.`,
+    signedOut: "Çıkış yaptın.",
+    deleted: "Hesabın silindi.",
   },
   groups: {
     title: "Arkadaş ligleri",
@@ -682,6 +688,7 @@ const EN: Dict = {
     addFavs: "Add favourites from any team page.",
   },
   rounds: { prev: "Previous matchday", next: "Next matchday", empty: "Fixtures for this matchday are not out yet.", page: "Matchday predictions page →" },
+  pager: { label: "Pages", prev: "Previous page", next: "Next page", count: (a, b, n) => `${a}–${b} of ${n}` },
   week: {
     title: (comp, round) => `${comp} ${round} predictions`,
     description: (comp, round, n) => `${comp} ${round}: score and result predictions for ${n} games, win probabilities and the week's highlights.`,
@@ -1063,6 +1070,11 @@ const EN: Dict = {
     deleteConfirm: "Your account, picks and league memberships will be deleted for good.",
     deleteYes: "Yes, delete",
     cancel: "Cancel",
+    working: "Please wait…",
+    signedIn: "You are signed in.",
+    signedUp: (n: string) => `Your account is ready. Welcome, ${n}.`,
+    signedOut: "You have signed out.",
+    deleted: "Your account has been deleted.",
   },
   groups: {
     title: "Friend leagues",

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { fmt } from "@/lib/format";
 import { dict, type Lang } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
+import { Pager, usePage } from "./Pager";
 
 export type Row = {
   username: string;
@@ -64,6 +65,7 @@ export function PeriodPicker({ period, onChange, lang }: { period: Period; onCha
 export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string | null; lang: Lang }) {
   const t = dict(lang).league2;
   const f = fmt(lang);
+  const pg = usePage(rows?.length ?? 0, 25);
   return (
     <>
       {rows === null ? (
@@ -82,9 +84,9 @@ export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string 
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
+              {rows.slice(pg.from, pg.to).map((r, i) => (
                 <tr key={r.username} className={r.username === me ? "hl" : undefined}>
-                  <td className="c num">{i + 1}</td>
+                  <td className="c num">{pg.from + i + 1}</td>
                   <td>
                     <b>{r.username}</b>
                   </td>
@@ -98,6 +100,7 @@ export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string 
               ))}
             </tbody>
           </table>
+          <Pager {...pg} total={rows.length} onChange={pg.setPage} lang={lang} />
         </div>
       ) : (
         <div className="empty">{t.empty}</div>

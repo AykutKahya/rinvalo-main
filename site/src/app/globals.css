@@ -670,7 +670,9 @@ table.power td { vertical-align: middle; }
 .account-form input { font: inherit; font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--edge); background: var(--card); color: var(--ink); }
 .account-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .account-form small { color: var(--muted); font-weight: 500; font-size: 12px; }
-.account-msg { margin: 0; font-size: 14px; color: var(--ink-2); background: var(--card-2); padding: 10px 12px; border-radius: 10px; }
+.account-msg { margin: 0; font-size: 14px; color: var(--ink-2); background: var(--card-2); padding: 10px 12px; border-radius: 10px; border-left: 3px solid var(--muted); }
+.account-msg.ok { border-left-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+.account-msg.err { border-left-color: var(--bad); color: var(--ink); }
 .guess-cloud { margin: 0; text-align: center; font-size: 12.5px; font-weight: 700; }
 .guess-cloud.saved { color: var(--good); }
 .guess-cloud.locked { color: var(--bad); }
@@ -727,3 +729,12 @@ table.power td { vertical-align: middle; }
 .week-links a:last-child { border-bottom: 0; }
 .week-links a span:last-child { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 12.5px; }
 .week-links a:hover { color: var(--accent); }
+
+/* ---------- Pager ---------- */
+.pager { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 12px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+.pager button { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; border: 1px solid transparent; background: none; font: inherit; font-weight: 700; color: var(--ink-2); cursor: pointer; font-variant-numeric: tabular-nums; }
+.pager button:hover:not(:disabled) { background: var(--card-2); }
+.pager button[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+.pager button:disabled { opacity: .35; cursor: default; }
+.pager-gap { color: var(--muted); padding: 0 2px; }
+.pager-count { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }

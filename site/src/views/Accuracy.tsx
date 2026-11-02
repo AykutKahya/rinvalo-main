@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CountUp } from "@/components/CountUp";
 import { LeagueMark } from "@/components/Crest";
 import { MatchRow } from "@/components/MatchRow";
+import { Paged } from "@/components/Pager";
 import { accuracy, getEngineBacktest, getMarket, getMatches, getTracking, LEAGUES } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
@@ -116,7 +117,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
               <span>{t.gradedList}</span>
               <span>{t.pickScore}</span>
             </div>
-            {graded.length ? graded.slice(0, 60).map((m) => <MatchRow key={m.id} m={m} showDate lang={lang} />) : <div className="empty">{t.noneYet}</div>}
+            <Paged items={graded.map((m) => <MatchRow key={m.id} m={m} showDate lang={lang} />)} per={15} lang={lang} empty={<div className="empty">{t.noneYet}</div>} />
           </section>
         </div>
 
