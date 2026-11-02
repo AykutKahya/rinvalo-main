@@ -23,6 +23,11 @@ export function LeagueHub({ lang }: { lang: Lang }) {
     if (["standings", "groups", "mine", "account"].includes(h)) setTab(h);
   }, []);
 
+  // The password-reset link signs the visitor in; send them to the account tab to set a new one.
+  useEffect(() => {
+    if (account.recovery) setTab("account");
+  }, [account.recovery]);
+
   // Picks saved to the account join the ones kept in this browser.
   useEffect(() => {
     const sb = supabase();

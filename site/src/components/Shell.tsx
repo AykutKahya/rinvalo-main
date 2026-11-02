@@ -7,6 +7,7 @@ import { Search } from "@/components/Search";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Ticker } from "@/components/Ticker";
 import { dict, paths, type Lang } from "@/lib/i18n";
+import { Analytics } from "@vercel/analytics/next";
 import { siteUrl } from "@/lib/site";
 import "../app/globals.css";
 
@@ -73,11 +74,16 @@ export function Shell({ lang, children }: { lang: Lang; children: React.ReactNod
         <footer className="footer">
           <div className="shell">
             <span>{t.footer}</span>
-            <Link href={paths(lang).myPicks}>{t.league2.title}</Link>
+            <span className="footer-links">
+              <Link href={paths(lang).myPicks}>{t.league2.title}</Link>
+              <Link href={paths(lang).privacy}>{t.privacy.title}</Link>
+            </span>
           </div>
         </footer>
         <BottomNav lang={lang} />
         <RegisterSW />
+        {/* Cookieless page views; works once Web Analytics is enabled for the project in Vercel. */}
+        <Analytics />
       </body>
     </html>
   );

@@ -10,6 +10,9 @@ export interface Account {
   ready: boolean;
   session: Session | null;
   username: string | null;
+  /** Signed in from a password-reset link: a new password is due. */
+  recovery: boolean;
+  endRecovery: () => void;
   refresh: () => void;
 }
 
@@ -20,6 +23,7 @@ export function useAccount(): Account {
   const [username, setUsername] = useState<string | null>(null);
   const [ready, setReady] = useState(!sb);
   const [tick, setTick] = useState(0);
+  const [recovery, setRecovery] = useState(false);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
@@ -28,7 +32,10 @@ export function useAccount(): Account {
       setSession(data.session);
       setReady(true);
     });
-    const { data } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
+    const { data } = sb.auth.onAuthStateChange((event, s) => {
+      setSession(s);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+    });
     return () => data.subscription.unsubscribe();
   }, [sb]);
 
@@ -44,5 +51,6 @@ export function useAccount(): Account {
       .then(({ data }) => setUsername(data?.username ?? null));
   }, [sb, session, tick]);
 
-  return { enabled: !!sb, ready, session, username, refresh };
+  const endRecovery = useCallback(() => setRecovery(false), []);
+  return { enabled: !!sb, ready, session, username, recovery, endRecovery, refresh };
 }

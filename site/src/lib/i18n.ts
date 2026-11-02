@@ -20,6 +20,7 @@ const ROUTES = {
     accuracy: "/analiz/basari",
     compare: "/analiz/karsilastir",
     myPicks: "/tahminlerim",
+    privacy: "/gizlilik",
   },
   en: {
     home: "/en",
@@ -34,6 +35,7 @@ const ROUTES = {
     accuracy: "/en/analysis/accuracy",
     compare: "/en/analysis/compare",
     myPicks: "/en/my-picks",
+    privacy: "/en/privacy",
   },
 } as const;
 
@@ -474,6 +476,18 @@ const TR = {
     error: "Bir sorun çıktı, tekrar dene.",
     synced: "Hesabına kaydedildi",
     locked: "Maç başladı, tahmin kilitlendi.",
+    forgot: "Şifremi unuttum",
+    forgotTitle: "Şifreni sıfırla",
+    sendReset: "Sıfırlama bağlantısı gönder",
+    resetSent: "Bu adrese kayıtlı bir hesap varsa, şifre sıfırlama bağlantısı gönderdik. Gelen kutunu ve spam klasörünü kontrol et.",
+    backToSignIn: "← Girişe dön",
+    newPassword: "Yeni şifreni belirle",
+    savePassword: "Şifreyi kaydet",
+    passwordChanged: "Şifren değişti.",
+    deleteAccount: "Hesabımı sil",
+    deleteConfirm: "Hesabın, tahminlerin ve lig üyeliklerin kalıcı olarak silinecek.",
+    deleteYes: "Evet, sil",
+    cancel: "Vazgeç",
   },
   groups: {
     title: "Arkadaş ligleri",
@@ -512,6 +526,48 @@ const TR = {
       sharp: { name: "Keskin nişancı", how: "10 maçın skorunu tam bil" },
       loyal: { name: "Sadık", how: "50 tahminin sonuçlansın" },
     },
+  },
+  privacy: {
+    title: "Gizlilik",
+    description: "Rinvalo hangi verileri, neden ve nerede tutar; haklarını nasıl kullanırsın.",
+    updated: "Son güncelleme: 2 Kasım 2026",
+    sections: [
+      {
+        h: "Kısaca",
+        p: [
+          "Rinvalo'yu hesap açmadan kullanabilirsin. Reklam göstermiyoruz, verini satmıyoruz ve kimseyle paylaşmıyoruz. Yalnız tahmin ligi ve bildirimler için gereken bilgileri tutuyoruz.",
+        ],
+      },
+      {
+        h: "Tuttuğumuz veriler",
+        p: [
+          "Hesap açarsan: e-posta adresin, kullanıcı adın, şifren (yalnız şifrelenmiş hâli; biz göremeyiz), maç tahminlerin ve katıldığın arkadaş ligleri. Kullanıcı adın ve puanın sıralamada herkese görünür, e-postan görünmez.",
+          "Bildirim açarsan: tarayıcının bize verdiği bildirim adresi ve takip ettiğin maçlar ya da takımlar. Bunlar bir hesaba ya da isme bağlı değildir.",
+          "Tarayıcında kalanlar: tema tercihin, favori takımların ve hesapsız yaptığın tahminler yalnız senin cihazında (yerel depolama) durur, bize gelmez.",
+          "Ziyaret istatistiği: hangi sayfaların kaç kez açıldığını çerez kullanmadan ve seni tanımlamadan sayıyoruz (Vercel Web Analytics).",
+        ],
+      },
+      {
+        h: "Nerede tutuluyor",
+        p: [
+          "Hesap, tahmin ve bildirim verileri Supabase'te, Avrupa Birliği'nde (Frankfurt) tutulur. Site Vercel üzerinden yayınlanır, alan adı Cloudflare'de yönetilir. Tahmin ligi verisi haftada bir şifreli olarak yedeklenir; yedekler 90 gün saklanır.",
+        ],
+      },
+      {
+        h: "Ne kadar süre",
+        p: [
+          "Hesap verilerin, hesabını silene kadar durur. Bildirim kaydı, bildirimi kapattığında ya da tarayıcın aboneliği bitirdiğinde silinir.",
+        ],
+      },
+      {
+        h: "Hakların",
+        p: [
+          "6698 sayılı KVKK'nın 11. maddesi uyarınca verilerinin işlenip işlenmediğini öğrenme, düzeltilmesini ya da silinmesini isteme haklarına sahipsin.",
+          "Hesabını istediğin an Tahmin ligi → Hesap → \"Hesabımı sil\" ile kendin silebilirsin; tahminlerin ve lig üyeliklerin de silinir. Bildirimi kapatmak için aynı butona tekrar basman yeterli.",
+        ],
+      },
+    ],
+    contact: (mail: string) => `Sorular için: ${mail}`,
   },
   myPicks: {
     title: "Tahminlerim",
@@ -940,6 +996,18 @@ const EN: Dict = {
     error: "Something went wrong, please try again.",
     synced: "Saved to your account",
     locked: "The game has started; picks are locked.",
+    forgot: "Forgot password",
+    forgotTitle: "Reset your password",
+    sendReset: "Send reset link",
+    resetSent: "If an account uses this address, we have sent a password reset link. Check your inbox and spam folder.",
+    backToSignIn: "← Back to sign in",
+    newPassword: "Choose a new password",
+    savePassword: "Save password",
+    passwordChanged: "Your password has been changed.",
+    deleteAccount: "Delete my account",
+    deleteConfirm: "Your account, picks and league memberships will be deleted for good.",
+    deleteYes: "Yes, delete",
+    cancel: "Cancel",
   },
   groups: {
     title: "Friend leagues",
@@ -978,6 +1046,48 @@ const EN: Dict = {
       sharp: { name: "Sharpshooter", how: "Call 10 scores exactly" },
       loyal: { name: "Loyal", how: "Have 50 picks settled" },
     },
+  },
+  privacy: {
+    title: "Privacy",
+    description: "What Rinvalo keeps, why and where, and how to use your rights.",
+    updated: "Last updated: 2 November 2026",
+    sections: [
+      {
+        h: "In short",
+        p: [
+          "You can use Rinvalo without an account. We show no ads, sell no data and share it with no one. We keep only what the prediction league and notifications need.",
+        ],
+      },
+      {
+        h: "What we keep",
+        p: [
+          "If you open an account: your e-mail address, username, password (hashed only; we cannot see it), your picks and the friend leagues you join. Your username and points are public in the standings; your e-mail is not.",
+          "If you turn on notifications: the push address your browser gives us and the games or clubs you follow. These are not tied to an account or a name.",
+          "In your browser: your theme, favourite clubs and picks made without an account stay on your device (local storage) and never reach us.",
+          "Visit statistics: we count page views without cookies and without identifying you (Vercel Web Analytics).",
+        ],
+      },
+      {
+        h: "Where it is kept",
+        p: [
+          "Account, pick and notification data is stored with Supabase in the European Union (Frankfurt). The site is served by Vercel and the domain is managed by Cloudflare. The prediction league is backed up weekly, encrypted; backups are kept for 90 days.",
+        ],
+      },
+      {
+        h: "How long",
+        p: [
+          "Account data stays until you delete your account. A notification record is removed when you turn notifications off or your browser ends the subscription.",
+        ],
+      },
+      {
+        h: "Your rights",
+        p: [
+          "You may ask whether your data is processed and have it corrected or deleted (Turkish data protection law KVKK, article 11, and the GDPR).",
+          "You can delete your account at any time under Prediction league → Account → \"Delete my account\"; your picks and league memberships go with it. To stop notifications, press the same button again.",
+        ],
+      },
+    ],
+    contact: (mail: string) => `Questions: ${mail}`,
   },
   myPicks: {
     title: "My picks",
