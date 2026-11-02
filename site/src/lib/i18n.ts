@@ -207,6 +207,15 @@ const TR = {
     closed: "Tahmin süresi doldu.",
     update: "Tahminimi güncelle",
     save: "Tahminimi kaydet",
+    share: "Tahminimi paylaş",
+    copied: "Bağlantı kopyalandı",
+    shareText: (home: string, pick: string, away: string) => `Tahminim: ${home} ${pick} ${away}. Seninki ne?`,
+  },
+  sharePick: {
+    pickTitle: (home: string, pick: string, away: string) => `Tahminim: ${home} ${pick} ${away}`,
+    pickText: "Rinvalo'da sen de tahminini yap, puan topla.",
+    open: "Maç sayfasına git →",
+    mine: "Tahminim",
   },
   league: {
     title: (n: string) => `${n} tahminleri ve puan durumu`,
@@ -652,6 +661,15 @@ const EN: Dict = {
     closed: "Picks are closed.",
     update: "Update my pick",
     save: "Save my pick",
+    share: "Share my pick",
+    copied: "Link copied",
+    shareText: (home, pick, away) => `My pick: ${home} ${pick} ${away}. What's yours?`,
+  },
+  sharePick: {
+    pickTitle: (home, pick, away) => `My pick: ${home} ${pick} ${away}`,
+    pickText: "Make your own pick on Rinvalo and score points.",
+    open: "Go to the match page →",
+    mine: "My pick",
   },
   league: {
     title: (n) => `${n} predictions and table`,

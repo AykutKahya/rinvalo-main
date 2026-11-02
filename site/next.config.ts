@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     "/takim/[slug]": ["./data/*.json"],
     "/en/match/[id]": ["./data/*.json"],
     "/en/team/[slug]": ["./data/*.json"],
+    "/mac/[id]/tahminim/[pick]": ["./data/*.json"],
+    "/en/match/[id]/my-pick/[pick]": ["./data/*.json"],
     "/og/[lang]/[id]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*"],
     "/live.json": ["./data/*.json"],
   },

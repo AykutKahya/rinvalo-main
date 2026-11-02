@@ -27,7 +27,7 @@ function crest(slug: string): string | null {
 // Night palette from globals.css.
 const C = { bg: "#0b1018", card: "#131a24", line: "#243042", ink: "#eef2f7", muted: "#8794a7", home: "#ffb21e", draw: "#4b5a70", away: "#4cc2ff" };
 
-export async function GET(_: Request, { params }: { params: Promise<{ lang: string; id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ lang: string; id: string }> }) {
   const { lang: raw, id } = await params;
   const lang: Lang = raw === "en" ? "en" : "tr";
   const m = getMatch(id.replace(/\.png$/, ""));
@@ -40,6 +40,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ lang: stri
   const a = team(m.away, lang);
   const finished = m.status === "finished" && m.hg !== null;
   const pick = p ? pickOf(p.p) : -1;
+  // A visitor's own pick (?t=2-1), drawn in place of Rinvalo's on shared links.
+  const mine = new URL(req.url).searchParams.get("t")?.match(/^(\d)-(\d)$/)?.[0] ?? null;
 
   // Satori upper-cases without locale rules, so do it here: GALATASARAY, BEŞİKTAŞ, TAHMİNİ.
   const up = (s: string, l: string = lang) => s.toLocaleUpperCase(l === "tr" ? "tr-TR" : "en-GB").replace("RİNVALO", "RINVALO");
@@ -69,12 +71,17 @@ export async function GET(_: Request, { params }: { params: Promise<{ lang: stri
           {side(m.home, h.name)}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
             <div style={{ fontFamily: "Barlow Condensed", fontWeight: 600, fontSize: 26, letterSpacing: 3, color: C.home }}>
-              {up(finished ? t.match.result : t.match.prediction)}
+              {up(finished ? t.match.result : mine ? t.sharePick.mine : t.match.prediction)}
             </div>
             <div style={{ fontFamily: "Barlow Condensed", fontWeight: 800, fontSize: 168, lineHeight: 1 }}>
-              {finished ? `${m.hg}-${m.ag}` : p ? `${p.score[0]}-${p.score[1]}` : "–"}
+              {finished ? `${m.hg}-${m.ag}` : mine ? mine : p ? `${p.score[0]}-${p.score[1]}` : "–"}
             </div>
-            {p && !finished && p.confidence && (
+            {mine && !finished && p && (
+              <div style={{ display: "flex", fontSize: 24, padding: "6px 18px", borderRadius: 99, background: C.card, color: C.ink }}>
+                Rinvalo: {p.score[0]}-{p.score[1]}
+              </div>
+            )}
+            {p && !finished && !mine && p.confidence && (
               <div style={{ display: "flex", fontSize: 24, padding: "6px 18px", borderRadius: 99, background: C.card, color: C.ink }}>{t.conf[p.confidence]}</div>
             )}
           </div>

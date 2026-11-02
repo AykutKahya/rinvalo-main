@@ -39,6 +39,7 @@ export function GuessWidget(props: {
   const [saved, setSaved] = useState<[number, number] | null>(null);
   const [ready, setReady] = useState(false);
   const [cloud, setCloud] = useState<"saved" | "locked" | null>(null);
+  const [copied, setCopied] = useState(false);
   const account = useAccount();
   const l2 = dict(lang).league2;
   const locked = actual !== null || (ready && Date.now() > Date.parse(kickoff));
@@ -98,6 +99,17 @@ export function GuessWidget(props: {
     </div>
   );
 
+  async function share() {
+    if (!saved) return;
+    const pick = `${saved[0]}-${saved[1]}`;
+    const url = `${window.location.origin}${paths(lang).matchOf(id)}/${lang === "tr" ? "tahminim" : "my-pick"}/${pick}`;
+    const text = t.shareText(home, pick, away);
+    if (navigator.share) return navigator.share({ text, url }).catch(() => {});
+    await navigator.clipboard?.writeText(`${text} ${url}`).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
   let verdict: string | null = null;
   if (actual && saved) {
     const you = saved[0] === actual[0] && saved[1] === actual[1] ? t.exact : outcome(...saved) === outcome(...actual) ? t.result : null;
@@ -129,6 +141,11 @@ export function GuessWidget(props: {
           <button className="btn accent" type="button" onClick={save}>
             {saved ? t.update : t.save}
           </button>
+          {saved && (
+            <button className="btn ghost" type="button" onClick={share}>
+              {copied ? t.copied : t.share}
+            </button>
+          )}
           <p className="muted" style={{ margin: 0, fontSize: 12.5, textAlign: "center" }}>
             {model ? `Rinvalo: ${model[0]}-${model[1]}` : ""}
           </p>

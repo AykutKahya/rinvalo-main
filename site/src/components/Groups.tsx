@@ -147,7 +147,7 @@ export function Groups({ account, lang, onSignIn }: { account: Account; lang: La
                     .slice(0, 6),
                 )
               }
-              placeholder="H3SR95"
+              placeholder="ABC234"
               required
               minLength={6}
               maxLength={6}
