@@ -65,13 +65,21 @@ export function MatchRow({ m, lang, favorites = [], showDate = false }: { m: Mat
       ) : (
         <span className="p3" aria-label={t.row.none} />
       )}
-      <span className={`sc${m.exact ? " exact" : ""}`} title={t.row.predicted}>
-        {p ? `${p.score[0]}-${p.score[1]}` : "–"}
-        {!finished && <ConfidenceDot level={p?.confidence} lang={lang} />}
-      </span>
-      <span className={`mark${verdict}`} aria-label={m.hit === null ? undefined : m.hit ? t.row.hit : t.row.miss}>
-        {m.hit === null ? "" : m.hit ? "✓" : "✕"}
-      </span>
+      {finished && p && m.hit !== null ? (
+        // After the final whistle: the real score sits next to the teams; this box is clearly Rinvalo's pick and how it went.
+        <span className={`sc done${m.exact ? " exact" : verdict}`} aria-label={`${t.row.predicted} ${p.score[0]}-${p.score[1]}, ${m.hit ? t.row.hit : t.row.miss}`}>
+          <small>{t.row.pick}</small>
+          <b>
+            {p.score[0]}-{p.score[1]}
+          </b>
+          <i>{m.exact ? t.row.vExact : m.hit ? t.row.vHit : t.row.vMiss}</i>
+        </span>
+      ) : (
+        <span className="sc" title={t.row.predicted}>
+          {p ? `${p.score[0]}-${p.score[1]}` : "–"}
+          {!finished && <ConfidenceDot level={p?.confidence} lang={lang} />}
+        </span>
+      )}
     </Link>
   );
 }

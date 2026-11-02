@@ -137,7 +137,12 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                 <span className="mh-score">
                   {m.hg}-{m.ag}
                 </span>
-                {m.hit !== null && <span className={`pill ${m.hit ? "good" : "bad"}`}>{m.exact ? tm.exact : m.hit ? tm.hit : tm.miss}</span>}
+                {p && m.hit !== null && (
+                  <>
+                    <span className="mh-pick">{tm.ourPick(`${p.score[0]}-${p.score[1]}`)}</span>
+                    <span className={`pill ${m.hit ? "good" : "bad"}`}>{m.exact ? tm.exact : m.hit ? tm.hit : tm.miss}</span>
+                  </>
+                )}
               </>
             ) : m.status === "postponed" ? (
               <>
