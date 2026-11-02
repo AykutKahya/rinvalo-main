@@ -160,6 +160,8 @@ const TR = {
     over25: "2.5 Üst",
     btts: "Karşılıklı gol",
     likeliest: "En olası skor",
+    scoreNote: (pick: string, winner: string | null, top: string) =>
+      `Rinvalo tahmini ${pick}, ${winner ? `${winner} galibiyeti` : "beraberlik"} içindeki en olası skor. Tek başına en olası skor ${top}, ama o sonucun toplam ihtimali daha düşük.`,
     grid: "Skor olasılıkları (%)",
     none: "Tahmin yok",
     form: "Form",
@@ -565,6 +567,8 @@ const EN: Dict = {
     over25: "Over 2.5",
     btts: "Both teams score",
     likeliest: "Likeliest score",
+    scoreNote: (pick: string, winner: string | null, top: string) =>
+      `Rinvalo's pick ${pick} is the likeliest score within ${winner ? `a ${winner} win` : "a draw"}. The single likeliest score is ${top}, but its result is less likely overall.`,
     grid: "Score probabilities (%)",
     none: "No prediction",
     form: "Form",

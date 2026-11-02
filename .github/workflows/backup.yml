@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Export and encrypt
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
           RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
         run: |
           curl -fsS -H "x-upload-token: $RINVALO_UPLOAD_TOKEN" "$SUPABASE_URL/functions/v1/upload" \

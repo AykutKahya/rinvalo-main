@@ -2,7 +2,8 @@
 # lives in Supabase Storage, not in git: the bot pulls it, updates it, uploads what changed and
 # asks Vercel for a new build through a deploy hook. It never pushes to the repository.
 #
-# Secrets: SUPABASE_URL, SUPABASE_ANON_KEY, RINVALO_UPLOAD_TOKEN, VERCEL_DEPLOY_HOOK.
+# Secrets: RINVALO_UPLOAD_TOKEN, VERCEL_DEPLOY_HOOK. The Supabase address and publishable key below
+# are public anyway (the site ships them to every browser).
 # Cost: public repository, so GitHub Actions minutes are free.
 name: Rinvalo site bot
 
@@ -41,8 +42,9 @@ jobs:
       run:
         working-directory: site
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_cL3R0HrigIvr2OqSMdQIsQ_7ZjTcYNX
     steps:
       - name: Check out
         # v7.0.1
@@ -101,7 +103,6 @@ jobs:
       - name: Upload changed data
         id: push
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
         run: node scripts/push-data.mjs push "$RUNNER_TEMP/before"
 

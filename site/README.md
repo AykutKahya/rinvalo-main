@@ -18,8 +18,8 @@ football-data.co.uk ───────> scripts/stats.ts ──┘
   günceller, yalnız gerçekten değişen dosyaları geri yükler (`scripts/push-data.mjs`) ve Vercel'den
   yeni derleme ister. Vercel de derlemeden önce veriyi aynı yerden alır. `data/` altındaki git
   kopyası yalnız başlangıç verisidir.
-- Botun gizli değerleri (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL`,
-  `SUPABASE_ANON_KEY`, `RINVALO_UPLOAD_TOKEN`, `VERCEL_DEPLOY_HOOK`.
+- Botun gizli değerleri (GitHub → Settings → Secrets and variables → Actions): `RINVALO_UPLOAD_TOKEN`
+  ve `VERCEL_DEPLOY_HOOK`.
 - Maç sayfalarının yalnız bugünün ±10 günü derlemede üretilir; diğer maç ve takım sayfaları ilk
   ziyarette üretilip bir sonraki derlemeye kadar saklanır.
 - Tahminler maç başlayana kadar her koşuda yenilenir. Maç başladıktan sonra tahmin dondurulur ve

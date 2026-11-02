@@ -19,6 +19,7 @@ import { getMarket, getMatch, getMatches, getSimulation, headToHead, leagueMatch
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
+import { pickOf } from "@/lib/model";
 import { stakesOf } from "@/lib/stakes";
 import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
@@ -155,7 +156,9 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           )}
           {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
           {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
-          {p && !cup && <MarketCompare rinvalo={p.p} market={p.market ?? getMarket()[m.id] ?? null} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />}
+          {p && !cup && (p.market ?? getMarket()[m.id]) && (
+            <MarketCompare rinvalo={p.p} market={(p.market ?? getMarket()[m.id])!} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />
+          )}
           {p ? (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
@@ -211,6 +214,11 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   </b>
                 </div>
               </div>
+              {(p.top[0][0] !== p.score[0] || p.top[0][1] !== p.score[1]) && (
+                <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+                  {tm.scoreNote(`${p.score[0]}-${p.score[1]}`, [`${h.name}`, null, `${a.name}`][pickOf(p.p)], `${p.top[0][0]}-${p.top[0][1]}`)}
+                </p>
+              )}
               <div>
                 <div className="eyebrow" style={{ marginBottom: 8 }}>
                   {tm.grid}
