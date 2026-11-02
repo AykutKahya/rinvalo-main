@@ -3,10 +3,12 @@ import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
 import { JsonLd } from "@/components/JsonLd";
 import { MatchBrowser } from "@/components/MatchBrowser";
+import { LeagueMark } from "@/components/Crest";
+import { PredictorCard } from "@/components/PredictorCard";
 import { ProbBar } from "@/components/ProbBar";
-import { accuracy, getEngineBacktest, getMatches, getSimulation } from "@/lib/data";
+import { accuracy, getEngineBacktest, getMatches, getSimulation, leagueMatches } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { dict, paths, type Lang } from "@/lib/i18n";
+import { dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site";
 import { competitions } from "@/lib/leagues";
 import { closestPicks, lite, matchOfTheWeek, surestPicks } from "@/lib/picks";
@@ -34,6 +36,13 @@ export function Home({ lang }: { lang: Lang }) {
   const motw = matchOfTheWeek(all, sim, now);
   const surest = surestPicks(all, now);
   const closest = closestPicks(all, now);
+  // Each competition's round in play or next up, for the round pages.
+  const weeks = competitions(lang).flatMap((c) => {
+    const next = leagueMatches(c.code)
+      .filter((m) => m.status !== "finished" && Date.parse(m.kickoff) > now - 3 * 3600_000)
+      .sort((a, b) => a.kickoff.localeCompare(b.kickoff))[0];
+    return next && Date.parse(next.kickoff) - now < 10 * DAY ? [{ ...c, round: next.round }] : [];
+  });
   const record = accuracy(all);
   const eb = getEngineBacktest();
   const race = (sim.leagues["super-lig"] ?? []).slice(0, 4);
@@ -100,6 +109,8 @@ export function Home({ lang }: { lang: Lang }) {
           </div>
         )}
 
+        <PredictorCard lang={lang} />
+
         <div className="card card-pad">
           <div className="section-title">
             <h2 style={{ fontSize: 15 }}>{h.surest}</h2>
@@ -137,6 +148,23 @@ export function Home({ lang }: { lang: Lang }) {
             ))}
           </div>
         </div>
+
+        {weeks.length > 0 && (
+          <div className="card card-pad">
+            <div className="section-title">
+              <h2 style={{ fontSize: 15 }}>{h.weeks}</h2>
+            </div>
+            <div className="week-links">
+              {weeks.map((w) => (
+                <Link key={w.code} href={p.weekOf(w.code, w.round)}>
+                  <LeagueMark code={w.code} accent={w.accent} />
+                  <span>{w.name}</span>
+                  <span>{roundLabel(lang, w.code, w.round)}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {race.length > 0 && (
           <div className="card card-pad">

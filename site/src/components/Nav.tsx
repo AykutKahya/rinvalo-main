@@ -9,6 +9,7 @@ const ICONS = {
   leagues: "M5 4h14v4a7 7 0 0 1-14 0zM9 20h6M12 15v5",
   analysis: "M4 19V9M10 19V5M16 19v-7M22 19H2",
   headlines: "M4 5h12v14H6a2 2 0 0 1-2-2zM16 9h4v8a2 2 0 0 1-4 0M7 9h6M7 13h6",
+  predict: "M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.5 13.5 7 22l5-3 5 3-1.5-8.5",
 };
 
 function links(lang: Lang) {
@@ -19,6 +20,7 @@ function links(lang: Lang) {
     { key: "leagues", href: p.leagues, label: t.leagues, also: [p.league, p.team] },
     { key: "analysis", href: p.analysis, label: t.analysis, also: [] },
     { key: "headlines", href: p.headlines, label: t.headlines, also: [] },
+    { key: "predict", href: p.myPicks, label: t.predict, also: [] },
   ] as const;
 }
 

@@ -88,7 +88,7 @@ const TR = {
   siteTitle: "Rinvalo · Maç tahminleri",
   siteDescription: "Süper Lig, Premier League, La Liga ve Avrupa'nın dokuz liginde, üç Avrupa kupasında her maç için istatistik modeliyle skor ve sonuç tahmini, puan durumu ve şampiyonluk ihtimalleri.",
   footer: "Tahminler istatistiksel modele dayanır; kesinlik taşımaz.",
-  nav: { matches: "Maçlar", leagues: "Ligler", analysis: "Analiz", headlines: "Manşet", main: "Ana menü", bottom: "Alt menü", home: "Rinvalo ana sayfa" },
+  nav: { matches: "Maçlar", leagues: "Ligler", analysis: "Analiz", headlines: "Manşet", predict: "Tahmin ligi", main: "Ana menü", bottom: "Alt menü", home: "Rinvalo ana sayfa" },
   theme: { toDay: "Gündüz temasına geç", toNight: "Gece temasına geç", day: "Gündüz", night: "Gece" },
   langSwitch: { label: "English", short: "EN", title: "Switch to English" },
   search: {
@@ -154,6 +154,12 @@ const TR = {
   table: { team: "Takım", p: "O", w: "G", d: "B", l: "M", gfga: "A:Y", gd: "Av", pts: "P", form: "Form" },
   outlook: { runs: (n: string) => `${n} sezon simülasyonu`, avg: "Ort. puan", champion: "Şampiyonluk", top: (n: number) => `İlk ${n}`, relegation: "Küme düşme" },
   home: {
+    weeks: "Bu haftanın tahminleri",
+    leagueCta: "Tahmin ligi",
+    leagueText: "Maçları sen de tahmin et, puan topla, arkadaşlarınla kendi ligini kur.",
+    leagueJoin: "Katıl",
+    leagueMine: (pts: number, rank: number | null) => (rank ? `${pts} puan · sezonda ${rank}. sıradasın` : `${pts} puan`),
+    leagueOpen: "Sıralamaya git →",
     highlights: "Öne çıkanlar",
     motw: "Haftanın maçı",
     over25: "2.5 Üst",
@@ -625,7 +631,7 @@ const EN: Dict = {
   siteTitle: "Rinvalo · Football predictions",
   siteDescription: "Score and result predictions from a statistical model for every game in nine European leagues and the three UEFA cups, with tables and title odds.",
   footer: "Predictions come from a statistical model and are never certain.",
-  nav: { matches: "Matches", leagues: "Leagues", analysis: "Analysis", headlines: "Headlines", main: "Main menu", bottom: "Bottom menu", home: "Rinvalo home" },
+  nav: { matches: "Matches", leagues: "Leagues", analysis: "Analysis", headlines: "Headlines", predict: "Predictor", main: "Main menu", bottom: "Bottom menu", home: "Rinvalo home" },
   theme: { toDay: "Switch to day theme", toNight: "Switch to night theme", day: "Day", night: "Night" },
   langSwitch: { label: "Türkçe", short: "TR", title: "Türkçeye geç" },
   search: {
@@ -691,6 +697,12 @@ const EN: Dict = {
   table: { team: "Team", p: "P", w: "W", d: "D", l: "L", gfga: "GF:GA", gd: "GD", pts: "Pts", form: "Form" },
   outlook: { runs: (n) => `${n} simulated seasons`, avg: "Avg. pts", champion: "Title", top: (n) => `Top ${n}`, relegation: "Relegation" },
   home: {
+    weeks: "This round's predictions",
+    leagueCta: "Predictor",
+    leagueText: "Call the scores yourself, score points and start a league with your friends.",
+    leagueJoin: "Join",
+    leagueMine: (pts: number, rank: number | null) => (rank ? `${pts} points · #${rank} this season` : `${pts} points`),
+    leagueOpen: "Go to the standings →",
     highlights: "Highlights",
     motw: "Match of the week",
     over25: "Over 2.5",
