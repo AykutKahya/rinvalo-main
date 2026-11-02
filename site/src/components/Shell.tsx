@@ -20,6 +20,11 @@ export function shellMetadata(lang: Lang): Metadata {
     title: { default: t.siteTitle, template: "%s · Rinvalo" },
     description: t.siteDescription,
     openGraph: { siteName: "Rinvalo", locale: t.ogLocale, type: "website" },
+    // Search Console / Bing Webmaster ownership tags, set as Vercel environment variables.
+    verification: {
+      ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+      ...(process.env.BING_SITE_VERIFICATION ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } } : {}),
+    },
   };
 }
 

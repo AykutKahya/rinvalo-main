@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { crumbs, JsonLd } from "@/components/JsonLd";
 import { LeagueMark } from "@/components/Crest";
 import { CupOutlook } from "@/components/CupOutlook";
 import { OutlookTable } from "@/components/OutlookTable";
@@ -9,7 +10,7 @@ import { Tabs } from "@/components/Tabs";
 import { XgTable } from "@/components/XgTable";
 import { accuracy, getRatings, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { alternates, dict, roundLabel, type Lang } from "@/lib/i18n";
+import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, countryOf, CUP_ROUNDS, cupByCode, CUPS, LEAGUES, leagueByCode, nameLang, SEASON, zonesOf, type Cup, type LeagueCode } from "@/lib/leagues";
 import { lite } from "@/lib/picks";
 import { leagueStats } from "@/lib/stats";
@@ -57,6 +58,7 @@ function CupPage({ cup, lang }: { cup: Cup; lang: Lang }) {
   const odds = sim.cups?.[cup.code];
   return (
     <>
+      <JsonLd data={crumbs([["Rinvalo", paths(lang).home], [dict(lang).nav.leagues, paths(lang).leagues], [competitionName(cup.code, lang), paths(lang).leagueOf(cup.code)]])} />
       <div className="page-head">
         <LeagueMark code={cup.code} accent={cup.accent} size={52} />
         <div>
@@ -122,6 +124,7 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
 
   return (
     <>
+      <JsonLd data={crumbs([["Rinvalo", paths(lang).home], [d.nav.leagues, paths(lang).leagues], [league.name, paths(lang).leagueOf(league.code)]])} />
       <div className="page-head">
         <LeagueMark code={league.code} accent={league.accent} size={52} />
         <div>

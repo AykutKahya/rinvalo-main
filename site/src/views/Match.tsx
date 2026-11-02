@@ -12,6 +12,7 @@ import { LiveMatch } from "@/components/LiveMatch";
 import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
+import { crumbs, JsonLd } from "@/components/JsonLd";
 import { NotifyButton } from "@/components/NotifyButton";
 import { ShareButton } from "@/components/ShareButton";
 import { Stakes, TieOdds } from "@/components/Stakes";
@@ -21,6 +22,7 @@ import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
 import { pickOf } from "@/lib/model";
+import { siteUrl } from "@/lib/site";
 import { stakesOf } from "@/lib/stakes";
 import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
@@ -91,12 +93,24 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
     homeTeam: { "@type": "SportsTeam", name: h.name },
     awayTeam: { "@type": "SportsTeam", name: a.name },
     superEvent: { "@type": "SportsEvent", name: compName },
+    url: `${siteUrl}${path.matchOf(m.id)}`,
+    image: `${siteUrl}/og/${lang}/${m.id}`,
+    ...(p ? { description: tm.ldDescription(h.name, a.name, `${p.score[0]}-${p.score[1]}`) } : {}),
     ...(m.venue ? { location: { "@type": "Place", name: m.venue } } : {}),
   };
 
   return (
     <article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <JsonLd
+        data={[
+          jsonLd,
+          crumbs([
+            ["Rinvalo", path.home],
+            [compName, path.leagueOf(m.league)],
+            [`${h.name} – ${a.name}`, path.matchOf(m.id)],
+          ]),
+        ]}
+      />
       <div className="card match-hero reveal" style={heroStyle}>
         <div className="mh-top">
           <Link href={path.leagueOf(m.league)}>

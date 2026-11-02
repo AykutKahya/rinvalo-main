@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
+import { JsonLd } from "@/components/JsonLd";
 import { MatchBrowser } from "@/components/MatchBrowser";
 import { ProbBar } from "@/components/ProbBar";
 import { accuracy, getEngineBacktest, getMatches, getSimulation } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { dict, paths, type Lang } from "@/lib/i18n";
+import { siteUrl } from "@/lib/site";
 import { competitions } from "@/lib/leagues";
 import { closestPicks, lite, matchOfTheWeek, surestPicks } from "@/lib/picks";
 import { team } from "@/lib/teams";
@@ -38,6 +40,19 @@ export function Home({ lang }: { lang: Lang }) {
 
   return (
     <div className="home-grid">
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Rinvalo",
+            url: `${siteUrl}${paths(lang).home}`,
+            inLanguage: lang,
+            description: dict(lang).siteDescription,
+          },
+          { "@context": "https://schema.org", "@type": "Organization", name: "Rinvalo", url: siteUrl, logo: `${siteUrl}/brand/icon-512.png` },
+        ]}
+      />
       <MatchBrowser matches={window.map(lite)} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
 
       <aside className="side-stack" aria-label={h.highlights}>
@@ -131,7 +146,11 @@ export function Home({ lang }: { lang: Lang }) {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {race.map((r) => (
-                <Link key={r.team} href={p.teamOf(r.team)} style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, alignItems: "center", fontSize: 13.5, fontWeight: 600 }}>
+                <Link
+                  key={r.team}
+                  href={p.teamOf(r.team)}
+                  style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10, alignItems: "center", fontSize: 13.5, fontWeight: 600 }}
+                >
                   <span className="tname">
                     <Crest slug={r.team} size="sm" />
                     {name(r.team)}

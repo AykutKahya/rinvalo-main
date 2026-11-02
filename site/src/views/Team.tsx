@@ -6,6 +6,7 @@ import { CalendarButton } from "@/components/CalendarButton";
 import { CountUp } from "@/components/CountUp";
 import { SeasonChart } from "@/components/SeasonChart";
 import { Crest } from "@/components/Crest";
+import { crumbs, JsonLd } from "@/components/JsonLd";
 import { NotifyButton } from "@/components/NotifyButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { MatchRow } from "@/components/MatchRow";
@@ -16,6 +17,7 @@ import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
 import { competitionName, leagueByCode, nameLang } from "@/lib/leagues";
 import { teamSeries } from "@/lib/series";
+import { siteUrl } from "@/lib/site";
 import { team } from "@/lib/teams";
 
 /** Club pages render on first visit and stay cached until the next deploy; building them ahead added minutes to every deploy. */
@@ -52,6 +54,23 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
 
   return (
     <>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "SportsTeam",
+            name: t.name,
+            sport: "Football",
+            url: `${siteUrl}${path.teamOf(slug)}`,
+            memberOf: { "@type": "SportsOrganization", name: competitionName(entry.league, lang) },
+          },
+          crumbs([
+            ["Rinvalo", path.home],
+            [competitionName(entry.league, lang), path.leagueOf(entry.league)],
+            [t.name, path.teamOf(slug)],
+          ]),
+        ]}
+      />
       <div className="card team-head reveal" style={{ "--c1": t.colors[0], "--c2": t.colors[1] } as CSSProperties}>
         <Crest slug={slug} size="lg" />
         <div style={{ flex: 1, minWidth: 200 }}>

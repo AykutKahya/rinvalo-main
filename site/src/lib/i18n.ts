@@ -73,7 +73,7 @@ const TR = {
   ogLocale: "tr_TR",
   tz: "Europe/Istanbul",
   siteTitle: "Rinvalo · Maç tahminleri",
-  siteDescription: "Süper Lig, Premier League, La Liga, Serie A ve Bundesliga maçları için istatistik modeliyle üretilmiş skor ve sonuç tahminleri.",
+  siteDescription: "Süper Lig, Premier League, La Liga ve Avrupa'nın dokuz liginde, üç Avrupa kupasında her maç için istatistik modeliyle skor ve sonuç tahmini, puan durumu ve şampiyonluk ihtimalleri.",
   footer: "Tahminler istatistiksel modele dayanır; kesinlik taşımaz.",
   nav: { matches: "Maçlar", leagues: "Ligler", analysis: "Analiz", headlines: "Manşet", main: "Ana menü", bottom: "Alt menü", home: "Rinvalo ana sayfa" },
   theme: { toDay: "Gündüz temasına geç", toNight: "Gece temasına geç", day: "Gündüz", night: "Gece" },
@@ -160,6 +160,7 @@ const TR = {
     over25: "2.5 Üst",
     btts: "Karşılıklı gol",
     likeliest: "En olası skor",
+    ldDescription: (h: string, a: string, s: string) => `${h} – ${a} maçı için Rinvalo skor tahmini: ${s}. Sonuç ihtimalleri, form ve puan durumu.`,
     scoreNote: (pick: string, winner: string | null, top: string) =>
       `Rinvalo tahmini ${pick}, ${winner ? `${winner} galibiyeti` : "beraberlik"} içindeki en olası skor. Tek başına en olası skor ${top}, ama o sonucun toplam ihtimali daha düşük.`,
     grid: "Skor olasılıkları (%)",
@@ -536,7 +537,7 @@ const EN: Dict = {
   ogLocale: "en_GB",
   tz: "Europe/London",
   siteTitle: "Rinvalo · Football predictions",
-  siteDescription: "Score and result predictions from a statistical model for the Süper Lig, Premier League, La Liga, Serie A and Bundesliga.",
+  siteDescription: "Score and result predictions from a statistical model for every game in nine European leagues and the three UEFA cups, with tables and title odds.",
   footer: "Predictions come from a statistical model and are never certain.",
   nav: { matches: "Matches", leagues: "Leagues", analysis: "Analysis", headlines: "Headlines", main: "Main menu", bottom: "Bottom menu", home: "Rinvalo home" },
   theme: { toDay: "Switch to day theme", toNight: "Switch to night theme", day: "Day", night: "Night" },
@@ -622,6 +623,7 @@ const EN: Dict = {
     over25: "Over 2.5",
     btts: "Both teams score",
     likeliest: "Likeliest score",
+    ldDescription: (h: string, a: string, s: string) => `Rinvalo's score prediction for ${h} v ${a}: ${s}. Result probabilities, form and standings.`,
     scoreNote: (pick: string, winner: string | null, top: string) =>
       `Rinvalo's pick ${pick} is the likeliest score within ${winner ? `a ${winner} win` : "a draw"}. The single likeliest score is ${top}, but its result is less likely overall.`,
     grid: "Score probabilities (%)",
