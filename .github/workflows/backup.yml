@@ -1,0 +1,35 @@
+# Weekly backup of the prediction league (accounts, usernames, picks). Supabase's free plan keeps
+# no backups. The file is encrypted with the upload token, because artifacts of a public repository
+# can be downloaded by anyone signed in to GitHub. To read one:
+#   openssl enc -d -aes-256-cbc -pbkdf2 -in league.json.gz.enc -pass env:RINVALO_UPLOAD_TOKEN | gunzip
+name: Prediction league backup
+
+on:
+  schedule:
+    - cron: '41 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Export and encrypt
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
+        run: |
+          curl -fsS -H "x-upload-token: $RINVALO_UPLOAD_TOKEN" "$SUPABASE_URL/functions/v1/upload" \
+            | gzip | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:RINVALO_UPLOAD_TOKEN -out league.json.gz.enc
+          ls -l league.json.gz.enc
+
+      - name: Keep
+        # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: league-${{ github.run_id }}
+          path: league.json.gz.enc
+          retention-days: 90

@@ -17,8 +17,9 @@ import { competitionName, leagueByCode, nameLang } from "@/lib/leagues";
 import { teamSeries } from "@/lib/series";
 import { team } from "@/lib/teams";
 
+/** Club pages render on first visit and stay cached until the next deploy; building them ahead added minutes to every deploy. */
 export function teamParams() {
-  return seasonTeams().map((t) => ({ slug: t.slug }));
+  return [] as { slug: string }[];
 }
 
 export function teamMetadata(slug: string, lang: Lang): Metadata {

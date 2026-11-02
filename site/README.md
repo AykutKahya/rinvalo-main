@@ -1,19 +1,27 @@
 # Rinvalo v2 (site/)
 
 Futbol maçlarını takip eden, her maç için skor ve sonuç tahmini yayınlayan site. Tamamen ücretsiz
-çalışır: veri kaynağı için anahtar veya ödeme gerekmez, veritabanı yoktur.
+çalışır: veri kaynağı için anahtar veya ödeme gerekmez. Supabase (ücretsiz plan) veriyi ve tahmin
+ligini tutar.
 
 ## Nasıl çalışır
 
 ```
 TheSportsDB (ücretsiz) ──┐
 openfootball (yedek) ────┼─> scripts/update.ts ─┐
-data/overrides.json ─────┘                      ├─> engine/predict.py ─> scripts/simulate.ts ─> git commit ─> Vercel
+data/overrides.json ─────┘                      ├─> engine/predict.py ─> scripts/simulate.ts ─> Supabase Storage ─> Vercel
 football-data.co.uk ───────> scripts/stats.ts ──┘
 ```
 
-- `.github/workflows/rinvalo-site-bot.yml` botu günde 6 kez çalıştırır. Bot yeni veri bulursa JSON
-  dosyalarını `main`'e commit eder, Vercel de siteyi yeniden derler.
+- `.github/workflows/rinvalo-site-bot.yml` botu maç günleri saatte bir, diğer günler günde üç kez
+  çalıştırır. Bot repoya commit atmaz: güncel veriyi Supabase Storage'dan alır (`scripts/pull-data.mjs`),
+  günceller, yalnız gerçekten değişen dosyaları geri yükler (`scripts/push-data.mjs`) ve Vercel'den
+  yeni derleme ister. Vercel de derlemeden önce veriyi aynı yerden alır. `data/` altındaki git
+  kopyası yalnız başlangıç verisidir.
+- Botun gizli değerleri (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL`,
+  `SUPABASE_ANON_KEY`, `RINVALO_UPLOAD_TOKEN`, `VERCEL_DEPLOY_HOOK`.
+- Maç sayfalarının yalnız bugünün ±10 günü derlemede üretilir; diğer maç ve takım sayfaları ilk
+  ziyarette üretilip bir sonraki derlemeye kadar saklanır.
 - Tahminler maç başlayana kadar her koşuda yenilenir. Maç başladıktan sonra tahmin dondurulur ve
   başarı oranı bu dondurulmuş tahminle hesaplanır.
 - Tahmin motoru Python'dadır: [`engine/`](../engine/README.md). `src/lib/model.ts` içindeki basit model

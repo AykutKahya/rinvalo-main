@@ -1,6 +1,8 @@
-# Rinvalo v2 bot: refreshes fixtures, results, predictions and season odds for site/ and
-# commits the JSON files. Each commit to main triggers a new Vercel build.
+# Rinvalo v2 bot: refreshes fixtures, results, predictions and season odds for site/. The data
+# lives in Supabase Storage, not in git: the bot pulls it, updates it, uploads what changed and
+# asks Vercel for a new build through a deploy hook. It never pushes to the repository.
 #
+# Secrets: SUPABASE_URL, SUPABASE_ANON_KEY, RINVALO_UPLOAD_TOKEN, VERCEL_DEPLOY_HOOK.
 # Cost: public repository, so GitHub Actions minutes are free.
 name: Rinvalo site bot
 
@@ -13,7 +15,7 @@ on:
     - cron: '23 8,15 * * *'
     # Match days: hourly while games finish (weekends 14:00-23:59, midweek evenings). Scores during a
     # game come from /live.json, so the bot only needs to settle results and refresh predictions.
-    # A run commits only when a score, fixture or prediction really changed.
+    # A run uploads only when a score, fixture or prediction really changed.
     - cron: '37 14-23 * * 5,6,0,1'
     - cron: '37 19,21,22 * * 2,3,4'
   workflow_dispatch:
@@ -29,7 +31,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update:
@@ -38,6 +40,9 @@ jobs:
     defaults:
       run:
         working-directory: site
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - name: Check out
         # v7.0.1
@@ -61,6 +66,11 @@ jobs:
         run: |
           npm test
           python -m unittest discover -s ../engine
+
+      - name: Pull current data
+        run: |
+          node scripts/pull-data.mjs --strict
+          node scripts/push-data.mjs snapshot "$RUNNER_TEMP/before"
 
       - name: Update data
         env:
@@ -88,19 +98,15 @@ jobs:
       - name: Season simulation
         run: npm run simulate
 
-      - name: Commit changed data
-        run: |
-          git config user.name "rinvalo-bot"
-          git config user.email "rinvalo-bot@users.noreply.github.com"
-          if ! npx tsx scripts/meaningful.ts; then
-            git checkout -- data
-            echo "Değişiklik yok."
-            exit 0
-          fi
-          git add data public/crests public/leagues
-          git commit -m "Veri güncellemesi $(date -u +'%Y-%m-%d %H:%M') UTC"
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
-            sleep $((i * 5))
-          done
-          exit 1
+      - name: Upload changed data
+        id: push
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
+        run: node scripts/push-data.mjs push "$RUNNER_TEMP/before"
+
+      - name: Rebuild the site
+        if: steps.push.outputs.changed == 'true'
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel derlemesi istendi."

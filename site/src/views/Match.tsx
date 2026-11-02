@@ -23,8 +23,14 @@ import { stakesOf } from "@/lib/stakes";
 import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
 
+const DAY = 86_400_000;
+
+/** Pages built ahead: the games around today. Older and later games render on first visit. */
 export function matchParams() {
-  return getMatches().map((m) => ({ id: m.id }));
+  const now = Date.now();
+  return getMatches()
+    .filter((m) => Math.abs(Date.parse(m.kickoff) - now) < 10 * DAY)
+    .map((m) => ({ id: m.id }));
 }
 
 export function matchMetadata(id: string, lang: Lang): Metadata {
