@@ -1,5 +1,5 @@
 /* Rinvalo service worker: pages network-first (fall back to the last copy when offline),
-   build assets and logos cache-first. Live scores are never cached here. */
+   build assets and logos cache-first, and push notifications. Live scores are never cached here. */
 const PAGES = "rinvalo-pages-v1";
 const ASSETS = "rinvalo-assets-v1";
 
@@ -40,4 +40,32 @@ self.addEventListener("fetch", (e) => {
         .catch(() => caches.match(req).then((hit) => hit || caches.match("/"))),
     );
   }
+});
+
+// Kick-off and full-time notifications sent by the Supabase "push" function.
+self.addEventListener("push", (e) => {
+  let d = {};
+  try {
+    d = e.data ? e.data.json() : {};
+  } catch {}
+  e.waitUntil(
+    self.registration.showNotification(d.title || "Rinvalo", {
+      body: d.body || "",
+      tag: d.tag,
+      data: { url: d.url || "/" },
+      icon: "/brand/icon-192.png",
+      badge: "/brand/icon-192.png",
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = new URL(e.notification.data?.url || "/", location.origin).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      const open = list.find((c) => c.url === url);
+      return open ? open.focus() : self.clients.openWindow(url);
+    }),
+  );
 });

@@ -12,6 +12,7 @@ import { LiveMatch } from "@/components/LiveMatch";
 import { MarketCompare } from "@/components/MarketCompare";
 import { ProbBar } from "@/components/ProbBar";
 import { ScoreGrid } from "@/components/ScoreGrid";
+import { NotifyButton } from "@/components/NotifyButton";
 import { ShareButton } from "@/components/ShareButton";
 import { Stakes, TieOdds } from "@/components/Stakes";
 import { Form, StandingsTable } from "@/components/StandingsTable";
@@ -104,6 +105,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           <span className="mh-meta">
             {f.longDay(m.kickoff)} · {f.time(m.kickoff)}
             {m.venue ? ` · ${m.venue}` : ""}
+            {!finished && <NotifyButton kind="match" id={m.id} lang={lang} />}
             <ShareButton title={tm.title(h.name, a.name)} lang={lang} />
           </span>
         </div>

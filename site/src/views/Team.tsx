@@ -6,6 +6,7 @@ import { CalendarButton } from "@/components/CalendarButton";
 import { CountUp } from "@/components/CountUp";
 import { SeasonChart } from "@/components/SeasonChart";
 import { Crest } from "@/components/Crest";
+import { NotifyButton } from "@/components/NotifyButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { MatchRow } from "@/components/MatchRow";
 import { ProbBar } from "@/components/ProbBar";
@@ -65,6 +66,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <FavoriteButton slug={slug} name={t.name} lang={lang} />
+          <NotifyButton kind="team" id={slug} lang={lang} look="button" />
           <CalendarButton slug={slug} lang={lang} />
           {league && (
             <Link href={`${path.compare}?a=${slug}`} className="btn ghost">

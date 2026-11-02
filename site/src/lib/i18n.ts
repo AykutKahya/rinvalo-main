@@ -211,6 +211,14 @@ const TR = {
     copied: "Bağlantı kopyalandı",
     shareText: (home: string, pick: string, away: string) => `Tahminim: ${home} ${pick} ${away}. Seninki ne?`,
   },
+  notify: {
+    off: "Bildirim al",
+    on: "Bildirim açık",
+    matchHint: "Maç başlamadan 15 dakika önce ve bitince haber ver",
+    teamHint: "Bu takımın her maçında, başlamadan 15 dakika önce ve bitince haber ver",
+    ios: "iPhone'da bildirim için önce Paylaş → Ana Ekrana Ekle ile Rinvalo'yu ana ekrana ekle, oradan aç.",
+    blocked: "Bildirimler bu tarayıcıda engelli. Tarayıcı ayarlarından bu site için bildirimlere izin ver.",
+  },
   sharePick: {
     pickTitle: (home: string, pick: string, away: string) => `Tahminim: ${home} ${pick} ${away}`,
     pickText: "Rinvalo'da sen de tahminini yap, puan topla.",
@@ -664,6 +672,14 @@ const EN: Dict = {
     share: "Share my pick",
     copied: "Link copied",
     shareText: (home, pick, away) => `My pick: ${home} ${pick} ${away}. What's yours?`,
+  },
+  notify: {
+    off: "Notify me",
+    on: "Notifications on",
+    matchHint: "Tell me 15 minutes before kick-off and at full time",
+    teamHint: "For every game of this club: 15 minutes before kick-off and at full time",
+    ios: "On iPhone, first add Rinvalo to your home screen (Share → Add to Home Screen) and open it from there.",
+    blocked: "Notifications are blocked in this browser. Allow them for this site in the browser settings.",
   },
   sharePick: {
     pickTitle: (home, pick, away) => `My pick: ${home} ${pick} ${away}`,
