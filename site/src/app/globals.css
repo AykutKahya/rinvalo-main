@@ -705,3 +705,15 @@ table.power td { vertical-align: middle; }
 .prose { max-width: 760px; display: flex; flex-direction: column; gap: 18px; }
 .prose h2 { font-size: 18px; margin: 0 0 6px; }
 .prose p { margin: 0 0 8px; line-height: 1.6; color: var(--ink-2); }
+
+/* ---------- Round pages ---------- */
+.week-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 4px 0 16px; font-weight: 700; font-size: 14px; }
+.week-nav a { color: var(--accent); }
+.week-record { margin: 0 0 16px; font-weight: 600; }
+.week-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.week-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; color: var(--ink); }
+.week-card small { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.week-card b { font-size: 15px; }
+.week-card span { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.week-card:hover { border-color: var(--accent); }
+.week-link { display: inline-block; margin-top: 4px; font-weight: 700; font-size: 14px; color: var(--accent); }

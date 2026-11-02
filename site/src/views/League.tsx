@@ -80,6 +80,7 @@ function CupPage({ cup, lang }: { cup: Cup; lang: Lang }) {
                 labels={rounds.map((r) => roundLabel(lang, cup.code, r))}
                 initial={currentRound(cup.code, rounds[rounds.length - 1])}
                 lang={lang}
+                weekBase={paths(lang).weekOf(cup.code, 0).replace(/\/0$/, "")}
               />
             ),
           },
@@ -140,7 +141,16 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
           {
             id: "fikstur",
             label: t.fixtures,
-            content: <RoundBrowser matches={matches.map(lite)} rounds={rounds} labels={rounds.map(d.round)} initial={currentRound(code, league.rounds)} lang={lang} />,
+            content: (
+              <RoundBrowser
+                matches={matches.map(lite)}
+                rounds={rounds}
+                labels={rounds.map(d.round)}
+                initial={currentRound(code, league.rounds)}
+                lang={lang}
+                weekBase={paths(lang).weekOf(code, 0).replace(/\/0$/, "")}
+              />
+            ),
           },
           {
             id: "puan",

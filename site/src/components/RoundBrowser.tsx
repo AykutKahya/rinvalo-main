@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { MatchView } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -8,7 +9,7 @@ import { useFavorites } from "./favorites";
 import { MatchRow } from "./MatchRow";
 
 /** Steps through a league's matchdays or a cup's stages. `labels[i]` names `rounds[i]`. */
-export function RoundBrowser({ matches, rounds, labels, initial, lang }: { matches: MatchView[]; rounds: number[]; labels: string[]; initial: number; lang: Lang }) {
+export function RoundBrowser({ matches, rounds, labels, initial, lang, weekBase }: { matches: MatchView[]; rounds: number[]; labels: string[]; initial: number; lang: Lang; weekBase?: string }) {
   const [round, setRound] = useState(initial);
   const at = Math.max(rounds.indexOf(round), 0);
   const { favorites } = useFavorites();
@@ -51,6 +52,11 @@ export function RoundBrowser({ matches, rounds, labels, initial, lang }: { match
         </div>
       ))}
       {list.length === 0 && <div className="card empty">{t.rounds.empty}</div>}
+      {weekBase && list.length > 0 && (
+        <Link href={`${weekBase}/${round}`} className="week-link">
+          {t.rounds.page}
+        </Link>
+      )}
     </div>
   );
 }

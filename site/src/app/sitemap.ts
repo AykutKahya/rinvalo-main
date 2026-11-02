@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getMatches, getSeason, LEAGUES, seasonTeams } from "@/lib/data";
 import { paths } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site";
+import { allWeeks } from "@/views/Week";
 
 const tr = paths("tr");
 const en = paths("en");
@@ -26,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page(tr.compare, en.compare, 0.5),
     page(tr.privacy, en.privacy, 0.2),
     ...LEAGUES.map((l) => page(tr.leagueOf(l.code), en.leagueOf(l.code), 0.7)),
+    ...allWeeks().map((w) => page(tr.weekOf(w.code, w.round), en.weekOf(w.code, w.round), 0.6)),
     ...seasonTeams().map((t) => page(tr.teamOf(t.slug), en.teamOf(t.slug), 0.5)),
     ...getMatches().map((m) => page(tr.matchOf(m.id), en.matchOf(m.id), m.status === "finished" ? 0.3 : 0.6)),
   ];

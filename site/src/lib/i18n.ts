@@ -41,12 +41,19 @@ const ROUTES = {
 
 export type RouteKey = keyof (typeof ROUTES)["tr"];
 
+/** Path segments below a route that differ by language, e.g. /lig/x/hafta/3 ⇄ /en/league/x/round/3. */
+const SEG = {
+  tr: { week: "hafta", myPick: "tahminim" },
+  en: { week: "round", myPick: "my-pick" },
+} as const;
+
 export function paths(lang: Lang) {
   const r = ROUTES[lang];
   return {
     ...r,
     matchOf: (id: string) => `${r.match}/${id}`,
     leagueOf: (code: string) => `${r.league}/${code}`,
+    weekOf: (code: string, round: number) => `${r.league}/${code}/${SEG[lang].week}/${round}`,
     teamOf: (slug: string) => `${r.team}/${slug}`,
   };
 }
@@ -58,7 +65,11 @@ export function switchPath(path: string, to: Lang): string {
   const keys = (Object.keys(ROUTES[from]) as RouteKey[]).filter((k) => k !== "home").sort((a, b) => ROUTES[from][b].length - ROUTES[from][a].length);
   for (const k of keys) {
     const base = ROUTES[from][k];
-    if (path === base || path.startsWith(`${base}/`)) return ROUTES[to][k] + path.slice(base.length);
+    if (path === base || path.startsWith(`${base}/`)) {
+      let rest = path.slice(base.length);
+      for (const seg of Object.keys(SEG[from]) as (keyof (typeof SEG)["tr"])[]) rest = rest.replace(`/${SEG[from][seg]}/`, `/${SEG[to][seg]}/`);
+      return ROUTES[to][k] + rest;
+    }
   }
   return ROUTES[to].home;
 }
@@ -127,7 +138,19 @@ const TR = {
     noGames: "Bu gün maç yok",
     addFavs: "Takım sayfalarından favori ekleyebilirsin.",
   },
-  rounds: { prev: "Önceki hafta", next: "Sonraki hafta", empty: "Bu haftanın fikstürü henüz açıklanmadı." },
+  rounds: { prev: "Önceki hafta", next: "Sonraki hafta", empty: "Bu haftanın fikstürü henüz açıklanmadı.", page: "Haftanın tahmin sayfası →" },
+  week: {
+    title: (comp: string, round: string) => `${comp} ${round} tahminleri`,
+    description: (comp: string, round: string, n: number) => `${comp} ${round}: ${n} maçın skor ve sonuç tahmini, kazanma ihtimalleri ve haftanın öne çıkanları.`,
+    intro: (n: number, from: string, to: string) => (from === to ? `${from} günündeki ${n} maçın Rinvalo tahminleri.` : `${from} – ${to} arasındaki ${n} maçın Rinvalo tahminleri.`),
+    surest: "En net tahmin",
+    closest: "En çekişmeli maç",
+    goals: "En çok gol beklenen",
+    draw: "Beraberlik adayı",
+    record: (hits: number, n: number, exact: number) => `Bu hafta Rinvalo ${n} maçın ${hits} tanesinin sonucunu, ${exact} tanesinin skorunu bildi.`,
+    league: "Lig sayfası",
+    image: "Paylaşım görselini indir",
+  },
   table: { team: "Takım", p: "O", w: "G", d: "B", l: "M", gfga: "A:Y", gd: "Av", pts: "P", form: "Form" },
   outlook: { runs: (n: string) => `${n} sezon simülasyonu`, avg: "Ort. puan", champion: "Şampiyonluk", top: (n: number) => `İlk ${n}`, relegation: "Küme düşme" },
   home: {
@@ -162,6 +185,8 @@ const TR = {
     over25: "2.5 Üst",
     btts: "Karşılıklı gol",
     likeliest: "En olası skor",
+    drawWord: "Beraberlik",
+    goalsWord: "gol",
     ldDescription: (h: string, a: string, s: string) => `${h} – ${a} maçı için Rinvalo skor tahmini: ${s}. Sonuç ihtimalleri, form ve puan durumu.`,
     scoreNote: (pick: string, winner: string | null, top: string) =>
       `Rinvalo tahmini ${pick}, ${winner ? `${winner} galibiyeti` : "beraberlik"} içindeki en olası skor. Tek başına en olası skor ${top}, ama o sonucun toplam ihtimali daha düşük.`,
@@ -227,6 +252,8 @@ const TR = {
     pickText: "Rinvalo'da sen de tahminini yap, puan topla.",
     open: "Maç sayfasına git →",
     mine: "Tahminim",
+    weekTitle: "Rinvalo tahminleri",
+    more: (n: number) => `+${n} maç rinvalo.net'te`,
   },
   league: {
     title: (n: string) => `${n} tahminleri ve puan durumu`,
@@ -648,7 +675,19 @@ const EN: Dict = {
     noGames: "No matches on this day",
     addFavs: "Add favourites from any team page.",
   },
-  rounds: { prev: "Previous matchday", next: "Next matchday", empty: "Fixtures for this matchday are not out yet." },
+  rounds: { prev: "Previous matchday", next: "Next matchday", empty: "Fixtures for this matchday are not out yet.", page: "Matchday predictions page →" },
+  week: {
+    title: (comp, round) => `${comp} ${round} predictions`,
+    description: (comp, round, n) => `${comp} ${round}: score and result predictions for ${n} games, win probabilities and the week's highlights.`,
+    intro: (n, from, to) => (from === to ? `Rinvalo's predictions for the ${n} games on ${from}.` : `Rinvalo's predictions for the ${n} games between ${from} and ${to}.`),
+    surest: "Surest pick",
+    closest: "Closest game",
+    goals: "Most goals expected",
+    draw: "Draw candidate",
+    record: (hits, n, exact) => `This round Rinvalo called ${hits} of ${n} results and ${exact} exact scores.`,
+    league: "League page",
+    image: "Download share image",
+  },
   table: { team: "Team", p: "P", w: "W", d: "D", l: "L", gfga: "GF:GA", gd: "GD", pts: "Pts", form: "Form" },
   outlook: { runs: (n) => `${n} simulated seasons`, avg: "Avg. pts", champion: "Title", top: (n) => `Top ${n}`, relegation: "Relegation" },
   home: {
@@ -682,6 +721,8 @@ const EN: Dict = {
     over25: "Over 2.5",
     btts: "Both teams score",
     likeliest: "Likeliest score",
+    drawWord: "Draw",
+    goalsWord: "goals",
     ldDescription: (h: string, a: string, s: string) => `Rinvalo's score prediction for ${h} v ${a}: ${s}. Result probabilities, form and standings.`,
     scoreNote: (pick: string, winner: string | null, top: string) =>
       `Rinvalo's pick ${pick} is the likeliest score within ${winner ? `a ${winner} win` : "a draw"}. The single likeliest score is ${top}, but its result is less likely overall.`,
@@ -747,6 +788,8 @@ const EN: Dict = {
     pickText: "Make your own pick on Rinvalo and score points.",
     open: "Go to the match page →",
     mine: "My pick",
+    weekTitle: "Rinvalo picks",
+    more: (n: number) => `+${n} more games on rinvalo.net`,
   },
   league: {
     title: (n) => `${n} predictions and table`,
