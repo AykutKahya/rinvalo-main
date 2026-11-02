@@ -185,6 +185,12 @@ export function Accuracy({ lang }: { lang: Lang }) {
                         <b>{label}</b>
                         <br />
                         <small className="muted">{t.baseline(f.pct(r.baseAccuracy))}</small>
+                        {r.market && r.market.matches >= 20 && (
+                          <>
+                            <br />
+                            <small className="muted">{t.vsMarket(f.int(r.market.matches), f.pct(r.market.accuracy), f.pct(r.market.marketAccuracy))}</small>
+                          </>
+                        )}
                       </span>
                       <span style={{ textAlign: "right" }}>
                         <b className="num" style={{ fontSize: 18 }}>

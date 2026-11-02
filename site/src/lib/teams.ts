@@ -306,6 +306,34 @@ for (const [slug, [name, short]] of Object.entries(cupTeams as unknown as Record
   if (!BY_ALIAS.has(normalizeName(name))) BY_ALIAS.set(normalizeName(name), slug);
 }
 
+// Other sources' spellings (odds feeds, line-ups) that the rows above do not cover.
+const SPELLINGS: Record<string, string> = {
+  "Sheff Utd": "sheffield-united",
+  "Nottm Forest": "nottingham-forest",
+  "Borussia M'gladbach": "gladbach",
+  "Deportivo A Coruna": "deportivo",
+  Cologne: "koln",
+  "Cambuur Leeuwarden": "cambuur",
+  "Bodo/Glimt": "bodo-glimt",
+  "LASK Linz": "lask",
+  Sabah: "sabah-baku",
+  "Ferencvarosi TC": "ferencvaros",
+  "FC Salzburg": "salzburg",
+  Lillestrom: "lillestrom",
+  "Jagiellonia Bialystok": "jagiellonia-bialystok",
+  "KuPS Kuopio": "kups",
+  Hearts: "heart-of-midlothian",
+  "Mjällby AIF": "mjallby",
+  "NK Celje": "celje",
+  "Hapoel Beer Sheva": "hapoel-beer-sheva",
+  "OFI Crete": "ofi",
+  "FC Nordsjaelland": "nordsjaelland",
+  "Sint-Truidense": "sint-truiden",
+  "CS U Craiova": "universitatea-craiova",
+  "KF Egnatia": "egnatia",
+};
+for (const [name, slug] of Object.entries(SPELLINGS)) if (!BY_ALIAS.has(normalizeName(name))) BY_ALIAS.set(normalizeName(name), slug);
+
 /** Resolve any source spelling to a slug, or null when the name is unknown. */
 export function resolveTeam(sourceName: string): string | null {
   return BY_ALIAS.get(normalizeName(sourceName)) ?? null;

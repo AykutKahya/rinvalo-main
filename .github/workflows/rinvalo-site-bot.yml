@@ -83,6 +83,11 @@ jobs:
         continue-on-error: true
         run: npm run stats
 
+      - name: Market odds (MoviOdds)
+        # One small request; the market's view next to Rinvalo's, never part of the prediction.
+        continue-on-error: true
+        run: npx tsx scripts/odds.ts
+
       - name: Rinvalo engine predictions
         # If the engine fails, the fallback predictions written by `npm run update` stay in place.
         continue-on-error: true

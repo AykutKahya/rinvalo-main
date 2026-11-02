@@ -48,6 +48,8 @@ export interface BinaryRecord {
   rate: number;
   baseAccuracy: number;
   baseBrier: number;
+  /** Rinvalo and the betting market on the games where the market's price was saved. */
+  market?: { matches: number; accuracy: number; brier: number; marketAccuracy: number; marketBrier: number } | null;
 }
 export interface Tracking {
   over25?: BinaryRecord | null;

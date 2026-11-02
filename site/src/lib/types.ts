@@ -62,6 +62,9 @@ export interface Prediction {
   reasonsEn?: string[];
   /** Margin-free betting market probabilities, when odds were published. */
   market?: [number, number, number] | null;
+  /** The market's over 2.5 and both-teams-score probabilities, when priced. */
+  marketOver25?: number | null;
+  marketBtts?: number | null;
   components?: { goals: [number, number, number]; shots: [number, number, number]; elo: number };
 }
 

@@ -173,7 +173,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           )}
           {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
           {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
-          {p && !cup && (p.market ?? getMarket()[m.id]) && (
+          {p && (p.market ?? getMarket()[m.id]) && (
             <MarketCompare rinvalo={p.p} market={(p.market ?? getMarket()[m.id])!} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />
           )}
           {p ? (

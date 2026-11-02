@@ -73,14 +73,28 @@ def main() -> None:
     p = np.array([preds[f["id"]]["p"] for f in settled], dtype=float).reshape(-1, 3)
     y = np.array([outcome(f) for f in settled])
 
-    def binary(key: str, happened) -> dict | None:
+    def binary(key: str, market_key: str, happened) -> dict | None:
         """A yes/no market (over 2.5, both teams score): hit rate at 50%, Brier score, games."""
-        rows = [(preds[f["id"]][key], happened(f)) for f in settled if preds[f["id"]].get(key) is not None]
+        rows = [(preds[f["id"]][key], happened(f), preds[f["id"]].get(market_key)) for f in settled if preds[f["id"]].get(key) is not None]
         if not rows:
             return None
         q = np.array([r[0] for r in rows], dtype=float)
         o = np.array([r[1] for r in rows], dtype=float)
         rate = float(o.mean())
+        # The same games, Rinvalo against the betting market, where the market's price was saved.
+        both = [r for r in rows if r[2] is not None]
+        vs = None
+        if both:
+            qr = np.array([r[0] for r in both], dtype=float)
+            qm = np.array([r[2] for r in both], dtype=float)
+            ob = np.array([r[1] for r in both], dtype=float)
+            vs = {
+                "matches": len(both),
+                "accuracy": round(float(np.mean((qr > 0.5) == (ob == 1))), 4),
+                "brier": round(float(np.mean((qr - ob) ** 2)), 4),
+                "marketAccuracy": round(float(np.mean((qm > 0.5) == (ob == 1))), 4),
+                "marketBrier": round(float(np.mean((qm - ob) ** 2)), 4),
+            }
         return {
             "matches": len(rows),
             "accuracy": round(float(np.mean((q > 0.5) == (o == 1))), 4),
@@ -89,14 +103,15 @@ def main() -> None:
             # The bar to clear: always calling the more common side, at the rate it actually happened.
             "baseAccuracy": round(max(rate, 1 - rate), 4),
             "baseBrier": round(rate * (1 - rate), 4),
+            "market": vs,
         }
 
     out = {
         "updatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "overall": {k: round(v, 4) if isinstance(v, float) else v for k, v in scores(p, y).items()} if len(y) else None,
         "calibration": calibration(p, y) if len(y) else [],
-        "over25": binary("over25", lambda f: f["hg"] + f["ag"] > 2),
-        "btts": binary("btts", lambda f: f["hg"] > 0 and f["ag"] > 0),
+        "over25": binary("over25", "marketOver25", lambda f: f["hg"] + f["ag"] > 2),
+        "btts": binary("btts", "marketBtts", lambda f: f["hg"] > 0 and f["ag"] > 0),
         "leagues": leagues,
     }
     (DATA / "tracking.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", "utf-8")

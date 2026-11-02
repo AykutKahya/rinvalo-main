@@ -149,6 +149,7 @@ const TR = {
     bttsYes: "KG Var",
     bttsNo: "KG Yok",
     note: "Adil oran = 1 ÷ olasılık; bahis şirketinin payı olmadan modelin hesapladığı oran.",
+    market: "Piyasa",
   },
   pager: { label: "Sayfalar", prev: "Önceki sayfa", next: "Sonraki sayfa", count: (a: number, b: number, n: number) => `${a}–${b} / ${n}` },
   week: {
@@ -417,6 +418,7 @@ const TR = {
     over25: "2.5 Alt/Üst",
     btts: "Karşılıklı gol",
     baseline: (p: string) => `Hep çoğunluk sonucunu söylemek: ${p}`,
+    vsMarket: (n: string, r: string, m: string) => `Piyasa oranı olan ${n} maçta: Rinvalo ${r}, piyasa ${m}`,
     goalsNote: "Tahmin, ihtimal %50'yi geçen taraf sayılır. Altındaki satır, her maça o sezon daha sık görülen sonucu (ör. hep 'Üst') söyleseydik tutacak oran; modelin geçmesi gereken çıta.",
     statusLabel: { ok: "Normal", watch: "İzleniyor", few: "Az maç" },
     lossTitle: (now: string, test: string) => `Log loss bu sezon ${now}, testte ${test} (düşük daha iyi)`,
@@ -714,6 +716,7 @@ const EN: Dict = {
     bttsYes: "BTTS yes",
     bttsNo: "BTTS no",
     note: "Fair odds = 1 ÷ probability: the price the model gives, with no bookmaker margin.",
+    market: "Market",
   },
   pager: { label: "Pages", prev: "Previous page", next: "Next page", count: (a, b, n) => `${a}–${b} of ${n}` },
   week: {
@@ -981,6 +984,7 @@ const EN: Dict = {
     over25: "Over/under 2.5",
     btts: "Both teams score",
     baseline: (p: string) => `Always the more common side: ${p}`,
+    vsMarket: (n: string, r: string, m: string) => `On the ${n} games with market prices: Rinvalo ${r}, market ${m}`,
     goalsNote: "The pick is the side above 50%. The line below is what always naming the season's more common outcome (e.g. always 'over') would hit; the bar the model has to clear.",
     statusLabel: { ok: "Normal", watch: "Watching", few: "Too few" },
     lossTitle: (now: string, test: string) => `Log loss this season ${now}, in testing ${test} (lower is better)`,

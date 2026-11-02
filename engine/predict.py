@@ -21,7 +21,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from rinvalo_engine.data import DATA, load_fixtures, load_matches, load_upcoming_odds, market_probs  # noqa: E402
+from rinvalo_engine.data import DATA, load_fixtures, load_matches, load_moviodds, load_upcoming_odds, market_probs, two_way  # noqa: E402
 from rinvalo_engine.data import _season_of as season_of  # noqa: E402
 from rinvalo_engine.features import Engine, build_training, fit_shot_coef  # noqa: E402
 from rinvalo_engine.metrics import confidence  # noqa: E402
@@ -169,6 +169,7 @@ def main() -> None:
     model = fit(X)
     names = json.loads((DATA / "team-names.json").read_text("utf-8")) if (DATA / "team-names.json").exists() else {}
     odds = load_upcoming_odds()
+    movi = load_moviodds()
 
     pred_path = DATA / "predictions.json"
     store = json.loads(pred_path.read_text("utf-8")) if pred_path.exists() else {"model": VERSION, "predictions": {}}
@@ -187,8 +188,12 @@ def main() -> None:
         p = model.probs(row)[0]
         dc = np.array([feats["dc_ph"], feats["dc_pd"], feats["dc_pa"]])
         xq = np.array([feats["xq_ph"], feats["xq_pd"], feats["xq_pa"]])
+        # The average of many bookmakers when football-data.co.uk has it, otherwise MoviOdds.
         o = odds.get((f["league"], f["home"], f["away"]))
-        market = market_probs(o[0], o[1], o[2]) if o else None
+        mo = movi.get(f["id"])
+        market = market_probs(o[0], o[1], o[2]) if o else market_probs(*mo[:3]) if mo else None
+        m_over = two_way(o[3], o[4]) if o and o[3] else two_way(mo[3], mo[4]) if mo else None
+        m_btts = two_way(mo[5], mo[6]) if mo else None
 
         lh, la = rates_for(p, feats["dc_lh"], feats["dc_la"])
         grid = score_grid(lh, la)
@@ -213,6 +218,8 @@ def main() -> None:
             "reasons": reasons(feats, p, market, names, f["home"], f["away"]),
             "reasonsEn": reasons(feats, p, market, names, f["home"], f["away"], "en"),
             "market": [r4(x) for x in market] if market is not None else None,
+            "marketOver25": r4(m_over) if m_over is not None else None,
+            "marketBtts": r4(m_btts) if m_btts is not None else None,
             "components": {"goals": [r4(x) for x in dc], "shots": [r4(x) for x in xq], "elo": round(float(feats["elo_diff"]))},
         }
         refreshed += 1

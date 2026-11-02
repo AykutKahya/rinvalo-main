@@ -28,7 +28,7 @@ from sklearn.linear_model import LogisticRegression
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from rinvalo_engine.data import DATA, _season_of, load_matches  # noqa: E402
+from rinvalo_engine.data import DATA, _season_of, load_matches, load_moviodds, market_probs, two_way  # noqa: E402
 from rinvalo_engine.metrics import scores  # noqa: E402
 from rinvalo_engine.model import rates_for  # noqa: E402
 from rinvalo_engine.ratings import score_grid  # noqa: E402
@@ -181,6 +181,7 @@ def main() -> None:
     season = _season_of(now.isoformat())
     means = {lg: elo.league_mean(lg) for lg in LEAGUE_NAME}
 
+    movi = load_moviodds()
     refreshed = 0
     for f in read("cups.json", {"fixtures": []})["fixtures"]:
         kick = pd.Timestamp(f["kickoff"]).tz_convert(None)
@@ -228,7 +229,10 @@ def main() -> None:
             "grid": [[r4(v) for v in row[:6]] for row in grid[:6]],
             "reasons": reasons("tr"),
             "reasonsEn": reasons("en"),
-            "market": None,
+            # MoviOdds prices, as the market's view; the cup model never uses them.
+            "market": [r4(x) for x in market_probs(*mo[:3])] if (mo := movi.get(f["id"])) else None,
+            "marketOver25": r4(v) if mo and (v := two_way(mo[3], mo[4])) is not None else None,
+            "marketBtts": r4(v) if mo and (v := two_way(mo[5], mo[6])) is not None else None,
         }
         refreshed += 1
 

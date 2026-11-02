@@ -69,6 +69,18 @@ def load_upcoming_odds() -> dict[tuple[str, str, str], tuple[float, float, float
     return out
 
 
+def load_moviodds() -> dict[str, list]:
+    """MoviOdds prices by fixture id: [home, draw, away, over 2.5, under 2.5, btts yes, btts no] (None when missing)."""
+    return _read("odds-moviodds.json", {})
+
+
+def two_way(yes, no) -> float | None:
+    """A yes/no price pair to the margin-free probability of yes."""
+    if not yes or not no or yes <= 1 or no <= 1:
+        return None
+    return (1 / yes) / (1 / yes + 1 / no)
+
+
 def market_probs(oh, od, oa) -> np.ndarray:
     """Bookmaker prices to probabilities with the margin removed proportionally."""
     inv = np.array([1 / oh, 1 / od, 1 / oa], dtype=float)

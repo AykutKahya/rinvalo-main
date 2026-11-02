@@ -65,6 +65,12 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
   hakkında yanlış bir şey söyleyeceği için eklenmedi; güven seviyesi bu işi görüyor. Maçların %25,8'i berabere bitse de
   beraberlik neredeyse hiç en olası sonuç olmuyor: piyasa 10.300 maçın yalnız 5'inde beraberliği
   favori gösteriyor.
+- **Kasım 2026, deplasman mesafesi (M3):** 249 kulübün stat konumu (Wikidata + Open-Meteo
+  geocoding) ile iki stat arası km; 2023-26, 9.776 maç, ileriye dönük. log(km) eklemek 1X2 log
+  loss'u 0,98430'dan 0,98416'ya indiriyor (fark -0,00014 ± 0,00029, gürültü); 800 km üstü bayrağı
+  da öyle. Yalnız Süper Lig için: -0,0014 ± 0,0018 (1.028 maç), anlamsız. Eklenmedi.
+- **Hava durumu (M3):** Open-Meteo arşivinin ücretsiz günlük sınırı, beş yıllık seri isteklerinde
+  13 kulüpten sonra doldu; test henüz yapılamadı.
 
 ## Canlı izleme
 
@@ -73,6 +79,15 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
 log loss'u testtekinden iki standart hatadan fazla kötüyse (en az 30 maç) lig "izleniyor" olur:
 başarı sayfasında görünür ve GitHub Actions koşusunda uyarı çıkar. 2.5 alt/üst ve karşılıklı gol
 için isabet ve Brier, "her maça o sezonun daha sık sonucunu söyle" çıtasıyla birlikte yazılır.
+Piyasa oranı kaydedilmiş maçlarda aynı ölçüler piyasa için de yazılır (`market`).
+
+## Piyasa oranları
+
+`site/scripts/odds.ts` her bot koşusunda MoviOdds'tan (ücretsiz, anahtarsız, tek gzip istek) maç
+sonucu, 2.5 alt/üst ve karşılıklı gol fiyatlarını alır, lig ve kupa maçlarımızla eşleştirir ve
+`site/data/odds-moviodds.json`'a yazar. football-data.co.uk ortalaması olan lig maçlarında 1X2 ve
+alt/üst için o kullanılır, yoksa MoviOdds. Oranlar marjı atılmış olasılık olarak tahmine
+`market`, `marketOver25`, `marketBtts` diye kaydedilir; tahminin kendisine girmez.
 
 ## Çalıştırma
 
