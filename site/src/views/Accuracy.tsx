@@ -169,6 +169,40 @@ export function Accuracy({ lang }: { lang: Lang }) {
             </section>
           )}
 
+          {(tracking.over25 || tracking.btts) && (
+            <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <h2 style={{ fontSize: 18 }}>{t.goalsTitle}</h2>
+              <div className="mini-list">
+                {(
+                  [
+                    [t.over25, tracking.over25],
+                    [t.btts, tracking.btts],
+                  ] as const
+                ).map(([label, r]) =>
+                  r ? (
+                    <div key={label} className="mini-item" style={{ alignItems: "flex-start" }}>
+                      <span>
+                        <b>{label}</b>
+                        <br />
+                        <small className="muted">{t.baseline(f.pct(r.baseAccuracy))}</small>
+                      </span>
+                      <span style={{ textAlign: "right" }}>
+                        <b className="num" style={{ fontSize: 18 }}>
+                          {f.pct(r.accuracy)}
+                        </b>
+                        <br />
+                        <small className="muted">{t.games(f.int(r.matches))}</small>
+                      </span>
+                    </div>
+                  ) : null,
+                )}
+              </div>
+              <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                {t.goalsNote}
+              </p>
+            </section>
+          )}
+
           <section className="card card-pad">
             <div className="section-title">
               <h2 style={{ fontSize: 18 }}>{t.perLeague}</h2>

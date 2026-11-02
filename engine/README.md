@@ -50,7 +50,19 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
 - **Kasım 2026, sonradan kalibrasyon (2023-26, walk-forward, ayar yalnız önceki sezonların
   tahminleriyle; temel log loss 0,9831):** genel sıcaklık 0,9832, genel sıcaklık + sınıf kayması
   0,9832, lig başına sıcaklık 0,9842, lig başına sıcaklık + kayma 0,9858. Model zaten kalibre;
-  lig başına ayar ezberliyor. Değiştirilmedi. Maçların %25,8'i berabere bitse de
+  lig başına ayar ezberliyor. Değiştirilmedi.
+- **Kasım 2026, skor seçme kuralları (2023-26, 9.776 maç):** favori içinde en olası skor (şimdiki)
+  tam skor %11,2; tek başına en olası skor %13,3 ama maçların %65'ine 1-1 diyor ve sonuç isabeti
+  %41'e düşüyor; gol beklentisini yuvarlamak %11,4 / sonuç %48; tahmin ligi puanını (3/1) en
+  çoklamak %11,9 / %51,4 ve %11 beraberlik. Kural değiştirilmedi; skor çeşitliliği gol modelinin
+  kendisini iyileştirerek (kadro verisi) ele alınacak.
+- **Kasım 2026, değer analizi (2023-26, ortalama maç öncesi oranlar, marj %5,7):** modelin
+  "piyasadan iyi" dediği her sonuca oynamak getiriyi %-15 (eşik %0) ile %-23 (eşik %12) arasında
+  bırakıyor; model piyasadan düz olduğu için sistematik olarak zayıf tarafı seçiyor. Sitede
+  "değer var" kararı yayınlanmıyor. 2.5 alt/üst için de %-7.
+- **Kasım 2026, veri yeterliliği etiketi:** kulübü az gördüğümüz ya da sezonun ilk haftalarındaki
+  maçlar ("zayıf") daha kötü tahmin edilmiyor (log loss 0,976, "güçlü" 0,982). Etiket güvenilirlik
+  hakkında yanlış bir şey söyleyeceği için eklenmedi; güven seviyesi bu işi görüyor. Maçların %25,8'i berabere bitse de
   beraberlik neredeyse hiç en olası sonuç olmuyor: piyasa 10.300 maçın yalnız 5'inde beraberliği
   favori gösteriyor.
 
@@ -59,7 +71,8 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
 `engine/track.py` her bot koşusunda bu sezonun dondurulmuş tahminlerini sonuçlarla karşılaştırır ve
 `site/data/tracking.json`'a lig lig isabet, log loss ve piyasa log loss'u yazar. Bir ligin bu sezonki
 log loss'u testtekinden iki standart hatadan fazla kötüyse (en az 30 maç) lig "izleniyor" olur:
-başarı sayfasında görünür ve GitHub Actions koşusunda uyarı çıkar.
+başarı sayfasında görünür ve GitHub Actions koşusunda uyarı çıkar. 2.5 alt/üst ve karşılıklı gol
+için isabet ve Brier, "her maça o sezonun daha sık sonucunu söyle" çıtasıyla birlikte yazılır.
 
 ## Çalıştırma
 

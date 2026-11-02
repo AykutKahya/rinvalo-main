@@ -41,7 +41,17 @@ export interface EngineBacktest {
 export const getEngineBacktest = cache(() => read<EngineBacktest | null>("engine-backtest.json", null));
 
 /** This season's frozen predictions against results, per league (engine/track.py). */
+export interface BinaryRecord {
+  matches: number;
+  accuracy: number;
+  brier: number;
+  rate: number;
+  baseAccuracy: number;
+  baseBrier: number;
+}
 export interface Tracking {
+  over25?: BinaryRecord | null;
+  btts?: BinaryRecord | null;
   leagues: Record<string, { matches: number; accuracy: number; logloss: number; test: number | null; market: number | null; status: "ok" | "watch" | "few" }>;
 }
 export const getTracking = cache(() => read<Tracking>("tracking.json", { leagues: {} }));

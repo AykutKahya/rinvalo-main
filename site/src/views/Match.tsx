@@ -7,6 +7,7 @@ import { ConfidencePill } from "@/components/Confidence";
 import { Countdown } from "@/components/Countdown";
 import { CountUp } from "@/components/CountUp";
 import { Crest } from "@/components/Crest";
+import { FairOdds } from "@/components/FairOdds";
 import { GuessWidget } from "@/components/GuessWidget";
 import { LiveMatch } from "@/components/LiveMatch";
 import { MarketCompare } from "@/components/MarketCompare";
@@ -235,6 +236,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   {tm.scoreNote(`${p.score[0]}-${p.score[1]}`, [`${h.name}`, null, `${a.name}`][pickOf(p.p)], `${p.top[0][0]}-${p.top[0][1]}`)}
                 </p>
               )}
+              <FairOdds p={p} lang={lang} />
               <div>
                 <div className="eyebrow" style={{ marginBottom: 8 }}>
                   {tm.grid}
