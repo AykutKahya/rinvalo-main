@@ -6,7 +6,8 @@
  * (4 requests), and the line-up of every game kicking off within 75 minutes (1 request each, once).
  *
  *   tsx scripts/squads.ts   -> data/squads.json (shown on match pages)
- *                              data/lineups-history.json (kept for a future squad model)
+ *                              data/lineups-history.json, data/absent-history.json (kept for a
+ *                              squad model: who starts, who was missing)
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -174,8 +175,19 @@ async function main() {
   }
   if (lineups) save("lineups-history.json", history);
 
-  // Forget games more than two days old.
-  for (const [id, m] of Object.entries(file.matches)) if (t - Date.parse(m.kickoff) > KEEP_MS) delete file.matches[id];
+  // Forget games more than two days old, keeping their final absentee list.
+  const absentHistory = load<unknown[]>("absent-history.json", []);
+  let archived = 0;
+  for (const [id, m] of Object.entries(file.matches)) {
+    if (t - Date.parse(m.kickoff) <= KEEP_MS) continue;
+    const f = ours.find((x) => x.id === id);
+    if (m.absent && f) {
+      absentHistory.push({ fixture: id, api: m.api, kickoff: m.kickoff, league: f.league, homeTeam: f.home, awayTeam: f.away, absentHome: m.absent.home, absentAway: m.absent.away });
+      archived++;
+    }
+    delete file.matches[id];
+  }
+  if (archived) save("absent-history.json", absentHistory);
   file.updatedAt = now.toISOString();
   save("squads.json", file);
   console.log(`İlk 11: ${lineups} yeni maç. Bugünkü istek: ${file.quota.used}/${DAILY_CAP}.`);

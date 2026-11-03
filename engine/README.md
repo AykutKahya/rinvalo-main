@@ -74,6 +74,14 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
   rüzgâr (>35 km/sa), sıcak (>25 °C), soğuk (<3 °C) bayrakları; 2023-26, 9.776 maç. 1X2 log loss
   0,9843 -> 0,9847, 2.5 üst Brier 0,2426 -> 0,2428, isabet %56,9 -> %56,5: kötüleştiriyor.
   Eklenmedi; mesafe ile birlikte de (0,9846) aynı.
+- **Kasım 2026, eksik oyuncu sayısı (M2-2):** API-FOOTBALL'un 2022-25 sakat/cezalı listeleri
+  (8 lig, Portekiz yok; maçların %89'u), ileriye dönük 2023-25, 5.849 maç. İki takımın eksik
+  sayısı farkı log loss'u 0,9837'den 0,9827'ye indiriyor (-0,0010 ± 0,0004, gerçek ama küçük);
+  isabet değişmiyor (%52,4). Aynı maçlarda piyasa 0,9651: fark kapanmanın ~%5'i. "Bu hafta yeni
+  eksik" ayrımı (-0,0005) ve şüpheliler daha iyi değil; 2.5 üste katkısı yok. Oyuncunun önemi
+  bilinmeden sayı zayıf kaldığı için eklenmedi: bot ilk 11'leri ve eksik listelerini
+  (`lineups-history.json`, `absent-history.json`) biriktiriyor; önem ağırlıklı eksik bu sezon
+  verisiyle test edilecek.
 
 ## Canlı izleme
 

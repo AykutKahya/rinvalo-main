@@ -333,6 +333,8 @@ const SPELLINGS: Record<string, string> = {
   "KF Egnatia": "egnatia",
   "CSU Craiova": "universitatea-craiova",
   "Ajax Amsterdam": "ajax",
+  "Gazişehir Gaziantep": "gaziantep",
+  "BB Bodrumspor": "bodrumspor",
   "Red Star Belgrade": "crvena-zvezda",
   "KAA Gent": "gent",
   AGF: "agf-aarhus",
