@@ -69,8 +69,11 @@ Güven: yüksek %65 (2.247 maç), orta %49 (1.786), düşük %36 (1.333).
   geocoding) ile iki stat arası km; 2023-26, 9.776 maç, ileriye dönük. log(km) eklemek 1X2 log
   loss'u 0,98430'dan 0,98416'ya indiriyor (fark -0,00014 ± 0,00029, gürültü); 800 km üstü bayrağı
   da öyle. Yalnız Süper Lig için: -0,0014 ± 0,0018 (1.028 maç), anlamsız. Eklenmedi.
-- **Hava durumu (M3):** Open-Meteo arşivinin ücretsiz günlük sınırı, beş yıllık seri isteklerinde
-  13 kulüpten sonra doldu; test henüz yapılamadı.
+- **Kasım 2026, hava durumu (M3):** ev sahibinin stadında maç günü yağış, en yüksek rüzgâr ve
+  ortalama sıcaklık (NASA POWER, 13 kulüp Open-Meteo), ayrıca şiddetli yağmur (>5 mm), sert
+  rüzgâr (>35 km/sa), sıcak (>25 °C), soğuk (<3 °C) bayrakları; 2023-26, 9.776 maç. 1X2 log loss
+  0,9843 -> 0,9847, 2.5 üst Brier 0,2426 -> 0,2428, isabet %56,9 -> %56,5: kötüleştiriyor.
+  Eklenmedi; mesafe ile birlikte de (0,9846) aynı.
 
 ## Canlı izleme
 
