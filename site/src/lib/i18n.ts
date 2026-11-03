@@ -195,6 +195,11 @@ const TR = {
     coach: (n: string) => `T.D. ${n}`,
     note: "Sakat ve cezalı oyuncular maç gününe yakın güncellenir; ilk 11'ler maçtan yaklaşık bir saat önce açıklanınca burada görünür.",
     pos: { G: "KL", D: "DF", M: "OS", F: "FV" },
+    count: (h: string, n: number, a: string, m: number) => `Eksik oyuncu: ${h} ${n}, ${a} ${m}.`,
+    lean: (t: string) => `Kadro durumu ${t} lehine.`,
+    doubts: (t: string, names: string) => `${t} tarafında şüpheli: ${names}.`,
+    banned: (t: string, names: string) => `${t}: ${names} cezalı.`,
+    lineupsIn: "İlk 11'ler açıklandı, aşağıda.",
     reason: (r: string) => {
       if (/suspend|red card|yellow card/i.test(r)) return "cezalı";
       if (/illness|sick|virus/i.test(r)) return "hastalık";
@@ -790,6 +795,11 @@ const EN: Dict = {
     coach: (n) => `Coach ${n}`,
     note: "Injuries and suspensions are refreshed close to match day; the line-ups appear here once announced, about an hour before kick-off.",
     pos: { G: "GK", D: "DF", M: "MF", F: "FW" },
+    count: (h, n, a, m) => `Absentees: ${h} ${n}, ${a} ${m}.`,
+    lean: (t) => `The squad situation favours ${t}.`,
+    doubts: (t, names) => `Doubtful for ${t}: ${names}.`,
+    banned: (t, names) => `${t}: ${names} suspended.`,
+    lineupsIn: "The line-ups are out, see below.",
     reason: (r) => r.toLowerCase(),
   },
   match: {

@@ -74,7 +74,25 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
   const p = m.prediction;
   const finished = m.status === "finished";
   const actual: [number, number] | null = finished ? [m.hg!, m.ag!] : null;
-  const reasons = lang === "en" ? p?.reasonsEn : p?.reasons;
+  // Absentees from the squad feed, next to the engine's reasons (they do not change the prediction).
+  const sq = finished ? undefined : getSquads()[m.id];
+  const squadLines: string[] = [];
+  if (sq?.absent) {
+    const ts = dict(lang).squads;
+    const out = (s: "home" | "away") => sq.absent![s].filter((x) => x.kind === "out");
+    const [ho, ao] = [out("home"), out("away")];
+    squadLines.push(ts.count(h.name, ho.length, a.name, ao.length));
+    // Three or more extra absentees: a small but real edge in the backtest (engine/README.md).
+    if (Math.abs(ho.length - ao.length) >= 3) squadLines.push(ts.lean(ho.length > ao.length ? a.name : h.name));
+    for (const [s, t] of [["home", h.name], ["away", a.name]] as const) {
+      const banned = sq.absent[s].filter((x) => /suspend|red card|yellow card/i.test(x.reason)).map((x) => x.name);
+      if (banned.length) squadLines.push(ts.banned(t, banned.join(", ")));
+      const doubts = sq.absent[s].filter((x) => x.kind === "doubt").map((x) => x.name);
+      if (doubts.length && doubts.length <= 4) squadLines.push(ts.doubts(t, doubts.join(", ")));
+    }
+  }
+  if (sq?.lineups) squadLines.push(dict(lang).squads.lineupsIn);
+  const reasons = [...((lang === "en" ? p?.reasonsEn : p?.reasons) ?? []), ...squadLines];
 
   const table = leagueTable(m.league);
   const hi = table.findIndex((r) => r.team === m.home);
