@@ -21,6 +21,20 @@ export const getPredictions = cache(() => read<PredictionsFile>("predictions.jso
 export const getSimulation = cache(() => read<SimulationFile>("simulation.json", { updatedAt: "", runs: 0, leagues: {} }));
 export const getHistory = cache(() => read<HistoryFile>("history.json", { source: "", matches: [] }));
 
+/** Absentees and confirmed line-ups by fixture id, written by scripts/squads.ts. */
+export interface SquadPlayer {
+  id: number;
+  name: string;
+  number: number | null;
+  pos: string | null;
+}
+export interface SquadEntry {
+  kickoff: string;
+  absent?: Record<"home" | "away", { name: string; kind: "out" | "doubt"; reason: string }[]>;
+  lineups?: Record<"home" | "away", { formation: string | null; coach: string | null; xi: SquadPlayer[]; bench: SquadPlayer[] }>;
+}
+export const getSquads = cache(() => read<{ matches: Record<string, SquadEntry> }>("squads.json", { matches: {} }).matches);
+
 export const getMarket = cache(() => read<Record<string, [number, number, number]>>("market.json", {}));
 
 export interface Scores {

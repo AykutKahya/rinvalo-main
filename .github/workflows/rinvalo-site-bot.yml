@@ -2,7 +2,7 @@
 # lives in Supabase Storage, not in git: the bot pulls it, updates it, uploads what changed and
 # asks Vercel for a new build through a deploy hook. It never pushes to the repository.
 #
-# Secrets: RINVALO_UPLOAD_TOKEN, VERCEL_DEPLOY_HOOK. The Supabase address and publishable key below
+# Secrets: RINVALO_UPLOAD_TOKEN, VERCEL_DEPLOY_HOOK, API_FOOTBALL_KEY. The Supabase address and publishable key below
 # are public anyway (the site ships them to every browser).
 # Cost: public repository, so GitHub Actions minutes are free.
 name: Rinvalo site bot
@@ -73,6 +73,14 @@ jobs:
         run: |
           node scripts/pull-data.mjs --strict
           node scripts/push-data.mjs snapshot "$RUNNER_TEMP/before"
+
+      - name: Absentees and line-ups (API-FOOTBALL)
+        # Early in the run so a line-up published an hour before kick-off is caught; stays inside
+        # the free plan (6.5 s apart, at most 90 requests a day) and never fails the run.
+        continue-on-error: true
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: npx tsx scripts/squads.ts
 
       - name: Update data
         env:

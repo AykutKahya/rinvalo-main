@@ -185,6 +185,33 @@ const TR = {
     seasonHits: (n: number) => `Bu sezon ${n} maçta isabet`,
     highHits: "Yüksek güvenli tahminlerde isabet",
   },
+  squads: {
+    absent: "Eksikler",
+    lineups: "İlk 11'ler",
+    confirmed: "Açıklanan kadrolar",
+    out: "Oynamaz",
+    doubt: "Şüpheli",
+    none: "Bildirilen eksik yok",
+    coach: (n: string) => `T.D. ${n}`,
+    note: "Sakat ve cezalı oyuncular maç gününe yakın güncellenir; ilk 11'ler maçtan yaklaşık bir saat önce açıklanınca burada görünür.",
+    pos: { G: "KL", D: "DF", M: "OS", F: "FV" },
+    reason: (r: string) => {
+      if (/suspend|red card|yellow card/i.test(r)) return "cezalı";
+      if (/illness|sick|virus/i.test(r)) return "hastalık";
+      if (/personal|family/i.test(r)) return "özel neden";
+      const part = (
+        [
+          [/knee/i, "diz"], [/ankle/i, "ayak bileği"], [/hamstring/i, "arka adale"], [/thigh/i, "uyluk"], [/groin/i, "kasık"],
+          [/calf/i, "baldır"], [/achilles/i, "aşil"], [/foot|toe/i, "ayak"], [/hip/i, "kalça"], [/back/i, "sırt"],
+          [/shoulder/i, "omuz"], [/head|concussion/i, "kafa"], [/leg/i, "bacak"], [/muscle/i, "kas"], [/ligament/i, "bağ"],
+        ] as const
+      ).find(([re]) => re.test(r))?.[1];
+      if (part) return `${part} sakatlığı`;
+      if (/injur|knock/i.test(r)) return "sakatlık";
+      if (/doubt|question|fitness/i.test(r)) return "durumu belirsiz";
+      return r;
+    },
+  },
   match: {
     title: (h: string, a: string) => `${h} – ${a} tahmini`,
     description: (h: string, a: string, s: string, ph: string, pd: string, pa: string) =>
@@ -752,6 +779,18 @@ const EN: Dict = {
     all: "All",
     seasonHits: (n) => `Hit rate over ${n} games this season`,
     highHits: "Hit rate on high-confidence picks",
+  },
+  squads: {
+    absent: "Absentees",
+    lineups: "Starting line-ups",
+    confirmed: "Confirmed teams",
+    out: "Out",
+    doubt: "Doubt",
+    none: "No absentees reported",
+    coach: (n) => `Coach ${n}`,
+    note: "Injuries and suspensions are refreshed close to match day; the line-ups appear here once announced, about an hour before kick-off.",
+    pos: { G: "GK", D: "DF", M: "MF", F: "FW" },
+    reason: (r) => r.toLowerCase(),
   },
   match: {
     title: (h, a) => `${h} vs ${a} prediction`,

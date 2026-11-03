@@ -288,6 +288,18 @@ main { padding-block: 20px 48px; }
 .mini-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
 .mini-item:last-child { border-bottom: 0; }
 .mini-item:hover .mi-t { color: var(--accent); }
+.squads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.squad-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.xi, .absent { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+.xi li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 6px; align-items: baseline; }
+.xi-n { color: var(--muted); font-size: 12px; text-align: right; }
+.xi-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xi-pos { font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.absent li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.absent li small { flex-basis: 100%; padding-left: 2px; }
+.absent-k { font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 1px 6px; border-radius: 5px; background: var(--miss-soft); color: var(--miss); }
+.absent-k.doubt { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+@media (max-width: 420px) { .squads { grid-template-columns: 1fr; } }
 .pair { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 600; }
 .pair-t { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 0 1 auto; }
 .pair-n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }

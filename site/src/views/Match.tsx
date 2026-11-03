@@ -18,7 +18,7 @@ import { NotifyButton } from "@/components/NotifyButton";
 import { ShareButton } from "@/components/ShareButton";
 import { Stakes, TieOdds } from "@/components/Stakes";
 import { Form, StandingsTable } from "@/components/StandingsTable";
-import { getMarket, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
+import { getMarket, getSquads, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
@@ -28,6 +28,7 @@ import { stakesOf } from "@/lib/stakes";
 import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
 import { TeamPair } from "@/components/TeamPair";
+import { Squads } from "@/components/Squads";
 
 const DAY = 86_400_000;
 
@@ -255,6 +256,8 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
               <b>{tm.none}</b>
             </section>
           )}
+
+          {getSquads()[m.id] && <Squads entry={getSquads()[m.id]} home={m.home} away={m.away} lang={lang} />}
 
           <section className="card card-pad">
             <div className="section-title">
