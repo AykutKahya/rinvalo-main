@@ -288,6 +288,13 @@ main { padding-block: 20px 48px; }
 .mini-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
 .mini-item:last-child { border-bottom: 0; }
 .mini-item:hover .mi-t { color: var(--accent); }
+.pair { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 600; }
+.pair-t { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 0 1 auto; }
+.pair-n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pair-sep { color: var(--muted); flex: none; }
+.pair-s { flex: none; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: var(--card-2); }
+.mini-item .pair { flex: 1 1 auto; }
+.mini-item:hover .pair-n { color: var(--accent); }
 .mi-t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .acc-box { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--good-soft); color: var(--good); font-weight: 600; font-size: 13.5px; }
 .acc-box b { font-size: 26px; line-height: 1; font-family: var(--font-num); }

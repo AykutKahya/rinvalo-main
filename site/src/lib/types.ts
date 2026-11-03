@@ -23,7 +23,7 @@ export interface Fixture {
   hg: number | null;
   ag: number | null;
   /** Where the score came from. */
-  source: "thesportsdb" | "openfootball" | "manual" | null;
+  source: "thesportsdb" | "openfootball" | "espn" | "manual" | null;
 }
 
 export interface SourceStatus {

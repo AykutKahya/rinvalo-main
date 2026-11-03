@@ -8,6 +8,7 @@ import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
 import { disagreements, shocks, upsetRisks } from "@/lib/picks";
 import { team } from "@/lib/teams";
+import { TeamPair } from "@/components/TeamPair";
 
 export function analysisMetadata(lang: Lang): Metadata {
   const t = dict(lang).analysis;
@@ -63,11 +64,7 @@ export function Analysis({ lang }: { lang: Lang }) {
           <div className="mini-list">
             {risks.map(({ m, dog }) => (
               <div key={m.id} className="mini-item">
-                <span className="tname">
-                  <Crest slug={m.home} size="sm" />
-                  <Crest slug={m.away} size="sm" />
-                  {team(m.home).short} – {team(m.away).short}
-                </span>
+                <TeamPair home={m.home} away={m.away} lang={lang} />
                 <span className="muted" style={{ fontSize: 12.5 }}>
                   {t.upset} <b className="num tone-warn">{f.pct(dog)}</b>
                 </span>

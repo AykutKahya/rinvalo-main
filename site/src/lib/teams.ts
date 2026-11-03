@@ -331,6 +331,13 @@ const SPELLINGS: Record<string, string> = {
   "Sint-Truidense": "sint-truiden",
   "CS U Craiova": "universitatea-craiova",
   "KF Egnatia": "egnatia",
+  "CSU Craiova": "universitatea-craiova",
+  "Ajax Amsterdam": "ajax",
+  "Red Star Belgrade": "crvena-zvezda",
+  "KAA Gent": "gent",
+  AGF: "agf-aarhus",
+  "Inter D'Escaldes": "inter-club-d-escaldes",
+  "F.C. København": "copenhagen",
 };
 for (const [name, slug] of Object.entries(SPELLINGS)) if (!BY_ALIAS.has(normalizeName(name))) BY_ALIAS.set(normalizeName(name), slug);
 

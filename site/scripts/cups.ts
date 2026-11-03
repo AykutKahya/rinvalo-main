@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { CUP_ROUNDS, CUPS, TSDB_SEASON, type Cup } from "../src/lib/leagues";
 import { normalizeName, resolveTeam } from "../src/lib/teams";
 import type { Fixture } from "../src/lib/types";
+import { ESPN_LEAGUE, gamesOn, leaguePhase } from "./sources/espn";
 import { fetchEvents, status, type TsdbEvent } from "./sources/thesportsdb";
 
 const DATA = join(import.meta.dirname, "../data");
@@ -118,6 +119,86 @@ async function downloadBadges() {
   if (n) console.log(`${n} kupa logosu indirildi`);
 }
 
+/** League-phase match days of each cup (UTC weekday: 2 Tuesday ... 4 Thursday) and number of rounds. */
+const PHASE: Record<string, { days: number[]; rounds: number }> = {
+  ucl: { days: [2, 3], rounds: 8 },
+  uel: { days: [3, 4], rounds: 8 },
+  uecl: { days: [4], rounds: 6 },
+};
+const PER_ROUND = 18;
+
+/**
+ * Fill league-phase games TheSportsDB missed from ESPN. Only for a cup with a round short of its 18
+ * games, and only on match days we do not already hold complete; days run in order so each new
+ * game's round is one more than the games either club has already played.
+ */
+async function fillFromEspn(byId: Map<string, Fixture>) {
+  const today = new Date().toISOString().slice(0, 10);
+  for (const cup of CUPS) {
+    const ph = PHASE[cup.code];
+    if (!ph || !ESPN_LEAGUE[cup.code]) continue;
+    const mine = () => [...byId.values()].filter((f) => f.league === cup.code && f.round >= 1 && f.round <= ph.rounds);
+    const short = Array.from({ length: ph.rounds }, (_, i) => i + 1).some((r) => mine().filter((f) => f.round === r).length < PER_ROUND);
+    if (!short) continue;
+    try {
+      const window = await leaguePhase(cup.code);
+      if (!window) continue;
+      const until = new Date(Date.parse(today) + 10 * 86_400_000).toISOString().slice(0, 10);
+      let added = 0;
+      // Only clubs this cup already lists: an unfamiliar spelling must not become a second club.
+      const clubs = new Set([...byId.values()].filter((f) => f.league === cup.code && f.round >= 1 && f.round <= ph.rounds).flatMap((f) => [f.home, f.away]));
+      const club = (name: string) => {
+        const slug = resolveTeam(name) ?? byName.get(normalizeName(name)) ?? null;
+        return slug && clubs.has(slug) ? slug : null;
+      };
+      const unknown = new Set<string>();
+      for (let t = Date.parse(window[0]); t <= Date.parse(window[1]); t += 86_400_000) {
+        const day = new Date(t).toISOString().slice(0, 10);
+        if (day > until || !ph.days.includes(new Date(t).getUTCDay())) continue;
+        const held = mine().filter((f) => f.kickoff.slice(0, 10) === day);
+        if (held.length >= PER_ROUND && held.every((f) => f.status === "finished")) continue;
+        for (const g of await gamesOn(cup.code, day)) {
+          const home = club(g.home);
+          const away = club(g.away);
+          if (!home || !away) {
+            for (const [n, s] of [[g.home, home], [g.away, away]] as const) if (!s) unknown.add(n);
+            continue;
+          }
+          const st: Fixture["status"] = g.completed ? "finished" : g.state === "in" ? "live" : "scheduled";
+          const known = mine().find((f) => f.home === home && f.away === away);
+          if (known) {
+            // Only fill a result the main source has not given.
+            if (st === "finished" && known.status !== "finished") byId.set(known.id, { ...known, status: "finished", hg: g.hg, ag: g.ag, source: "espn" });
+            continue;
+          }
+          const before = (team: string) => mine().filter((f) => (f.home === team || f.away === team) && f.kickoff < g.kickoff.toISOString()).length;
+          const round = Math.max(before(home), before(away)) + 1;
+          if (round > ph.rounds) continue;
+          const id = `${cup.code}-${round}-${home}-${away}`;
+          byId.set(id, {
+            id,
+            league: cup.code as Fixture["league"],
+            round,
+            kickoff: g.kickoff.toISOString(),
+            home,
+            away,
+            venue: g.venue,
+            status: st,
+            hg: st === "scheduled" ? null : g.hg,
+            ag: st === "scheduled" ? null : g.ag,
+            source: st === "finished" ? "espn" : null,
+          });
+          added++;
+        }
+      }
+      if (added) console.log(`[${cup.code}] ESPN'den ${added} eksik maç eklendi`);
+      if (unknown.size) console.log(`[${cup.code}] ESPN'de tanınmayan takım adları (maçları atlandı): ${[...unknown].join(", ")}`);
+    } catch (err) {
+      console.error(`[${cup.code}] ESPN alınamadı: ${(err as Error).message}`);
+    }
+  }
+}
+
 async function current() {
   const prev = load<CupsFile>("cups.json", { updatedAt: "", fixtures: [] });
   const byId = new Map(prev.fixtures.map((f) => [f.id, f]));
@@ -150,6 +231,7 @@ async function current() {
     }
     console.log(`[${cup.code}] ${count} maç`);
   }
+  await fillFromEspn(byId);
   save("cups.json", { updatedAt: new Date().toISOString(), fixtures: [...byId.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id.localeCompare(b.id)) });
   save("cup-teams.json", Object.fromEntries(Object.entries(cupTeams).sort()));
   await downloadBadges();

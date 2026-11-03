@@ -13,6 +13,7 @@ import { siteUrl } from "@/lib/site";
 import { competitions } from "@/lib/leagues";
 import { closestPicks, lite, matchOfTheWeek, surestPicks } from "@/lib/picks";
 import { team } from "@/lib/teams";
+import { TeamPair } from "@/components/TeamPair";
 
 const DAY = 86_400_000;
 
@@ -118,13 +119,13 @@ export function Home({ lang }: { lang: Lang }) {
           <div className="mini-list">
             {surest.map((m) => {
               const i = m.prediction!.p.indexOf(Math.max(...m.prediction!.p));
-              const who = i === 0 ? name(m.home) : i === 2 ? name(m.away) : t.draw;
+              const who = i === 0 ? team(m.home).short : i === 2 ? team(m.away).short : "X";
               return (
                 <Link key={m.id} href={p.matchOf(m.id)} className="mini-item">
-                  <span className="mi-t">
-                    {team(m.home).short} – {team(m.away).short} · {who}
+                  <TeamPair home={m.home} away={m.away} lang={lang} />
+                  <span className="pill good" title={i === 0 ? name(m.home) : i === 2 ? name(m.away) : t.draw}>
+                    {who} {f.pct(m.prediction!.p[i])}
                   </span>
-                  <span className="pill good">{f.pct(m.prediction!.p[i])}</span>
                 </Link>
               );
             })}
@@ -138,9 +139,7 @@ export function Home({ lang }: { lang: Lang }) {
           <div className="mini-list">
             {closest.map((m) => (
               <Link key={m.id} href={p.matchOf(m.id)} className="mini-item">
-                <span className="mi-t">
-                  {name(m.home)} – {name(m.away)}
-                </span>
+                <TeamPair home={m.home} away={m.away} lang={lang} />
                 <span className="num muted" style={{ fontSize: 12 }}>
                   {m.prediction!.p.map((v) => Math.round(v * 100)).join("·")}
                 </span>

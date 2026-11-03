@@ -10,6 +10,7 @@ import { pickOf } from "@/lib/model";
 import { matchOfTheWeek, recentResults, upcoming } from "@/lib/picks";
 import type { TableRow } from "@/lib/table";
 import { team } from "@/lib/teams";
+import { TeamPair } from "@/components/TeamPair";
 import s from "./headlines.module.css";
 
 const anton = Anton({ subsets: ["latin", "latin-ext"], weight: "400", variable: "--font-anton", display: "swap" });
@@ -211,9 +212,7 @@ export function Headlines({ lang }: { lang: Lang }) {
                   {recent.map((m) => (
                     <li key={m.id}>
                       <Link href={path.matchOf(m.id)}>
-                        <span>
-                          {name(m.home)} {m.hg}-{m.ag} {name(m.away)}
-                        </span>
+                        <TeamPair home={m.home} away={m.away} lang={lang} score={`${m.hg}-${m.ag}`} />
                         <span className={m.hit ? s.ok : s.no}>{m.exact ? t.exact : m.hit ? t.hit : t.miss}</span>
                       </Link>
                     </li>
@@ -304,7 +303,7 @@ export function Headlines({ lang }: { lang: Lang }) {
                     </div>
                     <div className={s.line}>
                       <div className={s.nm} lang={nameLang(m.league)}>
-                        {name(m.home)} – {name(m.away)}
+                        <TeamPair home={m.home} away={m.away} lang={lang} />
                       </div>
                       <div className={s.sc}>
                         {p.score[0]}-{p.score[1]}

@@ -11,6 +11,7 @@ import { competitions, CUP_ROUNDS, cupByCode, leagueByCode } from "@/lib/leagues
 import { pickOf } from "@/lib/model";
 import { siteUrl } from "@/lib/site";
 import { team } from "@/lib/teams";
+import { TeamPair } from "@/components/TeamPair";
 
 const DAY = 86_400_000;
 
@@ -157,7 +158,9 @@ export function Week({ code, round: raw, lang }: { code: string; round: string; 
             m ? (
               <Link key={label} href={p.matchOf(m.id)} className="card week-card">
                 <small>{label}</small>
-                <b>{name(m)}</b>
+                <b>
+                  <TeamPair home={m.home} away={m.away} lang={lang} />
+                </b>
                 <span>{detail(m)}</span>
               </Link>
             ) : null,

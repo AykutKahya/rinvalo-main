@@ -39,12 +39,13 @@
 .bignums .hot b { color: var(--red); }
 .bignums span { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.rail { padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--ink); color: #fff; }
+.rail { min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--ink); color: #fff; }
 .rail h2 { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 32px; line-height: 1; margin: 0; letter-spacing: 0; }
 .pct { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(80px, 11vw, 112px); line-height: 0.85; color: var(--yel); }
 .rail p { margin: 0; font-size: 14px; color: #ddd; }
 .rail ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
-.rail li a { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 7px; }
+.rail li a { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 7px; min-width: 0; }
+.rail li a > span:last-child { flex: none; }
 .rail li a:hover span:first-child { text-decoration: underline; }
 .ok { color: #7be08f; font-weight: 800; white-space: nowrap; }
 .no { color: #ff8a80; font-weight: 800; white-space: nowrap; }

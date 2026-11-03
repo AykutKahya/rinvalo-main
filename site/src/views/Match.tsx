@@ -27,6 +27,7 @@ import { siteUrl } from "@/lib/site";
 import { stakesOf } from "@/lib/stakes";
 import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
+import { TeamPair } from "@/components/TeamPair";
 
 const DAY = 86_400_000;
 
@@ -283,9 +284,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
               <div className="mini-list">
                 {h2h.map((x) => (
                   <div key={x.date + x.home} className="mini-item">
-                    <span className="mi-t">
-                      {team(x.home, lang).name} – {team(x.away, lang).name}
-                    </span>
+                    <TeamPair home={x.home} away={x.away} lang={lang} />
                     <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
                       <span className="muted" style={{ fontSize: 12 }}>
                         {f.fullDate(x.date)}
