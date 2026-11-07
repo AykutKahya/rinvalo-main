@@ -92,7 +92,10 @@ if (mode === "snapshot") {
   // Upload the small files first and the big ones last; the site reads them as one set at build time.
   changed.sort((a, b) => readFileSync(join("data", a)).length - readFileSync(join("data", b)).length);
   // Never publish a file that lost a big part of its records; the site keeps the last good set.
-  const lost = process.env.ALLOW_SHRINK === "1" ? [] : shrunk(changed);
+  // A new season starts with short files on purpose.
+  const seasonOf = (d) => { try { return JSON.parse(readFileSync(join(d, "season.json"), "utf8")).season; } catch { return null; } };
+  const rolled = seasonOf(join(dir, "data")) !== seasonOf("data");
+  const lost = process.env.ALLOW_SHRINK === "1" || rolled ? [] : shrunk(changed);
   if (lost.length) {
     console.error(`Yükleme durduruldu, kayıt sayısı düştü (bilerek ise ALLOW_SHRINK=1):\n  ${lost.join("\n  ")}`);
     process.exit(1);

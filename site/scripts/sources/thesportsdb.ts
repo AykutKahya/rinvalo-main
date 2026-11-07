@@ -3,7 +3,7 @@
  * Ücretsiz katman dakikada ~30 isteğe izin verir; istekler arasında bekleriz.
  */
 import type { League } from "../../src/lib/leagues";
-import { TSDB_SEASON } from "../../src/lib/leagues";
+import { fixtureId, TSDB_SEASON } from "../../src/lib/leagues";
 import { resolveTeam } from "../../src/lib/teams";
 import type { Fixture, FixtureStatus } from "../../src/lib/types";
 
@@ -94,7 +94,7 @@ export async function fetchRound(league: League, round: number): Promise<RoundRe
     const hasScore = e.intHomeScore !== null && e.intHomeScore !== "" && e.intAwayScore !== null && e.intAwayScore !== "";
     const st = status(e, hasScore, kickoff.getTime());
     fixtures.push({
-      id: `${home}-${away}`,
+      id: fixtureId(home, away),
       league: league.code,
       round: Number(e.intRound ?? round) || round,
       kickoff: kickoff.toISOString(),

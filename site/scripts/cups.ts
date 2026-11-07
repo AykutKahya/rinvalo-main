@@ -9,7 +9,7 @@
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CUP_ROUNDS, CUPS, TSDB_SEASON, type Cup } from "../src/lib/leagues";
+import { CUP_ROUNDS, CUPS, fixtureId, SEASON, TSDB_SEASON, type Cup } from "../src/lib/leagues";
 import { normalizeName, resolveTeam } from "../src/lib/teams";
 import type { Fixture } from "../src/lib/types";
 import { ESPN_LEAGUE, gamesOn, leaguePhase } from "./sources/espn";
@@ -19,6 +19,7 @@ const DATA = join(import.meta.dirname, "../data");
 const PUBLIC = join(import.meta.dirname, "../public");
 
 export interface CupsFile {
+  season?: string;
   updatedAt: string;
   fixtures: Fixture[];
 }
@@ -174,7 +175,7 @@ async function fillFromEspn(byId: Map<string, Fixture>) {
           const before = (team: string) => mine().filter((f) => (f.home === team || f.away === team) && f.kickoff < g.kickoff.toISOString()).length;
           const round = Math.max(before(home), before(away)) + 1;
           if (round > ph.rounds) continue;
-          const id = `${cup.code}-${round}-${home}-${away}`;
+          const id = fixtureId(cup.code, round, home, away);
           byId.set(id, {
             id,
             league: cup.code as Fixture["league"],
@@ -201,6 +202,19 @@ async function fillFromEspn(byId: Map<string, Fixture>) {
 
 async function current() {
   const prev = load<CupsFile>("cups.json", { updatedAt: "", fixtures: [] });
+  if ((prev.season ?? "2026-27") !== SEASON) {
+    // New season: last season's results join the archive the cup model learns from.
+    const old = prev.season ?? "2026-27";
+    const hist = load<CupHistoryRow[]>("cups-history.json", []);
+    const seen = new Set(hist.map((r) => `${r[0]}|${r[1]}|${r[2]}|${r[3]}|${r[4]}`));
+    for (const f of prev.fixtures) {
+      const row: CupHistoryRow = [f.league, old, f.kickoff.slice(0, 10), f.home, f.away, f.hg!, f.ag!];
+      if (f.status === "finished" && f.hg !== null && f.ag !== null && !seen.has(row.slice(0, 5).join("|"))) hist.push(row);
+    }
+    save("cups-history.json", hist);
+    console.log(`${old} kupa sezonu arşivlendi; ${SEASON} başlıyor.`);
+    prev.fixtures = [];
+  }
   const byId = new Map(prev.fixtures.map((f) => [f.id, f]));
   for (const cup of CUPS) {
     let count = 0;
@@ -210,7 +224,7 @@ async function current() {
       const away = teamOf(e.strAwayTeam, e.strAwayTeamBadge);
       const hasScore = e.intHomeScore !== null && e.intHomeScore !== "" && e.intAwayScore !== null && e.intAwayScore !== "";
       const st = status(e, hasScore, kickoff.getTime());
-      const id = `${cup.code}-${round}-${home}-${away}`;
+      const id = fixtureId(cup.code, round, home, away);
       const old = byId.get(id);
       const f: Fixture = {
         id,
@@ -232,7 +246,7 @@ async function current() {
     console.log(`[${cup.code}] ${count} maç`);
   }
   await fillFromEspn(byId);
-  save("cups.json", { updatedAt: new Date().toISOString(), fixtures: [...byId.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id.localeCompare(b.id)) });
+  save("cups.json", { season: SEASON, updatedAt: new Date().toISOString(), fixtures: [...byId.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff) || a.id.localeCompare(b.id)) });
   save("cup-teams.json", Object.fromEntries(Object.entries(cupTeams).sort()));
   await downloadBadges();
 }

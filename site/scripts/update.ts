@@ -10,7 +10,7 @@
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { LEAGUES, SEASON, type League } from "../src/lib/leagues";
+import { LEAGUES, SEASON, type League, type LeagueCode } from "../src/lib/leagues";
 import { fit, predict, type ModelMatch } from "../src/lib/model";
 import type { Fixture, HistoryFile, OverridesFile, PredictionsFile, SeasonFile } from "../src/lib/types";
 import { fetchOpenfootball } from "./sources/openfootball";
@@ -34,6 +34,21 @@ const history = load<HistoryFile>("history.json", { source: "", matches: [] });
 const season = load<SeasonFile>("season.json", { season: SEASON, updatedAt: "", sources: {}, fixtures: [] });
 const overrides = load<OverridesFile>("overrides.json", { results: {}, kickoffs: {}, postponed: [] });
 const predictions = load<PredictionsFile>("predictions.json", { model: "", predictions: {} });
+
+if (season.season && season.season !== SEASON) {
+  // New season: last season's results move to history.json (head-to-head, form) and the
+  // fixture list starts empty, so old games never mix into the new tables.
+  const seen = new Set(history.matches.map((m) => `${m[0]}|${m[1]}|${m[3]}|${m[4]}`));
+  let moved = 0;
+  for (const f of season.fixtures) {
+    if (f.status !== "finished" || f.hg === null || f.ag === null || seen.has(`${f.league}|${season.season}|${f.home}|${f.away}`)) continue;
+    history.matches.push([f.league as LeagueCode, season.season, f.kickoff.slice(0, 10), f.home, f.away, f.hg, f.ag]);
+    moved++;
+  }
+  save("history.json", history);
+  console.log(`${season.season} arşivlendi (${moved} maç); ${SEASON} başlıyor.`);
+  Object.assign(season, { season: SEASON, sources: {}, fixtures: [] });
+}
 
 const byId = new Map(season.fixtures.map((f) => [f.id, f]));
 const badgeUrls = new Map<string, string>();

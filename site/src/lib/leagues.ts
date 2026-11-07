@@ -1,3 +1,16 @@
+/** The season the site shows. Changing it starts a new season; the bot archives the old one. */
+export const SEASON = "2026-27";
+export const TSDB_SEASON = `${SEASON.slice(0, 4)}-20${SEASON.slice(5)}`;
+
+/**
+ * Fixture ids carry the season from 2027-28 on, so a pairing that repeats next season gets a new
+ * id. This season's ids stay as they are: match links and saved picks use them.
+ */
+export function fixtureId(...parts: (string | number)[]): string {
+  const id = parts.join("-");
+  return SEASON === "2026-27" ? id : `${id}-${SEASON}`;
+}
+
 export type LeagueCode = "super-lig" | "premier-league" | "la-liga" | "serie-a" | "bundesliga" | "ligue-1" | "eredivisie" | "primeira-liga" | "championship";
 
 export interface League {
@@ -35,7 +48,7 @@ export const LEAGUES: League[] = [
     csv: "E0",
     tsdb: 4328,
     rounds: 38,
-    openfootball: "england/master/2026-27/1-premierleague.txt",
+    openfootball: `england/master/${SEASON}/1-premierleague.txt`,
     zones: { europe: 4, relegation: 3 },
     accent: "#3d195b",
   },
@@ -46,7 +59,7 @@ export const LEAGUES: League[] = [
     csv: "SP1",
     tsdb: 4335,
     rounds: 38,
-    openfootball: "espana/master/2026-27/1-liga.txt",
+    openfootball: `espana/master/${SEASON}/1-liga.txt`,
     zones: { europe: 4, relegation: 3 },
     accent: "#ee8707",
   },
@@ -57,7 +70,7 @@ export const LEAGUES: League[] = [
     csv: "I1",
     tsdb: 4332,
     rounds: 38,
-    openfootball: "italy/master/2026-27/1-seriea.txt",
+    openfootball: `italy/master/${SEASON}/1-seriea.txt`,
     zones: { europe: 4, relegation: 3 },
     accent: "#008fd7",
   },
@@ -68,7 +81,7 @@ export const LEAGUES: League[] = [
     csv: "D1",
     tsdb: 4331,
     rounds: 34,
-    openfootball: "deutschland/master/2026-27/1-bundesliga.txt",
+    openfootball: `deutschland/master/${SEASON}/1-bundesliga.txt`,
     zones: { europe: 4, relegation: 2 },
     accent: "#d20515",
   },
@@ -112,15 +125,13 @@ export const LEAGUES: League[] = [
     csv: "E1",
     tsdb: 4329,
     rounds: 46,
-    openfootball: "england/master/2026-27/2-championship.txt",
+    openfootball: `england/master/${SEASON}/2-championship.txt`,
     // Top 2 go up automatically; "europe" is the promotion line here.
     zones: { europe: 2, relegation: 3 },
     accent: "#1d2b6b",
   },
 ];
 
-export const SEASON = "2026-27";
-export const TSDB_SEASON = "2026-2027";
 
 export function leagueByCode(code: string): League | undefined {
   return LEAGUES.find((l) => l.code === code);

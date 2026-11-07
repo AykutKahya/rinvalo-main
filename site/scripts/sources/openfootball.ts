@@ -1,3 +1,4 @@
+import { fixtureId } from "../../src/lib/leagues";
 /**
  * openfootball (GitHub'da açık veri, anahtar yok). Yalnız yedek olarak kullanılır: ana kaynakta
  * skoru gelmeyen bitmiş maçların sonucunu doldurur. Süper Lig dosyası yoktur.
@@ -21,7 +22,7 @@ export function parseOpenfootball(text: string): OpenfootballResult[] {
     const home = resolveTeam(m[1].trim());
     const away = resolveTeam(m[2].trim());
     if (!home || !away) continue;
-    out.push({ id: `${home}-${away}`, hg: Number(m[3]), ag: Number(m[4]) });
+    out.push({ id: fixtureId(home, away), hg: Number(m[3]), ag: Number(m[4]) });
   }
   return out;
 }

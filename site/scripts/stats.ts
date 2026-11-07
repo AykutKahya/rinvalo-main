@@ -7,11 +7,11 @@
  */
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { LEAGUES } from "../src/lib/leagues";
+import { LEAGUES, SEASON } from "../src/lib/leagues";
 import { allTeams, resolveTeam } from "../src/lib/teams";
 
 const DATA = join(import.meta.dirname, "../data");
-export const CURRENT_SEASON_CODE = "2627";
+export const CURRENT_SEASON_CODE = SEASON.slice(2, 4) + SEASON.slice(5);
 
 /**
  * Row: [league, season, date, home, away, hg, ag, hs, as, hst, ast, hxg, axg,
@@ -138,7 +138,18 @@ async function main() {
     if (unknown.length) console.warn(`Tanınmayan takım: ${unknown.join(", ")}`);
     if (failed.length) console.warn(`Alınamayan lig: ${failed.join(", ")}`);
     const path = join(DATA, "stats-current.json");
-    const keep: StatRow[] = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : [];
+    let keep: StatRow[] = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : [];
+    // New season: last season's rows join the archive.
+    const old = keep.filter((r) => r[1] !== SEASON);
+    if (old.length) {
+      const histPath = join(DATA, "stats-history.json");
+      const hist: StatRow[] = JSON.parse(readFileSync(histPath, "utf8"));
+      const seen = new Set(hist.map((r) => `${r[0]}|${r[1]}|${r[3]}|${r[4]}`));
+      hist.push(...old.filter((r) => !seen.has(`${r[0]}|${r[1]}|${r[3]}|${r[4]}`)));
+      writeFileSync(histPath, JSON.stringify(hist.sort((a, b) => a[2].localeCompare(b[2]))));
+      console.log(`${old.length} eski sezon maçı -> stats-history.json`);
+      keep = keep.filter((r) => r[1] === SEASON);
+    }
     // Keep previously stored rows of leagues that failed this time.
     const merged = [...rows, ...keep.filter((r) => failed.includes(r[0]))].sort((a, b) => a[2].localeCompare(b[2]));
     writeFileSync(path, JSON.stringify(merged));
