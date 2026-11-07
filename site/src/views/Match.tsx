@@ -196,11 +196,6 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           {p && !finished && (
             <LiveMatch id={m.id} kickoff={m.kickoff} lh={p.lh} la={p.la} status={m.status} hg={m.hg} ag={m.ag} home={h.short} away={a.short} lang={lang} />
           )}
-          {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
-          {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
-          {p && (p.market ?? getMarket()[m.id]) && (
-            <MarketCompare rinvalo={p.p} market={(p.market ?? getMarket()[m.id])!} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />
-          )}
           {p ? (
             <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
@@ -213,7 +208,6 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
               </div>
               {reasons && reasons.length > 0 && (
                 <div className="why-box">
-                  <div className="eyebrow">{tm.reasons}</div>
                   <ul>
                     {reasons.map((r) => (
                       <li key={r}>{r}</li>
@@ -221,15 +215,6 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   </ul>
                 </div>
               )}
-              <ul className="scenarios" aria-label={tm.scenarios}>
-                {[
-                  [h.name, liveOdds(p.lh, p.la, 1, 0, firstGoalMinute(p.lh, p.la))[0]],
-                  [a.name, liveOdds(p.lh, p.la, 0, 1, firstGoalMinute(p.lh, p.la))[2]],
-                ].map(([n, v]) => (
-                  <li key={n as string}>{tm.firstGoal(n as string, f.pct(v as number))}</li>
-                ))}
-                <li>{tm.goalless(f.pct(p.grid[0]?.[0] ?? Math.exp(-p.lh - p.la)))}</li>
-              </ul>
               <div className="kv-grid four">
                 <div className="kv">
                   <small>{tm.xg}</small>
@@ -261,13 +246,6 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   {tm.scoreNote(`${p.score[0]}-${p.score[1]}`, [`${h.name}`, null, `${a.name}`][pickOf(p.p)], `${p.top[0][0]}-${p.top[0][1]}`)}
                 </p>
               )}
-              <FairOdds p={p} lang={lang} />
-              <div>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>
-                  {tm.grid}
-                </div>
-                <ScoreGrid grid={p.grid} home={h.name} away={a.name} actual={actual} lang={lang} />
-              </div>
             </section>
           ) : (
             <section className="card empty">
@@ -275,7 +253,42 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
             </section>
           )}
 
+          {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
+          {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
           {getSquads()[m.id] && <Squads entry={getSquads()[m.id]} home={m.home} away={m.away} lang={lang} />}
+
+          {p && (
+            // The full numbers stay one tap away, so the pick and its reasons lead the page.
+            <details className="card more-box">
+              <summary>
+                <span>{tm.more}</span>
+                <small className="muted">{tm.moreHint}</small>
+              </summary>
+              <div className="more-body">
+            {p && (p.market ?? getMarket()[m.id]) && (
+              <MarketCompare rinvalo={p.p} market={(p.market ?? getMarket()[m.id])!} home={h.name} away={a.name} finished={finished} lang={lang} nameLang={nl} />
+            )}
+                <section className="more-sec">
+                <ul className="scenarios" aria-label={tm.scenarios}>
+                  {[
+                    [h.name, liveOdds(p.lh, p.la, 1, 0, firstGoalMinute(p.lh, p.la))[0]],
+                    [a.name, liveOdds(p.lh, p.la, 0, 1, firstGoalMinute(p.lh, p.la))[2]],
+                  ].map(([n, v]) => (
+                    <li key={n as string}>{tm.firstGoal(n as string, f.pct(v as number))}</li>
+                  ))}
+                  <li>{tm.goalless(f.pct(p.grid[0]?.[0] ?? Math.exp(-p.lh - p.la)))}</li>
+                </ul>
+                <FairOdds p={p} lang={lang} />
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 8 }}>
+                    {tm.grid}
+                  </div>
+                  <ScoreGrid grid={p.grid} home={h.name} away={a.name} actual={actual} lang={lang} />
+                </div>
+                </section>
+              </div>
+            </details>
+          )}
 
           <section className="card card-pad">
             <div className="section-title">
