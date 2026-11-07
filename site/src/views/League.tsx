@@ -8,12 +8,12 @@ import { RoundBrowser } from "@/components/RoundBrowser";
 import { StandingsTable } from "@/components/StandingsTable";
 import { Tabs } from "@/components/Tabs";
 import { XgTable } from "@/components/XgTable";
-import { accuracy, getRatings, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
+import { accuracy, getRatings, getSeason, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, countryOf, CUP_ROUNDS, cupByCode, CUPS, LEAGUES, leagueByCode, nameLang, SEASON, zonesOf, type Cup, type LeagueCode } from "@/lib/leagues";
 import { lite } from "@/lib/picks";
-import { leagueStats } from "@/lib/stats";
+import { leagueStats, statsUntil } from "@/lib/stats";
 
 export function leagueParams() {
   return [...LEAGUES, ...CUPS].map((l) => ({ code: l.code }));
@@ -160,6 +160,7 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
                 <StandingsTable rows={table} zones={league.zones} lang={lang} />
                 <p className="muted" style={{ fontSize: 12.5, margin: "10px 0 0" }}>
                   {t.zones(league.zones.europe)}
+                  {getSeason().updatedAt && <> · {dict(lang).xg.updated(`${fmt(lang).fullDate(getSeason().updatedAt)} ${fmt(lang).time(getSeason().updatedAt)}`)}</>}
                 </p>
               </div>
             ),
@@ -178,7 +179,7 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
               />
             ),
           },
-          { id: "istatistik", label: t.stats, content: <XgTable rows={leagueStats(code)} lang={lang} /> },
+          { id: "istatistik", label: t.stats, content: <XgTable rows={leagueStats(code)} until={statsUntil(code)} lang={lang} /> },
         ]}
       />
     </>

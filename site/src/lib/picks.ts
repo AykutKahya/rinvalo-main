@@ -8,16 +8,35 @@ export function upcoming(matches: MatchView[], now: number, days: number): Match
   return matches.filter((m) => m.status === "scheduled" && m.prediction && Date.parse(m.kickoff) > now && Date.parse(m.kickoff) < now + days * DAY);
 }
 
+/** How much our (mostly Turkish) visitors care about each competition; scales a game's stakes. */
+const INTEREST: Record<string, number> = {
+  "super-lig": 1.5,
+  "premier-league": 1.2,
+  ucl: 1.2,
+  "la-liga": 1.1,
+  "serie-a": 1.1,
+  bundesliga: 1.1,
+  "ligue-1": 1,
+  uel: 1,
+  eredivisie: 0.8,
+  "primeira-liga": 0.8,
+  uecl: 0.8,
+  championship: 0.7,
+};
+
 /**
  * Match of the week: the game the season turns on most (biggest title, Europe or relegation swing),
- * then the two strongest sides by projected finish.
+ * weighted by how much visitors follow that competition, then the two strongest sides by projected finish.
  */
 export function matchOfTheWeek(matches: MatchView[], sim: SimulationFile, now: number): MatchView | undefined {
   const pos = new Map<string, number>();
   for (const rows of Object.values(sim.leagues)) rows.forEach((r) => pos.set(r.team, r.avgPosition));
   const pool = upcoming(matches, now, 7);
   const score = (m: MatchView) =>
-    (pos.get(m.home) ?? 10) + (pos.get(m.away) ?? 10) + Math.max(...m.prediction!.p) * 4 - stakeWeight(sim.impact?.[m.id], m.home, m.away) * 60;
+    (pos.get(m.home) ?? 10) +
+    (pos.get(m.away) ?? 10) +
+    Math.max(...m.prediction!.p) * 4 -
+    stakeWeight(sim.impact?.[m.id], m.home, m.away) * 60 * (INTEREST[m.league] ?? 1);
   return [...pool].sort((a, b) => score(a) - score(b))[0];
 }
 

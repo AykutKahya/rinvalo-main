@@ -15,6 +15,17 @@ export function MyPicksPage({ lang }: { lang: Lang }) {
           <h1>{dict(lang).league2.title}</h1>
         </div>
       </div>
+      <section className="card card-pad how">
+        <h2>{dict(lang).league2.howTitle}</h2>
+        <ol className="how-grid steps">
+          {dict(lang).league2.how.map(([q, a]) => (
+            <li key={q}>
+              <h3>{q}</h3>
+              <p>{a}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
       <LeagueHub lang={lang} />
     </>
   );

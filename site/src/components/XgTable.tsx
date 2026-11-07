@@ -30,7 +30,7 @@ function Luck({ rows, lang, title, tone }: { rows: TeamStats[]; lang: Lang; titl
   );
 }
 
-export function XgTable({ rows, lang }: { rows: TeamStats[]; lang: Lang }) {
+export function XgTable({ rows, until, lang }: { rows: TeamStats[]; until?: string | null; lang: Lang }) {
   const t = dict(lang).xg;
   const f = fmt(lang);
   const p = paths(lang);
@@ -45,6 +45,12 @@ export function XgTable({ rows, lang }: { rows: TeamStats[]; lang: Lang }) {
       <div className="card card-pad">
         <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
           {t.caption}
+          {until && (
+            <>
+              <br />
+              <small>{t.until(f.fullDate(`${until}T12:00:00Z`))}</small>
+            </>
+          )}
         </p>
         <div className="table-wrap">
           <table className="std">

@@ -80,3 +80,10 @@ export const leagueStats = cache((league: string): TeamStats[] => {
   }
   return [...by.values()].sort((x, y) => y.xgf - y.xga - (x.xgf - x.xga));
 });
+
+/** Date (YYYY-MM-DD) of the latest game with xG in this season's data for one league. */
+export const statsUntil = cache((league: string): string | null => {
+  let last: string | null = null;
+  for (const r of read()) if (r[0] === league && r[1] === SEASON && r[11] != null && (!last || r[2] > last)) last = r[2];
+  return last;
+});

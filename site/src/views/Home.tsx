@@ -50,6 +50,12 @@ export function Home({ lang }: { lang: Lang }) {
 
   return (
     <>
+      <div className="pitch">
+        <h1>{h.pitchTitle}</h1>
+        <p>
+          {h.pitchText} <Link href={`${p.accuracy}#nasil`}>{h.pitchLink}</Link>
+        </p>
+      </div>
       <section className="hero" aria-label={h.highlights}>
         {motw && motw.prediction && (
           <div className="card feature hero-motw reveal">

@@ -72,6 +72,18 @@ export function Accuracy({ lang }: { lang: Lang }) {
         </div>
       </div>
 
+      <section id="nasil" className="card card-pad how">
+        <h2>{t.howTitle}</h2>
+        <div className="how-grid">
+          {t.how.map(([q, a]) => (
+            <div key={q}>
+              <h3>{q}</h3>
+              <p>{a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <div className="match-grid">
         <div className="stack">
           {eb && (
@@ -274,7 +286,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
                 </div>
               </div>
               <p className="muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
-                {t.games(String(vs.length))}
+                {t.vsNote(f.int(vs.length), f.int(graded.length))}
               </p>
             </section>
           )}

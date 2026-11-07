@@ -215,7 +215,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   </ul>
                 </div>
               )}
-              <div className="kv-grid four">
+              <div className="kv-grid three">
                 <div className="kv">
                   <small>{tm.xg}</small>
                   <b>
@@ -234,18 +234,36 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                     <CountUp value={p.btts} lang={lang} />
                   </b>
                 </div>
-                <div className="kv">
-                  <small>{tm.likeliest}</small>
-                  <b>
-                    {p.top[0][0]}-{p.top[0][1]}
-                  </b>
-                </div>
               </div>
-              {(p.top[0][0] !== p.score[0] || p.top[0][1] !== p.score[1]) && (
-                <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-                  {tm.scoreNote(`${p.score[0]}-${p.score[1]}`, [`${h.name}`, null, `${a.name}`][pickOf(p.p)], `${p.top[0][0]}-${p.top[0][1]}`)}
-                </p>
-              )}
+              {(() => {
+                const pick = pickOf(p.p);
+                const winner = [h.name, null, a.name][pick];
+                const differs = p.top[0][0] !== p.score[0] || p.top[0][1] !== p.score[1];
+                const rows: [string, string, number | undefined, boolean][] = [
+                  [tm.favResult, winner ? tm.winOf(winner) : tm.drawWord, p.p[pick], false],
+                  [winner ? tm.ifWin(winner) : tm.ifDraw, `${p.score[0]}-${p.score[1]}`, p.grid[p.score[0]]?.[p.score[1]], true],
+                ];
+                if (differs) rows.push([tm.topScore, `${p.top[0][0]}-${p.top[0][1]}`, p.top[0][2], false]);
+                return (
+                  <>
+                    <ul className="ladder">
+                      {rows.map(([label, value, prob, ours]) => (
+                        <li key={label} className={ours ? "ours" : undefined}>
+                          <span>{label}</span>
+                          <b>{value}</b>
+                          <span className="num muted">{prob != null ? f.pct(prob, 1) : ""}</span>
+                          {ours && <em>{tm.prediction}</em>}
+                        </li>
+                      ))}
+                    </ul>
+                    {differs && (
+                      <p className="muted" style={{ margin: 0, fontSize: 12.5 }}>
+                        {tm.whyDiffer}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </section>
           ) : (
             <section className="card empty">
