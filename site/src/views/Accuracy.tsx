@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CountUp } from "@/components/CountUp";
 import { LeagueMark } from "@/components/Crest";
-import { MatchRow } from "@/components/MatchRow";
-import { Paged } from "@/components/Pager";
+import { PagedMatches } from "@/components/PagedMatches";
+import { lite } from "@/lib/picks";
 import { AnalysisNav } from "@/components/AnalysisNav";
 import { SectionNav } from "@/components/SectionNav";
 import { accuracy, getEngineBacktest, getMarket, getMatches, getTracking, LEAGUES } from "@/lib/data";
@@ -128,7 +128,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
               <span>{t.gradedList}</span>
               <span>{t.pickScore}</span>
             </div>
-            <Paged items={graded.map((m) => <MatchRow key={m.id} m={m} showDate lang={lang} />)} per={15} lang={lang} empty={<div className="empty">{t.noneYet}</div>} />
+            <PagedMatches matches={graded.map(lite)} lang={lang} empty={<div className="empty">{t.noneYet}</div>} />
           </section>
         </div>
 
