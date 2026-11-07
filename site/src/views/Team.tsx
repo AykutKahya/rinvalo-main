@@ -50,7 +50,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
   const now = Date.now();
   const next = matches.find((m) => m.status === "scheduled" && Date.parse(m.kickoff) > now);
   const played = matches.filter((m) => m.status === "finished").reverse();
-  const upcoming = matches.filter((m) => m.status !== "finished" && m.id !== next?.id).slice(0, 6);
+  const upcoming = matches.filter((m) => m.status !== "finished").slice(0, 6);
   const record = accuracy(matches);
 
   return (

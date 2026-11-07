@@ -838,3 +838,5 @@ table.power td { vertical-align: middle; }
 .how-grid.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
 .how-grid.steps li { counter-increment: step; }
 .how-grid.steps h3::before { content: counter(step); display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; }
+.table-note { margin: 10px 0 0; font-size: 12.5px; }
+.table-wrap > .table-note { padding: 0 14px 12px; }

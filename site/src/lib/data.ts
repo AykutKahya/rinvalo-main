@@ -83,7 +83,9 @@ export interface MatchView extends Fixture {
 
 export function toView(f: Fixture, predictions: Record<string, Prediction>): MatchView {
   const prediction = predictions[f.id] ?? null;
-  const done = f.status === "finished" && f.hg !== null && f.ag !== null;
+  // Only predictions made before kick-off are graded (e.g. not one refreshed during a suspended game).
+  const early = !!prediction && (!prediction.madeAt || Date.parse(prediction.madeAt) < Date.parse(f.kickoff));
+  const done = f.status === "finished" && f.hg !== null && f.ag !== null && early;
   return {
     ...f,
     prediction,

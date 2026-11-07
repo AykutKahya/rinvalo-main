@@ -138,7 +138,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
             {compName} · {roundLabel(lang, m.league, m.round)}
           </Link>
           <span className="mh-meta">
-            {f.longDay(m.kickoff)} · {f.time(m.kickoff)}
+            {f.longDay(m.kickoff)} · {f.time(m.kickoff)} {t.tzLabel}
             {m.venue ? ` · ${m.venue}` : ""}
             {!finished && <NotifyButton kind="match" id={m.id} lang={lang} />}
             <ShareButton title={tm.title(h.name, a.name)} lang={lang} />

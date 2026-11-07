@@ -21,15 +21,29 @@ jobs:
         env:
           SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
           RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
+        # bash brings pipefail, so a failed export fails the run instead of saving an empty file.
+        shell: bash
         run: |
-          curl -fsS -H "x-upload-token: $RINVALO_UPLOAD_TOKEN" "$SUPABASE_URL/functions/v1/upload" \
-            | gzip | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:RINVALO_UPLOAD_TOKEN -out league.json.gz.enc
-          ls -l league.json.gz.enc
+          curl -fsS -H "x-upload-token: $RINVALO_UPLOAD_TOKEN" "$SUPABASE_URL/functions/v1/upload" > league.json
+          test "$(stat -c %s league.json)" -gt 100
+          gzip -c league.json | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:RINVALO_UPLOAD_TOKEN -out league.json.gz.enc
+          rm league.json
+          # The frozen predictions and fixtures are the record behind the accuracy page; keep them too.
+          for f in predictions season cups tracking; do
+            curl -fsS "$SUPABASE_URL/storage/v1/object/public/site/data/$f.json" | gzip > "$f.json.gz"
+            test "$(stat -c %s "$f.json.gz")" -gt 100
+          done
+          ls -l *.gz *.enc
 
       - name: Keep
         # v4.6.2
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: league-${{ github.run_id }}
-          path: league.json.gz.enc
+          path: |
+            league.json.gz.enc
+            predictions.json.gz
+            season.json.gz
+            cups.json.gz
+            tracking.json.gz
           retention-days: 90

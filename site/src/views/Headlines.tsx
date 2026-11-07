@@ -42,7 +42,7 @@ const TR: Copy = {
             {h} – {a}: <em>kazananı yok</em>
           </>
         ),
-        sub: `Model bu maçı çok dengeli görüyor. Beraberlik ${f.pct(p.p[1])}.`,
+        sub: `Dengeli maç, beraberlik ${f.pct(p.p[1])}.`,
       };
     if (pick === 0)
       return {
@@ -51,7 +51,7 @@ const TR: Copy = {
             {h} evinde <em>{f.pct(p.p[0])}</em> favori
           </>
         ),
-        sub: `Rinvalo ${h} galibiyeti bekliyor, en olası skor ${sc}.`,
+        sub: `Tahmin ${sc}.`,
       };
     return {
       text: (
@@ -59,7 +59,7 @@ const TR: Copy = {
           {a} deplasmanda <em>{f.pct(p.p[2])}</em> favori
         </>
       ),
-      sub: `Rinvalo ${a} galibiyeti bekliyor, en olası skor ${sc}.`,
+      sub: `Tahmin ${sc}.`,
     };
   },
   why(m, table, f) {
@@ -69,10 +69,10 @@ const TR: Copy = {
     const wins = (n: number) => (n === 5 ? "5'ini de" : `${n}'ünü`);
     if (winsInLast5(h) >= 4) return `${team(m.home).name} son 5 maçın ${wins(winsInLast5(h))} kazandı.`;
     if (winsInLast5(a) >= 4) return `${team(m.away).name} son 5 maçın ${wins(winsInLast5(a))} kazandı.`;
-    if (p.over25 > 0.6) return `Gollü maç bekleniyor: 2.5 üst ${f.pct(p.over25)}.`;
-    if (p.over25 < 0.42) return `Az gol bekleniyor: 2.5 alt ${f.pct(1 - p.over25)}.`;
-    if (p.btts > 0.58) return `İki takımın da gol atma ihtimali ${f.pct(p.btts)}.`;
-    return `Beklenen gol ${f.dec(p.lh)} – ${f.dec(p.la)}.`;
+    if (p.over25 > 0.6) return `2.5 üst ${f.pct(p.over25)}.`;
+    if (p.over25 < 0.42) return `2.5 alt ${f.pct(1 - p.over25)}.`;
+    if (p.btts > 0.58) return `Karşılıklı gol ${f.pct(p.btts)}.`;
+    return "";
   },
 };
 
@@ -90,7 +90,7 @@ const EN: Copy = {
             {h} – {a}: <em>too close to call</em>
           </>
         ),
-        sub: `The model sees a very even game. Draw ${f.pct(p.p[1])}.`,
+        sub: `Even game, draw ${f.pct(p.p[1])}.`,
       };
     if (pick === 0)
       return {
@@ -99,7 +99,7 @@ const EN: Copy = {
             {h} <em>{f.pct(p.p[0])}</em> favourites at home
           </>
         ),
-        sub: `Rinvalo backs a ${h} win, likeliest score ${sc}.`,
+        sub: `Pick: ${sc}.`,
       };
     return {
       text: (
@@ -107,7 +107,7 @@ const EN: Copy = {
           {a} <em>{f.pct(p.p[2])}</em> favourites away
         </>
       ),
-      sub: `Rinvalo backs a ${a} win, likeliest score ${sc}.`,
+      sub: `Pick: ${sc}.`,
     };
   },
   why(m, table, f) {
@@ -120,7 +120,7 @@ const EN: Copy = {
     if (p.over25 > 0.6) return `Goals expected: over 2.5 at ${f.pct(p.over25)}.`;
     if (p.over25 < 0.42) return `A tight one: under 2.5 at ${f.pct(1 - p.over25)}.`;
     if (p.btts > 0.58) return `Both teams to score: ${f.pct(p.btts)}.`;
-    return `Expected goals ${f.dec(p.lh)} – ${f.dec(p.la)}.`;
+    return "";
   },
 };
 
@@ -309,7 +309,7 @@ export function Headlines({ lang }: { lang: Lang }) {
                         {p.score[0]}-{p.score[1]}
                       </div>
                     </div>
-                    <p className={s.why}>{copy.why(m, table, f)}</p>
+                    {copy.why(m, table, f) && <p className={s.why}>{copy.why(m, table, f)}</p>}
                   </Link>
                 );
               }),

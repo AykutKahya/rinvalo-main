@@ -103,6 +103,7 @@ export function OutlookTable({
           </tbody>
         </table>
       </div>
+      <p className="muted table-note">{d.seasonEnd.legend}</p>
     </div>
   );
 }

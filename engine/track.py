@@ -30,12 +30,24 @@ def read(name: str, default):
     return json.loads(path.read_text("utf-8")) if path.exists() else default
 
 
+def ts(iso: str) -> datetime:
+    return datetime.fromisoformat(iso.replace("Z", "+00:00"))
+
+
 def main() -> None:
     preds = read("predictions.json", {"predictions": {}})["predictions"]
     market = read("market.json", {})
     hist = read("engine-backtest.json", {}).get("perLeague", {})
     fixtures = read("season.json", {"fixtures": []})["fixtures"] + read("cups.json", {"fixtures": []})["fixtures"]
-    settled = [f for f in fixtures if f["status"] == "finished" and f.get("hg") is not None and f["id"] in preds]
+    # Only predictions made before kick-off count (e.g. not one refreshed during a suspended game).
+    settled = [
+        f
+        for f in fixtures
+        if f["status"] == "finished"
+        and f.get("hg") is not None
+        and f["id"] in preds
+        and (not preds[f["id"]].get("madeAt") or ts(preds[f["id"]]["madeAt"]) < ts(f["kickoff"]))
+    ]
 
     def outcome(f) -> int:
         return 0 if f["hg"] > f["ag"] else 1 if f["hg"] == f["ag"] else 2

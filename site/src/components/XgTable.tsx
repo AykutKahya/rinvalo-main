@@ -100,6 +100,7 @@ export function XgTable({ rows, until, lang }: { rows: TeamStats[]; until?: stri
             </tbody>
           </table>
         </div>
+        <p className="muted table-note">{t.legend}</p>
       </div>
     </div>
   );

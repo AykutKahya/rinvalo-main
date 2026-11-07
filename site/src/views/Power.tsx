@@ -77,6 +77,7 @@ function Table({ rows, lang }: { rows: TeamRating[]; lang: Lang }) {
           })}
         </tbody>
       </table>
+      <p className="muted table-note">{t.legend}</p>
     </div>
   );
 }
