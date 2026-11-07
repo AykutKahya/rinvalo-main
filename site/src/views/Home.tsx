@@ -49,25 +49,10 @@ export function Home({ lang }: { lang: Lang }) {
   const race = (sim.leagues["super-lig"] ?? []).slice(0, 4);
 
   return (
-    <div className="home-grid">
-      <JsonLd
-        data={[
-          {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "Rinvalo",
-            url: `${siteUrl}${paths(lang).home}`,
-            inLanguage: lang,
-            description: dict(lang).siteDescription,
-          },
-          { "@context": "https://schema.org", "@type": "Organization", name: "Rinvalo", url: siteUrl, logo: `${siteUrl}/brand/icon-512.png` },
-        ]}
-      />
-      <MatchBrowser matches={window.map(lite)} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
-
-      <aside className="side-stack" aria-label={h.highlights}>
+    <>
+      <section className="hero" aria-label={h.highlights}>
         {motw && motw.prediction && (
-          <div className="card feature reveal">
+          <div className="card feature hero-motw reveal">
             <div className="section-title" style={{ margin: 0 }}>
               <span className="eyebrow">{h.motw}</span>
               <span className="muted" style={{ fontSize: 12.5, fontWeight: 600 }}>
@@ -76,7 +61,7 @@ export function Home({ lang }: { lang: Lang }) {
             </div>
             <Link href={p.matchOf(motw.id)} className="vs">
               <span>
-                <Crest slug={motw.home} size="md" />
+                <Crest slug={motw.home} size="lg" />
                 <br />
                 {name(motw.home)}
               </span>
@@ -84,7 +69,7 @@ export function Home({ lang }: { lang: Lang }) {
                 {motw.prediction.score[0]}-{motw.prediction.score[1]}
               </span>
               <span>
-                <Crest slug={motw.away} size="md" />
+                <Crest slug={motw.away} size="lg" />
                 <br />
                 {name(motw.away)}
               </span>
@@ -110,27 +95,65 @@ export function Home({ lang }: { lang: Lang }) {
           </div>
         )}
 
-        <PredictorCard lang={lang} />
-
-        <div className="card card-pad">
-          <div className="section-title">
-            <h2 style={{ fontSize: 15 }}>{h.surest}</h2>
+        <div className="hero-side">
+          <div className="card card-pad hero-sure">
+            <div className="section-title" style={{ margin: 0 }}>
+              <h2 style={{ fontSize: 15 }}>{h.surest}</h2>
+            </div>
+            <div className="sure-list">
+              {surest.map((m) => {
+                const i = m.prediction!.p.indexOf(Math.max(...m.prediction!.p));
+                return (
+                  <Link key={m.id} href={p.matchOf(m.id)} className="sure">
+                    <span className="sure-crests">
+                      <Crest slug={m.home} size="md" />
+                      <Crest slug={m.away} size="md" />
+                    </span>
+                    <span className="sure-txt">
+                      <small>
+                        {name(m.home)} – {name(m.away)} · {f.shortDay(m.kickoff)} {f.time(m.kickoff)}
+                      </small>
+                      <b>{i === 1 ? h.drawPick : h.winPick(i === 0 ? name(m.home) : name(m.away))}</b>
+                    </span>
+                    <span className="sure-pct num">{f.pct(m.prediction!.p[i])}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <div className="mini-list">
-            {surest.map((m) => {
-              const i = m.prediction!.p.indexOf(Math.max(...m.prediction!.p));
-              const who = i === 0 ? team(m.home).short : i === 2 ? team(m.away).short : "X";
-              return (
-                <Link key={m.id} href={p.matchOf(m.id)} className="mini-item">
-                  <TeamPair home={m.home} away={m.away} lang={lang} />
-                  <span className="pill good" title={i === 0 ? name(m.home) : i === 2 ? name(m.away) : t.draw}>
-                    {who} {f.pct(m.prediction!.p[i])}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+          <Link href={p.accuracy} className="acc-box">
+          {record.n >= 10 ? (
+            <>
+              <b>{f.pct(record.hits / record.n)}</b>
+              <span>{h.seasonHits(record.n)}</span>
+            </>
+          ) : (
+            <>
+              <b>{eb ? f.pct(eb.byConfidence.high.accuracy) : "–"}</b>
+              <span>{h.highHits}</span>
+            </>
+          )}
+        </Link>
         </div>
+      </section>
+    <div className="home-grid">
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Rinvalo",
+            url: `${siteUrl}${paths(lang).home}`,
+            inLanguage: lang,
+            description: dict(lang).siteDescription,
+          },
+          { "@context": "https://schema.org", "@type": "Organization", name: "Rinvalo", url: siteUrl, logo: `${siteUrl}/brand/icon-512.png` },
+        ]}
+      />
+      <MatchBrowser matches={window.map(lite)} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
+
+      <aside className="side-stack" aria-label={h.highlights}>
+        <PredictorCard lang={lang} />
 
         <div className="card card-pad">
           <div className="section-title">
@@ -192,20 +215,8 @@ export function Home({ lang }: { lang: Lang }) {
           </div>
         )}
 
-        <Link href={p.accuracy} className="acc-box">
-          {record.n >= 10 ? (
-            <>
-              <b>{f.pct(record.hits / record.n)}</b>
-              <span>{h.seasonHits(record.n)}</span>
-            </>
-          ) : (
-            <>
-              <b>{eb ? f.pct(eb.byConfidence.high.accuracy) : "–"}</b>
-              <span>{h.highHits}</span>
-            </>
-          )}
-        </Link>
       </aside>
     </div>
+    </>
   );
 }

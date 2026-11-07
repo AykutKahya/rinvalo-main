@@ -22,6 +22,9 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
   const [day, setDay] = useState(initialDay);
   const [filter, setFilter] = useState<Filter>("all");
   const [today, setToday] = useState(initialDay);
+  // With every league shown, each one opens with its first few games; the rest are a tap away.
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const LIMIT = 4;
 
   // The page is built ahead of time; pick the visitor's real "today" once we are in the browser.
   useEffect(() => {
@@ -87,10 +90,11 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
 
       <section aria-label={b.matches} style={{ minWidth: 0 }}>
         <div className="days" role="group" aria-label={b.days}>
-          {days.map(([k, iso]) => (
+          {days.map(([k, iso], i) => (
             <button
               key={k}
-              className="day"
+              // Days without games are skipped; mark the jump so "Sun 8, Fri 20" does not look like a mistake.
+              className={i > 0 && Date.parse(k) - Date.parse(days[i - 1][0]) > 86_400_000 ? "day gap" : "day"}
               aria-pressed={k === day}
               onClick={() => setDay(k)}
               ref={(el) => {
@@ -119,11 +123,29 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
                     · {roundLabel(lang, l.code, ms[0].round)}
                   </span>
                 </Link>
-                <span>{t.colsPick}</span>
+                <span>
+                  <span className="cols-p3">1 · X · 2 &nbsp;</span>
+                  {t.row.pick}
+                </span>
               </div>
-              {ms.map((m) => (
+              {(filter === "all" && !open.has(l.code) && ms.length > LIMIT + 1 ? ms.slice(0, LIMIT) : ms).map((m) => (
                 <MatchRow key={m.id} m={m} favorites={favorites} lang={lang} />
               ))}
+              {filter === "all" && ms.length > LIMIT + 1 && (
+                <button
+                  className="more-row"
+                  onClick={() =>
+                    setOpen((s) => {
+                      const n = new Set(s);
+                      if (n.has(l.code)) n.delete(l.code);
+                      else n.add(l.code);
+                      return n;
+                    })
+                  }
+                >
+                  {open.has(l.code) ? b.less : b.more(ms.length - LIMIT)}
+                </button>
+              )}
             </div>
           ))}
 

@@ -80,6 +80,12 @@ export function MatchRow({ m, lang, favorites = [], showDate = false }: { m: Mat
           {!finished && <ConfidenceDot level={p?.confidence} lang={lang} />}
         </span>
       )}
+      {/* Phones: Rinvalo's pick in one line under the score, in place of the three-way row. */}
+      {p && (
+        <span className={`pk${verdict}`}>
+          {LABELS[pick]} {f.pct(p.p[pick as 0 | 1 | 2])}
+        </span>
+      )}
     </Link>
   );
 }

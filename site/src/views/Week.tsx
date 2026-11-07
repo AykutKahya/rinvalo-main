@@ -172,7 +172,10 @@ export function Week({ code, round: raw, lang }: { code: string; round: string; 
         <div key={day} className="card group">
           <div className="group-head">
             <span>{day}</span>
-            <span>{d.colsPick}</span>
+            <span>
+              <span className="cols-p3">1 · X · 2 &nbsp;</span>
+              {d.row.pick}
+            </span>
           </div>
           {byDay.get(day)!.map((m) => (
             <MatchRow key={m.id} m={m} lang={lang} />

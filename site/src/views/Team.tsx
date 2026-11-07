@@ -124,7 +124,10 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
             <section className="card group" style={{ margin: 0 }}>
               <div className="group-head">
                 <span>{tt.upcoming}</span>
-                <span>{d.colsPick}</span>
+                <span>
+              <span className="cols-p3">1 · X · 2 &nbsp;</span>
+              {d.row.pick}
+            </span>
               </div>
               {upcoming.map((m) => (
                 <MatchRow key={m.id} m={m} showDate lang={lang} />

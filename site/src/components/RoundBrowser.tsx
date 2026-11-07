@@ -44,7 +44,10 @@ export function RoundBrowser({ matches, rounds, labels, initial, lang, weekBase 
         <div key={d} className="card group">
           <div className="group-head">
             <span>{d}</span>
-            <span>{t.colsPick}</span>
+            <span>
+                  <span className="cols-p3">1 · X · 2 &nbsp;</span>
+                  {t.row.pick}
+                </span>
           </div>
           {ms.map((m) => (
             <MatchRow key={m.id} m={m} favorites={favorites} lang={lang} />
