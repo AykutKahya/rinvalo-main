@@ -6,9 +6,11 @@ import { MatchBrowser } from "@/components/MatchBrowser";
 import { LeagueMark } from "@/components/Crest";
 import { FavoritesStrip } from "@/components/FavoritesStrip";
 import { PredictorCard } from "@/components/PredictorCard";
+import { nation } from "@/lib/nations";
+import { Badge } from "@/views/National";
 import { Pulse } from "@/components/Pulse";
 import { ProbBar } from "@/components/ProbBar";
-import { accuracy, getEngineBacktest, getMatches, getSimulation, leagueMatches } from "@/lib/data";
+import { accuracy, getEngineBacktest, getInternational, getMatches, getSimulation, leagueMatches } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site";
@@ -33,10 +35,14 @@ export function Home({ lang }: { lang: Lang }) {
     return k > now - 4 * DAY && k < now + 14 * DAY;
   });
   const days = [...new Set(window.map((m) => f.dayKey(m.kickoff)))].sort();
+  // One list for both browser components: React sends a shared object once.
+  const slim = window.map(lite);
   const today = f.dayKey(now);
   const initialDay = days.includes(today) ? today : (days.find((d) => d >= today) ?? days[days.length - 1] ?? today);
 
   const motw = matchOfTheWeek(all, sim, now);
+  // Türkiye's next game, when it is this week.
+  const turkey = getInternational().games.find((g) => g.hg === null && g.pred && (g.home === "Turkey" || g.away === "Turkey") && Date.parse(g.kickoff) > now && Date.parse(g.kickoff) < now + 10 * DAY);
   const surest = surestPicks(all, now);
   const closest = closestPicks(all, now);
   // Each competition's round in play or next up, for the round pages.
@@ -52,7 +58,25 @@ export function Home({ lang }: { lang: Lang }) {
 
   return (
     <>
-      <FavoritesStrip matches={window.map(lite)} lang={lang} />
+      <FavoritesStrip matches={slim} lang={lang} />
+      {turkey && (
+        <Link href={p.national} className="card card-pad nat-next">
+          <span className="eyebrow">{h.nationalNext}</span>
+          <span className="nat-next-row">
+            <Badge name={turkey.home} />
+            <b>{nation(turkey.home, lang)}</b>
+            <span className="big-pick num">
+              <small>{h.predTag}</small>
+              {turkey.pred!.score[0]}-{turkey.pred!.score[1]}
+            </span>
+            <b>{nation(turkey.away, lang)}</b>
+            <Badge name={turkey.away} />
+          </span>
+          <small className="muted">
+            {f.shortDay(turkey.kickoff)} {f.time(turkey.kickoff)} · 1 {f.pct(turkey.pred!.p[0])} · X {f.pct(turkey.pred!.p[1])} · 2 {f.pct(turkey.pred!.p[2])}
+          </small>
+        </Link>
+      )}
       <section className="hero" aria-label={h.highlights}>
         {motw && motw.prediction && (
           <div className="card feature hero-motw reveal">
@@ -69,6 +93,7 @@ export function Home({ lang }: { lang: Lang }) {
                 {name(motw.home)}
               </span>
               <span className="big">
+                <small className="big-label">{h.predTag}</small>
                 {motw.prediction.score[0]}-{motw.prediction.score[1]}
               </span>
               <span>
@@ -153,7 +178,7 @@ export function Home({ lang }: { lang: Lang }) {
           { "@context": "https://schema.org", "@type": "Organization", name: "Rinvalo", url: siteUrl, logo: `${siteUrl}/brand/icon-512.png` },
         ]}
       />
-      <MatchBrowser matches={window.map(lite)} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
+      <MatchBrowser matches={slim} leagues={competitions(lang)} initialDay={initialDay} lang={lang} />
 
       <aside className="side-stack" aria-label={h.highlights}>
         <PredictorCard lang={lang} />
@@ -168,7 +193,7 @@ export function Home({ lang }: { lang: Lang }) {
               <Link key={m.id} href={p.matchOf(m.id)} className="mini-item">
                 <TeamPair home={m.home} away={m.away} lang={lang} />
                 <span className="num muted" style={{ fontSize: 12 }}>
-                  {m.prediction!.p.map((v) => Math.round(v * 100)).join("·")}
+                  {m.prediction!.p.map((v, i) => `${["1", "X", "2"][i]} ${Math.round(v * 100)}`).join(" · ")}
                 </span>
               </Link>
             ))}

@@ -6,6 +6,13 @@ on:
   schedule:
     - cron: '17 7 * * *'
   workflow_dispatch:
+    inputs:
+      only:
+        # A manual run posts again: name the channels to post to (e.g. "x" after X failed).
+        description: Channels (telegram,x,ig,bluesky); empty for all
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -37,6 +44,6 @@ jobs:
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
-          RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
           SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
-        run: npx tsx scripts/social.ts
+          ONLY: ${{ inputs.only }}
+        run: npx tsx scripts/social.ts ${ONLY:+--only=$ONLY}

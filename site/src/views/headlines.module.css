@@ -28,7 +28,7 @@
 .front { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); border-bottom: 3px solid var(--ink); }
 .lead { padding: 22px; border-right: 3px solid var(--ink); display: flex; flex-direction: column; gap: 14px; }
 .tag { align-self: flex-start; background: var(--yel); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 8px; }
-.headline { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(40px, 6.6vw, 82px); line-height: 0.92; margin: 0; text-wrap: balance; }
+.headline { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(40px, 6.6vw, 82px); line-height: 0.92; margin: 0; text-wrap: balance; overflow-wrap: break-word; }
 .headline em { font-style: normal; color: var(--red); }
 .lead p { margin: 0; font-size: 16.5px; line-height: 1.45; max-width: 56ch; }
 .lead a.more { align-self: flex-start; font-weight: 800; text-transform: uppercase; font-size: 13px; letter-spacing: 0.06em; border-bottom: 3px solid var(--red); padding-bottom: 2px; }
@@ -37,7 +37,7 @@
 .bignums div:last-child { border-right: 0; }
 .bignums b { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; display: block; font-size: clamp(36px, 5.4vw, 58px); line-height: 1; font-variant-numeric: tabular-nums; }
 .bignums .hot b { color: var(--red); }
-.bignums span { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bignums span { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; overflow-wrap: break-word; line-height: 1.2; }
 
 .rail { min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--ink); color: #fff; }
 .rail h2 { font-family: var(--font-anton), Impact, "Arial Black", sans-serif; font-weight: 400; text-transform: uppercase; font-size: 32px; line-height: 1; margin: 0; letter-spacing: 0; }
@@ -91,3 +91,6 @@
   .report > :nth-child(3) { border-right: 0; }
   .report > a { grid-column: 1 / -1; border-right: 0; border-top: 2px solid var(--ink); }
 }
+
+/* Long club names in capitals would be cut by the page edge on a phone. */
+@media (max-width: 480px) { .headline { font-size: clamp(30px, 9vw, 40px); } .bignums div { padding: 8px 6px; } .bignums span { font-size: 10px; letter-spacing: 0; } }

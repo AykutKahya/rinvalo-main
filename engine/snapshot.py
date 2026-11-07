@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parent.parent / "site" / "data"
@@ -70,7 +71,8 @@ def main() -> None:
     }
     day["elo"] = {r["team"]: round(r["elo"]) for rows in read("ratings.json", {"leagues": {}})["leagues"].values() for r in rows}
     daily = read("daily.json", {"days": {}})
-    daily["days"][now.date().isoformat()] = day
+    # Days are Istanbul days, as on the site: a late-evening run belongs to the next day there.
+    daily["days"][now.astimezone(ZoneInfo("Europe/Istanbul")).date().isoformat()] = day
     daily["days"] = dict(sorted(daily["days"].items())[-KEEP_DAYS:])
     write("daily.json", daily)
 

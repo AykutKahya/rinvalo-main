@@ -351,6 +351,12 @@ export function resolveTeam(sourceName: string): string | null {
 /** English names, only where the Turkish display name differs. */
 const EN_NAMES: Record<string, string> = { bayern: "Bayern Munich" };
 
+/**
+ * The language a club's displayed name is written in, where it differs from the surrounding text's
+ * hint: a Turkish name for a foreign club ("Bayern Münih") needs Turkish capitals (MÜNİH).
+ */
+export const teamLang = (slug: string, lang: "tr" | "en"): "tr" | undefined => (lang === "tr" && EN_NAMES[slug] ? "tr" : undefined);
+
 export function team(slug: string, lang: "tr" | "en" = "tr"): Team {
   const t = BY_SLUG.get(slug) ?? {
     slug,

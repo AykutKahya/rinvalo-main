@@ -16,10 +16,10 @@ export function PredictorCard({ lang }: { lang: Lang }) {
   useEffect(() => {
     const sb = supabase();
     if (!sb || !account.session || !account.username) return setMine(null);
-    sb.rpc("leaderboard", { since: null, max_rows: 500 }).then(({ data }) => {
-      const rows = (data as { username: string; points: number; rinvalo?: number }[]) ?? [];
-      const i = rows.findIndex((r) => r.username === account.username);
-      setMine({ points: i >= 0 ? rows[i].points : 0, rank: i >= 0 ? i + 1 : null, model: i >= 0 ? (rows[i].rinvalo ?? null) : null });
+    sb.rpc("my_standing").then(({ data }) => {
+      // No row until the first of the player's picks is settled.
+      const r = ((data as { points: number; rank: number; rinvalo: number | null }[]) ?? [])[0];
+      setMine({ points: r?.points ?? 0, rank: r?.rank ?? null, model: r?.rinvalo ?? null });
     });
   }, [account.session, account.username]);
 

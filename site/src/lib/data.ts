@@ -1,18 +1,40 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { cache } from "react";
 import { isCup, LEAGUES, type LeagueCode } from "./leagues";
 import { outcomeOf, pickOf } from "./model";
-import { buildTable } from "./table";
+import { buildTable, tiebreakOf } from "./table";
 import type { Fixture, HistoryFile, Prediction, PredictionsFile, SeasonFile, SimulationFile } from "./types";
 
 const DATA = join(process.cwd(), "data");
 
+/**
+ * Read once per process: the data never changes within a build or a deployment, and prerendering
+ * hundreds of pages would otherwise parse the same megabytes of JSON for each of them.
+ */
+function cache<T>(load: () => T): () => T {
+  let value: T | undefined;
+  let done = false;
+  return () => {
+    if (!done) {
+      value = load();
+      done = true;
+    }
+    return value as T;
+  };
+}
+
+/** A missing file is an empty one; a broken file stops the build instead of publishing an empty site. */
 function read<T>(name: string, fallback: T): T {
+  let text: string;
   try {
-    return JSON.parse(readFileSync(join(DATA, name), "utf8")) as T;
+    text = readFileSync(join(DATA, name), "utf8");
   } catch {
     return fallback;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch (err) {
+    throw new Error(`data/${name} bozuk: ${(err as Error).message}`);
   }
 }
 
@@ -115,7 +137,7 @@ export function leagueMatches(code: string): MatchView[] {
 export function leagueTable(code: string) {
   // A cup table is its league phase only.
   const ms = leagueMatches(code).filter((m) => !isCup(code) || m.round <= 8);
-  return buildTable(ms, ms.flatMap((m) => [m.home, m.away]));
+  return buildTable(ms, ms.flatMap((m) => [m.home, m.away]), tiebreakOf(code));
 }
 
 export function teamLeague(slug: string): LeagueCode | undefined {

@@ -1,5 +1,5 @@
 import type { Lang } from "@/lib/i18n";
-import { team } from "@/lib/teams";
+import { team, teamLang } from "@/lib/teams";
 import { Crest } from "./Crest";
 
 /** "[crest] Home – [crest] Away", or with the score between them; long names shorten with an ellipsis. */
@@ -9,12 +9,12 @@ export function TeamPair({ home, away, lang, score, short = false }: { home: str
     <span className="pair">
       <span className="pair-t">
         <Crest slug={home} size="sm" />
-        <span className="pair-n">{nm(home)}</span>
+        <span className="pair-n" lang={teamLang(home, lang)}>{nm(home)}</span>
       </span>
       <span className={score ? "pair-s num" : "pair-sep"}>{score ?? "–"}</span>
       <span className="pair-t">
         <Crest slug={away} size="sm" />
-        <span className="pair-n">{nm(away)}</span>
+        <span className="pair-n" lang={teamLang(away, lang)}>{nm(away)}</span>
       </span>
     </span>
   );

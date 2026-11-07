@@ -62,7 +62,9 @@ export function Analysis({ lang }: { lang: Lang }) {
 
         <Link href={p.surprises} className="card card-pad hub-card reveal">
           <span className="eyebrow">{t.surprises}</span>
+          {shock && <small className="muted">{t.lastShock}</small>}
           <h2>{shock ? `${team(shock.m.home, lang).name} ${shock.m.hg}-${shock.m.ag} ${team(shock.m.away, lang).name}` : t.favsAtRisk}</h2>
+          {shock && risks.length > 0 && <small className="muted">{t.favsAtRisk}</small>}
           <div className="mini-list">
             {risks.map(({ m, dog }) => (
               <div key={m.id} className="mini-item">

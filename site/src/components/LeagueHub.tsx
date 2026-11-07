@@ -65,7 +65,7 @@ export function LeagueHub({ lang }: { lang: Lang }) {
           </button>
         ))}
       </div>
-      {current === "standings" && <Leaderboard lang={lang} me={account.username} />}
+      {current === "standings" && <Leaderboard lang={lang} me={account.username} onFirstPick={() => open("mine")} />}
       {current === "groups" && <Groups account={account} lang={lang} onSignIn={() => open("account")} />}
       {current === "mine" && <MyPicks lang={lang} cloud={cloud} />}
       {current === "account" && <AccountPanel account={account} lang={lang} />}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { MatchView } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -8,9 +9,15 @@ import { dict, type Lang } from "@/lib/i18n";
 import { useFavorites } from "./favorites";
 import { MatchRow } from "./MatchRow";
 
-/** Steps through a league's matchdays or a cup's stages. `labels[i]` names `rounds[i]`. */
-export function RoundBrowser({ matches, rounds, labels, initial, lang, weekBase }: { matches: MatchView[]; rounds: number[]; labels: string[]; initial: number; lang: Lang; weekBase?: string }) {
-  const [round, setRound] = useState(initial);
+/**
+ * Steps through a league's matchdays or a cup's stages. `labels[i]` names `rounds[i]`. A league page
+ * sends only the rounds around the current one; picking another opens that round's own page.
+ */
+export function RoundBrowser({ matches, rounds, labels, initial, lang, weekBase, partial = false }: { matches: MatchView[]; rounds: number[]; labels: string[]; initial: number; lang: Lang; weekBase?: string; partial?: boolean }) {
+  const [round, setShown] = useState(initial);
+  const router = useRouter();
+  const loaded = new Set(matches.map((m) => m.round));
+  const setRound = (r: number) => (partial && weekBase && !loaded.has(r) ? router.push(`${weekBase}/${r}`) : setShown(r));
   const at = Math.max(rounds.indexOf(round), 0);
   const { favorites } = useFavorites();
   const t = dict(lang);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { CompareData, CompareTeam } from "@/lib/compare";
 import { fmt } from "@/lib/format";
+import { fixtureId } from "@/lib/leagues";
 import { withBrand } from "./Brand";
 import { dict, paths, type Lang } from "@/lib/i18n";
 
@@ -143,7 +144,7 @@ export function CompareTool({ lang }: { lang: Lang }) {
     [A.slug, B.slug],
     [B.slug, A.slug],
   ]
-    .map(([h, w]) => ({ id: `${h}-${w}`, home: h, away: w, fx: data.fixtures[`${h}-${w}`] }))
+    .map(([h, w]) => ({ id: fixtureId(h, w), home: h, away: w, fx: data.fixtures[fixtureId(h, w)] }))
     .filter((x) => x.fx)
     .sort((x, y) => x.fx[0].localeCompare(y.fx[0]));
   const name = (s: string) => data.teams.find((x) => x.slug === s)?.name[lang] ?? s;
@@ -162,7 +163,11 @@ export function CompareTool({ lang }: { lang: Lang }) {
           [t.neutral, 0],
           [t.atHome(A.name[lang]), data.model.home],
           [t.atHome(B.name[lang]), -data.model.home],
-        ] as const).map(([label, home]) => ({ label, p: meet(data.model!, A.shared!, B.shared!, home) }))
+        ] as const).map(([label, home], i) => {
+          // A real game still to play between them shows the match page's own prediction.
+          const real = i === 1 ? data.fixtures[fixtureId(A.slug, B.slug)]?.[5] : i === 2 ? data.fixtures[fixtureId(B.slug, A.slug)]?.[5] : null;
+          return { label, p: real ?? meet(data.model!, A.shared!, B.shared!, home) };
+        })
       : [];
 
   return (
@@ -223,7 +228,7 @@ export function CompareTool({ lang }: { lang: Lang }) {
                     <div className="cmp-meet-top">
                       <span>{label}</span>
                       <span className="num">
-                        {f.pct(q[0])} · {f.pct(q[1])} · {f.pct(q[2])}
+                        1 {f.pct(q[0])} · X {f.pct(q[1])} · 2 {f.pct(q[2])}
                       </span>
                     </div>
                     <div className="pbar" aria-hidden="true">

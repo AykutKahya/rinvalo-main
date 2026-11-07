@@ -20,7 +20,7 @@ export function MatchRow({ m, lang, favorites = [], showDate = false }: { m: Mat
   const verdict = m.hit === null ? "" : m.hit ? " ok" : " no";
 
   return (
-    <Link href={paths(lang).matchOf(m.id)} className="mrow">
+    <Link href={paths(lang).matchOf(m.id)} className="mrow" prefetch={false}>
       <span className="t">
         {m.status === "live" ? (
           <span className="pill live">{t.row.live}</span>
@@ -33,7 +33,7 @@ export function MatchRow({ m, lang, favorites = [], showDate = false }: { m: Mat
         )}
         {showDate && (
           <small>
-            {f.dayNum(m.kickoff)} {f.shortDay(m.kickoff)}
+            {f.dayMonth(m.kickoff)} {f.shortDay(m.kickoff)}
           </small>
         )}
       </span>

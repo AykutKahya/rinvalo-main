@@ -22,8 +22,61 @@ export function compareRows(a: TableRow, b: TableRow, byName = true): number {
   return b.points - a.points || b.gf - b.ga - (a.gf - a.ga) || b.gf - a.gf || (byName ? a.team.localeCompare(b.team) : 0);
 }
 
+/** How clubs level on points are split: goal difference, or first the games between them. */
+export type Tiebreak = "gd" | "h2h";
+
+/** Leagues that look at the games between the level clubs first. */
+export const H2H_LEAGUES = new Set(["super-lig", "la-liga", "serie-a"]);
+export const tiebreakOf = (league: string): Tiebreak => (H2H_LEAGUES.has(league) ? "h2h" : "gd");
+
+export type Score = { home: string; away: string; hg: number; ag: number };
+
+/**
+ * Orders rows by points, then within each group level on points by `rule`. Head-to-head counts only
+ * once the level clubs have all played each other home and away, as the leagues apply it; until
+ * then (and for "gd") goal difference and goals decide. `tie` breaks what is still level.
+ */
+export function rankRows(rows: TableRow[], games: Score[], rule: Tiebreak, tie: (a: TableRow, b: TableRow) => number = (a, b) => a.team.localeCompare(b.team)): TableRow[] {
+  const general = (a: TableRow, b: TableRow) => compareRows(a, b, false) || tie(a, b);
+  const sorted = [...rows].sort((a, b) => b.points - a.points || general(a, b));
+  if (rule !== "h2h") return sorted;
+  const out: TableRow[] = [];
+  for (let i = 0; i < sorted.length; ) {
+    let j = i + 1;
+    while (j < sorted.length && sorted[j].points === sorted[i].points) j++;
+    const group = sorted.slice(i, j);
+    i = j;
+    if (group.length < 2) {
+      out.push(...group);
+      continue;
+    }
+    const inGroup = new Set(group.map((r) => r.team));
+    const mutual = games.filter((g) => inGroup.has(g.home) && inGroup.has(g.away));
+    // Every pair home and away: n·(n−1) games.
+    if (mutual.length < group.length * (group.length - 1)) {
+      out.push(...group);
+      continue;
+    }
+    const mini = new Map(group.map((r) => [r.team, { pts: 0, gd: 0 }]));
+    for (const g of mutual) {
+      const h = mini.get(g.home)!;
+      const a = mini.get(g.away)!;
+      h.gd += g.hg - g.ag;
+      a.gd += g.ag - g.hg;
+      if (g.hg > g.ag) h.pts += 3;
+      else if (g.hg < g.ag) a.pts += 3;
+      else {
+        h.pts++;
+        a.pts++;
+      }
+    }
+    out.push(...group.sort((a, b) => mini.get(b.team)!.pts - mini.get(a.team)!.pts || mini.get(b.team)!.gd - mini.get(a.team)!.gd || general(a, b)));
+  }
+  return out;
+}
+
 /** Standings from finished fixtures. `teams` makes sure clubs without a game still appear. */
-export function buildTable(fixtures: Fixture[], teams: Iterable<string> = []): TableRow[] {
+export function buildTable(fixtures: Fixture[], teams: Iterable<string> = [], rule: Tiebreak = "gd"): TableRow[] {
   const rows = new Map<string, TableRow>();
   const row = (t: string) => {
     if (!rows.has(t)) rows.set(t, emptyRow(t));
@@ -68,5 +121,5 @@ export function buildTable(fixtures: Fixture[], teams: Iterable<string> = []): T
     }
   }
   for (const r of rows.values()) r.form = r.form.slice(-5);
-  return [...rows.values()].sort(compareRows);
+  return rankRows([...rows.values()], finished.map((f) => ({ home: f.home, away: f.away, hg: f.hg!, ag: f.ag! })), rule);
 }

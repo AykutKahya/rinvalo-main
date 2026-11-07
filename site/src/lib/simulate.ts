@@ -3,7 +3,7 @@
  * takımın şampiyonluk, Avrupa ve küme düşme ihtimalini sayar.
  */
 import type { League } from "./leagues";
-import { buildTable, compareRows, type TableRow } from "./table";
+import { buildTable, compareRows, rankRows, tiebreakOf, type Score, type TableRow } from "./table";
 import type { Fixture, MatchImpact, Prediction, TeamOutlook } from "./types";
 
 /** Small deterministic PRNG so the published numbers do not jump between identical runs. */
@@ -86,7 +86,9 @@ export function simulateLeague(
   runs = 5000,
   focus: Set<string> = new Set(),
 ): { outlook: TeamOutlook[]; impact: Record<string, MatchImpact> } {
-  const base = buildTable(fixtures, fixtures.flatMap((f) => [f.home, f.away]));
+  const rule = tiebreakOf(league.code);
+  const base = buildTable(fixtures, fixtures.flatMap((f) => [f.home, f.away]), rule);
+  const done: Score[] = fixtures.filter((f) => f.status === "finished" && f.hg !== null && f.ag !== null).map((f) => ({ home: f.home, away: f.away, hg: f.hg!, ag: f.ag! }));
   const remaining = fixtures
     .filter((f) => f.status !== "finished")
     .map((f) => ({ f, p: predictions[f.id] }))
@@ -123,6 +125,7 @@ export function simulateLeague(
   for (let run = 0; run < runs; run++) {
     const rows = new Map<string, TableRow>(base.map((r) => [r.team, { ...r, form: [] }]));
     const shock = new Map(base.map((r) => [r.team, gauss(rand) * STRENGTH_SD]));
+    const games: Score[] = rule === "h2h" ? [...done] : [];
     for (const { f, dist } of remaining) {
       const d = (shock.get(f.home) ?? 0) - (shock.get(f.away) ?? 0);
       const [hg, ag] = sampleScore(dist, d, rand);
@@ -131,11 +134,13 @@ export function simulateLeague(
         tilt.set(f.id, d);
       }
       add(rows.get(f.home)!, rows.get(f.away)!, hg, ag, 1);
+      if (rule === "h2h") games.push({ home: f.home, away: f.away, hg, ag });
     }
     // Level on points, goal difference and goals: a coin toss, never the alphabet.
     const lot = new Map([...rows.keys()].map((t) => [t, rand()]));
     const cmp = (x: TableRow, y: TableRow) => compareRows(x, y, false) || lot.get(x.team)! - lot.get(y.team)!;
-    const order = [...rows.values()].sort(cmp);
+    // The final table, with the league's own tiebreak; the replays below rank by goal difference.
+    const order = rankRows([...rows.values()], games, rule, (x, y) => lot.get(x.team)! - lot.get(y.team)!);
     const ending = (i: number) => [i === 0 ? 1 : 0, i < league.zones.europe ? 1 : 0, i >= n - league.zones.relegation ? 1 : 0];
     const placeOf = (row: TableRow) => {
       let i = 0;

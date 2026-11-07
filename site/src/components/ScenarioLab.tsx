@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { fmt } from "@/lib/format";
 import { dict, type Lang } from "@/lib/i18n";
 import { leagueByCode } from "@/lib/leagues";
@@ -9,7 +9,8 @@ import { team } from "@/lib/teams";
 import type { Fixture, Prediction, TeamOutlook } from "@/lib/types";
 import { Crest } from "./Crest";
 
-const RUNS = 2000;
+/** As many runs as the published odds, from the same data: with no picks the two agree exactly. */
+const RUNS = 5000;
 type Pick = 0 | 1 | 2;
 
 /** A prediction held to one result: the score grid outside that result is dropped. */
@@ -31,21 +32,37 @@ function readLink(): Record<string, Pick> {
   );
 }
 
-/**
- * League page "what if": pick results for games still to play and the season is simulated again
- * in the browser, next to the same simulation without the picks.
- */
-export function ScenarioLab({
-  code,
-  fixtures,
-  predictions,
-  lang,
-}: {
-  code: string;
+/** What the lab simulates, served by /lab/<code> and fetched once the tab is opened. */
+export interface LabData {
   fixtures: Fixture[];
   predictions: Record<string, Prediction>;
-  lang: Lang;
-}) {
+}
+
+const NONE: LabData = { fixtures: [], predictions: {} };
+
+/**
+ * League page "what if": pick results for games still to play and the season is simulated again
+ * in the browser, next to the published season odds (`base`).
+ */
+export function ScenarioLab({ code, base, lang }: { code: string; base: TeamOutlook[]; lang: Lang }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<LabData | null>(null);
+  // The tab is hidden until opened; the data (a season of score grids) loads only then.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || data) return;
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      fetch(`/lab/${code}`)
+        .then((r) => (r.ok ? r.json() : NONE))
+        .then(setData)
+        .catch(() => setData(NONE));
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [code, data]);
+  const { fixtures, predictions } = data ?? NONE;
   const t = dict(lang).lab;
   const o = dict(lang).outlook;
   const f = fmt(lang);
@@ -58,7 +75,6 @@ export function ScenarioLab({
 
   const upcoming = useMemo(() => fixtures.filter((x) => x.status !== "finished" && predictions[x.id]), [fixtures, predictions]);
   const rounds = useMemo(() => [...new Set(upcoming.map((x) => x.round))].sort((a, b) => a - b), [upcoming]);
-  const base = useMemo(() => simulateLeague(league, fixtures, predictions, RUNS).outlook, [league, fixtures, predictions]);
 
   useEffect(() => {
     const fromLink = readLink();
@@ -115,7 +131,7 @@ export function ScenarioLab({
   const name = (s: string) => team(s, lang).name;
 
   return (
-    <div className="lab">
+    <div className="lab" ref={ref}>
       <div className="card card-pad lab-games">
         <div className="section-title" style={{ margin: 0 }}>
           <h2 style={{ fontSize: 15 }}>{t.games}</h2>
@@ -132,6 +148,7 @@ export function ScenarioLab({
             )}
           </span>
         </div>
+        {!data && <p className="muted">{t.busy}</p>}
         {rounds.slice(0, shown).map((r) => (
           <div key={r}>
             <div className="lab-round">{dict(lang).round(r)}</div>

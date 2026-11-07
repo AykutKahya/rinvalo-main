@@ -9,7 +9,7 @@ import { nameLang } from "@/lib/leagues";
 import { pickOf } from "@/lib/model";
 import { matchOfTheWeek, recentResults, upcoming } from "@/lib/picks";
 import type { TableRow } from "@/lib/table";
-import { team } from "@/lib/teams";
+import { team, teamLang } from "@/lib/teams";
 import { TeamPair } from "@/components/TeamPair";
 import s from "./headlines.module.css";
 
@@ -130,7 +130,7 @@ export function Headlines({ lang }: { lang: Lang }) {
   const t = d.headlines;
   const path = paths(lang);
   const copy = lang === "en" ? EN : TR;
-  const name = (slug: string) => team(slug, lang).name;
+  const name = (slug: string) => <span lang={teamLang(slug, lang)}>{team(slug, lang).name}</span>;
   const now = Date.now();
   const all = getMatches();
   const sim = getSimulation();

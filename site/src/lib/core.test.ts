@@ -155,3 +155,17 @@ test("live odds: a two-goal lead late on is nearly safe, level at kick-off match
   assert.equal(minutePlayed("2026-10-10T18:00:00Z", Date.parse("2026-10-10T18:50:00Z")), 45);
   assert.equal(minutePlayed("2026-10-10T18:00:00Z", Date.parse("2026-10-10T19:30:00Z")), 75);
 });
+
+test("head-to-head splits clubs level on points once they have met home and away", () => {
+  // c tops the table; a and b both have 4 points, b the better goal difference, a the better record between them.
+  const games = [
+    fx("1", "a", "b", 1, 0, "2026-08-01T18:00:00Z"),
+    fx("2", "b", "a", 0, 0, "2026-08-08T18:00:00Z"),
+    fx("3", "b", "c", 5, 0, "2026-08-15T18:00:00Z"),
+    fx("4", "c", "a", 1, 0, "2026-08-22T18:00:00Z"),
+    fx("5", "a", "c", 0, 1, "2026-08-29T18:00:00Z"),
+    fx("6", "c", "b", 1, 0, "2026-09-05T18:00:00Z"),
+  ];
+  assert.deepEqual(buildTable(games, [], "gd").map((r) => r.team), ["c", "b", "a"]);
+  assert.deepEqual(buildTable(games, [], "h2h").map((r) => r.team), ["c", "a", "b"]);
+});

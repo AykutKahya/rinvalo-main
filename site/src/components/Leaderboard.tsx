@@ -26,7 +26,7 @@ export function since(p: Period): string | null {
 }
 
 /** League standings over settled games, from the database. */
-export function Leaderboard({ lang, me }: { lang: Lang; me: string | null }) {
+export function Leaderboard({ lang, me, onFirstPick }: { lang: Lang; me: string | null; onFirstPick?: () => void }) {
   const t = dict(lang).league2;
   const [period, setPeriod] = useState<Period>("week");
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -46,6 +46,17 @@ export function Leaderboard({ lang, me }: { lang: Lang; me: string | null }) {
         <PeriodPicker period={period} onChange={setPeriod} lang={lang} />
       </div>
       <BoardTable rows={rows} me={me} lang={lang} />
+      {/* A young league: say so and point to the first pick, rather than leave a near-empty table alone. */}
+      {rows !== null && rows.length < 10 && (
+        <p className="muted" style={{ margin: "10px 0 0", fontSize: 13.5 }}>
+          {t.early}{" "}
+          {onFirstPick && (
+            <button className="linklike" onClick={onFirstPick}>
+              {t.firstPick}
+            </button>
+          )}
+        </p>
+      )}
     </section>
   );
 }

@@ -31,8 +31,8 @@ export interface CompareTeam {
   season: number;
 }
 
-/** Keyed by fixture id ("home-away"): [kickoff date, hg, ag, predicted home goals, predicted away goals]. */
-export type CompareFixture = [string, number | null, number | null, number | null, number | null];
+/** Keyed by fixture id: [kickoff date, hg, ag, predicted home goals, predicted away goals, 1-X-2 of a game still to play]. */
+export type CompareFixture = [string, number | null, number | null, number | null, number | null, [number, number, number] | null];
 
 export interface CompareData {
   leagues: { code: string; name: string }[];
@@ -105,7 +105,7 @@ export function compareData(): CompareData {
     });
   }
   const fixtures = Object.fromEntries(
-    getMatches().map((m): [string, CompareFixture] => [m.id, [m.kickoff.slice(0, 10), m.hg, m.ag, m.prediction?.score[0] ?? null, m.prediction?.score[1] ?? null]]),
+    getMatches().map((m): [string, CompareFixture] => [m.id, [m.kickoff.slice(0, 10), m.hg, m.ag, m.prediction?.score[0] ?? null, m.prediction?.score[1] ?? null, m.status !== "finished" && m.prediction ? m.prediction.p : null]]),
   );
   return { leagues: LEAGUES.map((l) => ({ code: l.code, name: l.name })), teams, fixtures, model: europe.model ?? null };
 }

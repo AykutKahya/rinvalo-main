@@ -50,6 +50,11 @@ jobs:
         # v7.0.1
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Fix the run's clock
+        # One "now" for every step, so a game that kicks off mid-run is predicted the same way by
+        # the fallback and by the engine (otherwise the fallback could be the one kept for it).
+        run: echo "RINVALO_NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
       - name: Install
         run: npm ci --no-audit --no-fund
 
@@ -105,6 +110,11 @@ jobs:
         continue-on-error: true
         run: python ../engine/predict.py
 
+      - name: Keep the engine's last predictions
+        # A broken engine must not publish the simple fallback in its place.
+        if: steps.engine.outcome == 'failure'
+        run: npx tsx scripts/keep-engine.ts "$RUNNER_TEMP/before"
+
       - name: European cups
         id: cups
         continue-on-error: true
@@ -115,6 +125,11 @@ jobs:
         # One Elo scale across the nine leagues and the cups; leaves league predictions untouched.
         continue-on-error: true
         run: python ../engine/cups.py
+
+      - name: Shrink logos
+        # New logos come in at 200 px; they are shown at 20-64 px. Leaves small ones alone.
+        continue-on-error: true
+        run: npx tsx scripts/shrink-logos.ts
 
       - name: National teams
         id: intl
@@ -147,11 +162,15 @@ jobs:
         if: steps.push.outputs.changed == 'true'
         env:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-        run: curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel derlemesi istendi."
+        # Storage files are cached for 60 s at the edge; a build that started sooner could read the
+        # previous data, so wait that out first.
+        run: |
+          sleep 65
+          curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel derlemesi istendi."
 
       - name: Health check
         # Steps above may fail without stopping the run; say so here. A broken engine fails the run
-        # (GitHub then emails the owner), since the simple fallback would be published in its place.
+        # (GitHub then emails the owner); its last predictions were kept in the meantime.
         if: always()
         run: |
           for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }} snapshot:${{ steps.snapshot.outcome }} intl:${{ steps.intl.outcome }}; do

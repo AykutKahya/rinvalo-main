@@ -5,7 +5,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const TOKEN_SHA256 = "a59201dab66e59181e5bdb4fc3f21c3969b63f00702a50a6f604763903747cce";
-const PATH = /^(data\/[a-z0-9-]+\.json|assets\.tar\.gz|social\/day-[0-3][0-9]\.jpg)$/;
+const PATH = /^(data\/[a-z0-9-]+\.json|assets\.tar\.gz)$/;
 
 async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   if (!PATH.test(path)) return new Response("path", { status: 400 });
 
   const body = new Uint8Array(await req.arrayBuffer());
-  const type = path.endsWith(".json") ? "application/json" : path.endsWith(".jpg") ? "image/jpeg" : "application/gzip";
+  const type = path.endsWith(".json") ? "application/json" : "application/gzip";
   const { error } = await sb.storage.from("site").upload(path, body, { upsert: true, contentType: type, cacheControl: "60" });
   if (error) return new Response(error.message, { status: 500 });
   return new Response(JSON.stringify({ path, bytes: body.length }), { headers: { "content-type": "application/json" } });

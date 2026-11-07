@@ -9,13 +9,12 @@ import { ScenarioLab } from "@/components/ScenarioLab";
 import { StandingsTable } from "@/components/StandingsTable";
 import { Tabs } from "@/components/Tabs";
 import { XgTable } from "@/components/XgTable";
-import { accuracy, getPredictions, getRatings, getSeason, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
+import { accuracy, getRatings, getSeason, getSimulation, leagueMatches, leagueTable } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, countryOf, CUP_ROUNDS, cupByCode, CUPS, LEAGUES, leagueByCode, nameLang, SEASON, zonesOf, type Cup, type LeagueCode } from "@/lib/leagues";
 import { lite } from "@/lib/picks";
 import { leagueStats, statsUntil } from "@/lib/stats";
-import type { Fixture, Prediction } from "@/lib/types";
 
 export function leagueParams() {
   return [...LEAGUES, ...CUPS].map((l) => ({ code: l.code }));
@@ -123,19 +122,8 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
   const sim = getSimulation();
   const record = accuracy(matches);
   const played = matches.filter((m) => m.status === "finished").length;
-  const rounds = Array.from({ length: league.rounds }, (_, i) => i + 1);
-  // The lab simulates in the browser: only what the simulation reads, with the grid rounded.
-  const labFixtures: Fixture[] = matches.map((m) => ({ id: m.id, league: m.league, round: m.round, kickoff: m.kickoff, home: m.home, away: m.away, venue: null, status: m.status, hg: m.hg, ag: m.ag, source: null }));
-  const allPreds = getPredictions();
-  const labPreds: Record<string, Prediction> = Object.fromEntries(
-    matches
-      .filter((m) => m.status !== "finished" && allPreds[m.id])
-      .map((m) => {
-        const p = allPreds[m.id];
-        return [m.id, { fixtureId: p.fixtureId, p: p.p, lh: p.lh, la: p.la, score: p.score, grid: p.grid.map((row) => row.map((v) => Math.round(v * 1000) / 1000)) } as unknown as Prediction];
-      }),
-  );
-
+  // Only matchdays with games: the others have no page of their own to open.
+  const rounds = Array.from({ length: league.rounds }, (_, i) => i + 1).filter((r) => matches.some((m) => m.round === r));
   return (
     <>
       <JsonLd data={crumbs([["Rinvalo", paths(lang).home], [d.nav.leagues, paths(lang).leagues], [league.name, paths(lang).leagueOf(league.code)]])} />
@@ -156,7 +144,8 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
             label: t.fixtures,
             content: (
               <RoundBrowser
-                matches={matches.map(lite)}
+                matches={matches.filter((m) => Math.abs(m.round - currentRound(code, league.rounds)) <= 2).map(lite)}
+                partial
                 rounds={rounds}
                 labels={rounds.map(d.round)}
                 initial={currentRound(code, league.rounds)}
@@ -193,7 +182,7 @@ export function League({ code: raw, lang }: { code: string; lang: Lang }) {
             ),
           },
           { id: "istatistik", label: t.stats, content: <XgTable rows={leagueStats(code)} until={statsUntil(code)} lang={lang} /> },
-          { id: "senaryo", label: d.lab.tab, content: <ScenarioLab code={code} fixtures={labFixtures} predictions={labPreds} lang={lang} /> },
+          { id: "senaryo", label: d.lab.tab, content: <ScenarioLab code={code} base={sim.leagues[code] ?? []} lang={lang} /> },
         ]}
       />
     </>

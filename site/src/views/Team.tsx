@@ -50,7 +50,8 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
   const outlook = getSimulation().leagues[entry.league]?.find((r) => r.team === slug);
   const now = Date.now();
   const next = matches.find((m) => m.status === "scheduled" && Date.parse(m.kickoff) > now);
-  const played = matches.filter((m) => m.status === "finished").reverse();
+  // League and cup games come from different lists: newest first by date, not by list order.
+  const played = matches.filter((m) => m.status === "finished").sort((a, b) => b.kickoff.localeCompare(a.kickoff));
   const upcoming = matches.filter((m) => m.status !== "finished").slice(0, 6);
   const record = accuracy(matches);
 
@@ -83,7 +84,12 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
             <Link href={path.leagueOf(entry.league)}>{competitionName(entry.league, lang)}</Link>
             {row ? tt.standing(pos + 1, row.points) : ""}
           </p>
-          {row && <Form form={row.form} lang={lang} />}
+          {row && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Form form={row.form} lang={lang} />
+              <small className="muted">{tt.formNote}</small>
+            </span>
+          )}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <FavoriteButton slug={slug} name={t.name} lang={lang} />

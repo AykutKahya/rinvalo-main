@@ -5,8 +5,7 @@
  *   X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET  an X app with read and write access
  *   INSTAGRAM_USER_ID, INSTAGRAM_TOKEN                       a professional account and a page token
  *   BLUESKY_HANDLE, BLUESKY_APP_PASSWORD                     an app password, not the account password
- * Instagram reads the image from a public address, so it is stored as social/day-DD.jpg first
- * (RINVALO_UPLOAD_TOKEN).
+ * Instagram reads the image itself, as JPEG, from rinvalo.net/og/day/tr/<date>?jpg=1.
  *
  *   tsx scripts/social.ts                daily post
  *   tsx scripts/social.ts --dry          print instead of posting (saves the image to /tmp)
@@ -24,7 +23,18 @@ const SUPABASE = process.env.SUPABASE_URL ?? "https://cmwfmjbygorsjjopngky.supab
 const DATA = `${SUPABASE}/storage/v1/object/public/site/data`;
 const SITE = "rinvalo.net";
 const DRY = process.argv.includes("--dry");
-const ONLY = process.argv.find((a) => a.startsWith("--only="))?.slice(7).split(",");
+const CHANNELS = ["telegram", "x", "ig", "bluesky"];
+const ONLY = process.argv
+  .find((a) => a.startsWith("--only="))
+  ?.slice(7)
+  .split(",")
+  .map((c) => c.trim().toLowerCase())
+  .filter(Boolean);
+const unknown = ONLY?.filter((c) => !CHANNELS.includes(c)) ?? [];
+if (unknown.length) {
+  console.error(`Bilinmeyen kanal: ${unknown.join(", ")} (geçerli: ${CHANNELS.join(", ")})`);
+  process.exit(1);
+}
 const on = (channel: string) => !ONLY || ONLY.includes(channel);
 
 async function json<T>(name: string): Promise<T> {
@@ -33,6 +43,7 @@ async function json<T>(name: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+const ORIGIN = process.env.SOCIAL_ORIGIN ?? `https://${SITE}`;
 const istanbulDay = (d: Date | string) => new Date(d).toLocaleDateString("en-CA", { timeZone: "Europe/Istanbul" });
 const time = (iso: string) => new Date(iso).toLocaleTimeString("tr-TR", { timeZone: "Europe/Istanbul", hour: "2-digit", minute: "2-digit" });
 const pick = (p: number[]) => p.indexOf(Math.max(...p));
@@ -133,25 +144,11 @@ async function compose(): Promise<Post | null> {
 
 /** The day's image as JPEG, or null when the site has none for today. */
 async function image(): Promise<Buffer | null> {
-  const url = `${process.env.SOCIAL_ORIGIN ?? `https://${SITE}`}/og/day/tr/${istanbulDay(new Date())}`;
+  const url = `${ORIGIN}/og/day/tr/${istanbulDay(new Date())}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(60_000) });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Görsel: ${res.status}`);
   return sharp(Buffer.from(await res.arrayBuffer())).flatten({ background: "#0b1220" }).jpeg({ quality: 90, mozjpeg: true }).toBuffer();
-}
-
-/** Stores the image where Instagram can read it and returns its public address. */
-async function publish(jpg: Buffer): Promise<string> {
-  const token = process.env.RINVALO_UPLOAD_TOKEN;
-  if (!token) throw new Error("Instagram: RINVALO_UPLOAD_TOKEN yok, görsel yüklenemedi.");
-  const path = `social/day-${istanbulDay(new Date()).slice(8)}.jpg`;
-  const res = await fetch(`${SUPABASE}/functions/v1/upload?path=${encodeURIComponent(path)}`, {
-    method: "POST",
-    headers: { "x-upload-token": token, "content-type": "image/jpeg" },
-    body: new Uint8Array(jpg),
-  });
-  if (!res.ok) throw new Error(`Görsel yükleme: ${res.status} ${await res.text()}`);
-  return `${SUPABASE}/storage/v1/object/public/site/${path}?v=${Date.now()}`;
 }
 
 async function telegram(text: string, jpg: Buffer | null) {
@@ -249,7 +246,7 @@ async function instagram(caption: string, jpg: Buffer | null) {
     if (!res.ok) throw new Error(`Instagram: ${res.status} ${body.error?.message ?? ""}`);
     return body;
   };
-  const { id } = await call(`${user}/media`, { image_url: await publish(jpg), caption });
+  const { id } = await call(`${user}/media`, { image_url: `${ORIGIN}/og/day/tr/${istanbulDay(new Date())}?jpg=1`, caption });
   // The container is processed in the background; publishing before it is ready fails.
   for (let i = 0; i < 20; i++) {
     const { status_code } = await call(id!, { fields: "status_code" }, "GET");

@@ -13,7 +13,7 @@ import { CUP_ROUNDS, CUPS, fixtureId, SEASON, TSDB_SEASON, type Cup } from "../s
 import { normalizeName, resolveTeam } from "../src/lib/teams";
 import type { Fixture } from "../src/lib/types";
 import { ESPN_LEAGUE, gamesOn, leaguePhase } from "./sources/espn";
-import { fetchEvents, status, type TsdbEvent } from "./sources/thesportsdb";
+import { fetchEvents, parseKickoff, status, type TsdbEvent } from "./sources/thesportsdb";
 
 const DATA = join(import.meta.dirname, "../data");
 const PUBLIC = join(import.meta.dirname, "../public");
@@ -82,7 +82,8 @@ function register(name: string): string {
 
 function kickoffOf(e: TsdbEvent): Date | null {
   const ts = e.strTimestamp ?? (e.dateEvent ? `${e.dateEvent}T${e.strTime ?? "12:00:00"}` : null);
-  return ts ? new Date(ts.endsWith("Z") || ts.includes("+") ? ts : `${ts}Z`) : null;
+  const d = ts ? parseKickoff(ts) : null;
+  return d && !Number.isNaN(d.getTime()) ? d : null;
 }
 
 /** All games of one cup season from 1 September on (the qualifiers end in August). */
@@ -134,7 +135,7 @@ const PER_ROUND = 18;
  * game's round is one more than the games either club has already played.
  */
 async function fillFromEspn(byId: Map<string, Fixture>) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = (process.env.RINVALO_NOW ?? new Date().toISOString()).slice(0, 10);
   for (const cup of CUPS) {
     const ph = PHASE[cup.code];
     if (!ph || !ESPN_LEAGUE[cup.code]) continue;

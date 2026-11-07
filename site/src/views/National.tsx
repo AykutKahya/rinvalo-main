@@ -6,7 +6,7 @@ import { fmt } from "@/lib/format";
 import { alternates, dict, type Lang } from "@/lib/i18n";
 import { nation, nationSlug } from "@/lib/nations";
 
-function Badge({ name }: { name: string }) {
+export function Badge({ name }: { name: string }) {
   const file = `/nations/${nationSlug(name)}.png`;
   if (!existsSync(join(process.cwd(), "public", file))) return <span className="nat-badge" aria-hidden="true" />;
   // eslint-disable-next-line @next/next/no-img-element -- local badge
@@ -74,7 +74,7 @@ export function National({ lang }: { lang: Lang }) {
                             {g.pred.score[0]}-{g.pred.score[1]}
                           </b>
                           <span className="nat-pct num">
-                            {f.pct(g.pred.p[0])} · {f.pct(g.pred.p[1])} · {f.pct(g.pred.p[2])}
+                            1 {f.pct(g.pred.p[0])} · X {f.pct(g.pred.p[1])} · 2 {f.pct(g.pred.p[2])}
                           </span>
                           <span className="pbar" aria-hidden="true">
                             <span className="h" style={{ width: `${g.pred.p[0] * 100}%` }} />

@@ -166,6 +166,11 @@ async function main() {
   // Manual corrections always win.
   for (const [id, iso] of Object.entries(overrides.kickoffs)) {
     const f = byId.get(id);
+    // Without an offset the runner would read the time as UTC, three hours off for a Turkish time.
+    if (!/(Z|[+-]\d\d:\d\d)$/.test(iso) || Number.isNaN(Date.parse(iso))) {
+      console.warn(`overrides.kickoffs.${id}: saat diliminli olmalı (ör. 2026-11-07T19:00:00+03:00), atlandı.`);
+      continue;
+    }
     if (f) byId.set(id, { ...f, kickoff: new Date(iso).toISOString() });
   }
   for (const id of overrides.postponed) {

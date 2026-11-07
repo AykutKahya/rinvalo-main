@@ -1,5 +1,5 @@
 import { getRatings, leagueMatches } from "./data";
-import { buildTable } from "./table";
+import { buildTable, tiebreakOf } from "./table";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SEASON } from "./leagues";
@@ -36,6 +36,7 @@ export function teamSeries(slug: string, league: string): TeamSeries {
     const table = buildTable(
       ms.filter((x) => x.round <= m.round),
       teams,
+      tiebreakOf(league),
     );
     return { date: m.kickoff.slice(0, 10), value: table.findIndex((r) => r.team === slug) + 1 };
   });

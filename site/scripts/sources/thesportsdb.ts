@@ -53,13 +53,16 @@ export interface TsdbEvent {
   strLeagueBadge?: string | null;
 }
 
+/** TheSportsDB times are UTC unless they carry their own offset ("Z", "+03:00", "-03:00"). */
+export const parseKickoff = (ts: string) => new Date(/(Z|[+-]\d\d:?\d\d)$/.test(ts) ? ts : `${ts}Z`);
+
 export function status(e: TsdbEvent, hasScore: boolean, kickoff: number): FixtureStatus {
   const s = (e.strStatus ?? "").toLowerCase();
   if (e.strPostponed === "yes" || /postp|pst|canc|abd|susp/.test(s)) return "postponed";
   if (/^(ft|aet|pen|match finished|finished)/.test(s) && hasScore) return "finished";
   if (/^(1h|2h|ht|et|live|p)$/.test(s)) return "live";
   // Some finished events keep "NS" for a while; trust a score once the match is clearly over.
-  if (hasScore && Date.now() > kickoff + 2.5 * 3600_000) return "finished";
+  if (hasScore && Date.parse(process.env.RINVALO_NOW ?? new Date().toISOString()) > kickoff + 2.5 * 3600_000) return "finished";
   return "scheduled";
 }
 
@@ -90,7 +93,12 @@ export async function fetchRound(league: League, round: number): Promise<RoundRe
     if (e.strLeagueBadge) leagueBadge = e.strLeagueBadge;
     const ts = e.strTimestamp ?? (e.dateEvent ? `${e.dateEvent}T${e.strTime ?? "12:00:00"}` : null);
     if (!ts) continue;
-    const kickoff = new Date(ts.endsWith("Z") || ts.includes("+") ? ts : `${ts}Z`);
+    const kickoff = parseKickoff(ts);
+    // One malformed event must not take the whole round down with it.
+    if (Number.isNaN(kickoff.getTime())) {
+      console.warn(`Geçersiz saat atlandı: ${e.strHomeTeam} – ${e.strAwayTeam} (${ts})`);
+      continue;
+    }
     const hasScore = e.intHomeScore !== null && e.intHomeScore !== "" && e.intAwayScore !== null && e.intAwayScore !== "";
     const st = status(e, hasScore, kickoff.getTime());
     fixtures.push({

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 import { WHITE_LOGO } from "@/components/Crest";
 import { getInternational, getMatches } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -63,7 +64,7 @@ function dayRows(date: string, lang: Lang): Row[] {
   return [...national, ...clubs].sort((a, b) => a.rank - b.rank || a.kickoff.localeCompare(b.kickoff));
 }
 
-export async function GET(_: Request, { params }: { params: Promise<{ lang: string; date: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ lang: string; date: string }> }) {
   const { lang: raw, date } = await params;
   const lang: Lang = raw === "en" ? "en" : "tr";
   const rows = /^\d{4}-\d{2}-\d{2}$/.test(date) ? dayRows(date, lang) : [];
@@ -99,7 +100,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ lang: stri
     );
   };
 
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: C.bg, color: C.ink, fontFamily: "Barlow", padding: "56px 48px 44px" }}>
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -133,6 +134,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ lang: stri
         </div>
       </div>
     ),
-    { width: 1080, height: 1350, fonts: FONTS, headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" } },
+    { width: 1080, height: 1350, fonts: FONTS, headers: { "Cache-Control": CACHE } },
   );
+  // Instagram takes only JPEG, read from a public address: ?jpg=1 serves the same image as JPEG.
+  if (!new URL(req.url).searchParams.has("jpg")) return image;
+  const jpg = await sharp(Buffer.from(await image.arrayBuffer())).flatten({ background: C.bg }).jpeg({ quality: 90, mozjpeg: true }).toBuffer();
+  return new Response(new Uint8Array(jpg), { headers: { "Content-Type": "image/jpeg", "Cache-Control": CACHE } });
 }
+
+const CACHE = "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600";

@@ -144,6 +144,10 @@ h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
 .theme-toggle:hover { background: var(--card-2); transform: rotate(-12deg); }
 .theme-toggle svg { width: 20px; height: 20px; }
 .logo-word { font-family: var(--font-display); font-weight: 800; font-size: 25px; letter-spacing: .06em; line-height: 1; }
+.logo-text { display: flex; flex-direction: column; gap: 2px; }
+/* What the site is, said once under the name on phones, where there is no menu bar to say it. */
+.logo-tag { display: none; font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--muted); line-height: 1; }
+@media (max-width: 860px) { .logo-tag { display: block; } }
 .nav { display: flex; gap: 2px; font-weight: 600; font-size: 14.5px; }
 .nav a { padding: 8px 13px; border-radius: 999px; color: var(--muted); transition: background .15s, color .15s; }
 .nav a:hover { color: var(--ink); background: var(--card-2); }
@@ -309,6 +313,7 @@ main { padding-block: 20px 48px; }
 .vs .crest { margin: 0 auto 6px; }
 .vs .big { font-family: var(--font-num); font-size: 30px; font-weight: 700; letter-spacing: .02em; }
 .vs a:hover { color: var(--accent); }
+.vs .big-label { display: block; font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); line-height: 1; margin-bottom: 4px; }
 .kv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .kv-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 560px) { .kv-grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -934,3 +939,16 @@ text.ph-away { fill: var(--away); }
 .nat-badge { display: inline-block; width: 22px; height: 22px; object-fit: contain; vertical-align: middle; flex: none; }
 .nat-teams > span { display: flex; align-items: center; gap: 8px; }
 .mi-t .nat-badge { width: 18px; height: 18px; vertical-align: -4px; }
+
+.nat-next { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; text-decoration: none; color: inherit; }
+.nat-next-row { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-display); font-size: 18px; flex-wrap: wrap; }
+.nat-next .big-pick { display: flex; flex-direction: column; align-items: center; font-size: 26px; font-weight: 800; line-height: 1; padding: 0 6px; }
+.nat-next .big-pick small { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.nat-next > small { text-align: center; }
+.linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); font-weight: 700; cursor: pointer; }
+
+/* Season-end table: on phones the odds come right after the team, and the bars shrink to fit. */
+.ol-bar { min-width: 110px; }
+@media (max-width: 640px) { .ol-bar { min-width: 76px; } }
+/* Finger-sized taps on touch screens. */
+@media (pointer: coarse) { .chip, .tabs button { min-height: 40px; } .chip { padding-inline: 13px; } }

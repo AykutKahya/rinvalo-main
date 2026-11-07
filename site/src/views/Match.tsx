@@ -277,7 +277,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                           <span>{label}</span>
                           <b>{value}</b>
                           <span className="num muted">{prob != null ? f.pct(prob, 1) : ""}</span>
-                          {ours && <em>{tm.prediction}</em>}
+                          {ours && <em>{withBrand(tm.prediction)}</em>}
                         </li>
                       ))}
                     </ul>
@@ -407,9 +407,17 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                       {team(x.away).short}
                       <Crest slug={x.away} size="sm" />
                     </span>
-                    <b className="num" style={{ fontSize: 13 }}>
-                      {x.status === "finished" ? `${x.hg}-${x.ag}` : x.prediction ? `${x.prediction.score[0]}-${x.prediction.score[1]}` : f.time(x.kickoff)}
-                    </b>
+                    {/* A played game shows its result, marked; an upcoming one our pick, in muted type. */}
+                    {x.status === "finished" ? (
+                      <b className="num" style={{ fontSize: 13 }}>
+                        <small className="muted" style={{ fontWeight: 700, marginRight: 4 }}>{tm.ft}</small>
+                        {x.hg}-{x.ag}
+                      </b>
+                    ) : (
+                      <span className="num muted" style={{ fontSize: 13 }}>
+                        {x.prediction ? `${tm.pickShort} ${x.prediction.score[0]}-${x.prediction.score[1]}` : f.time(x.kickoff)}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

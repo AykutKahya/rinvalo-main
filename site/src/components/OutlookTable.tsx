@@ -51,10 +51,10 @@ export function OutlookTable({
             <tr>
               <th className="c">#</th>
               <th>{d.table.team}</th>
-              <th className="c">{d.seasonEnd.now}</th>
+              <th className="c hide-sm">{d.seasonEnd.now}</th>
               <th className="c">{d.seasonEnd.projected}</th>
               {schedule && (
-                <th className="c" title={d.seasonEnd.scheduleHint}>
+                <th className="c hide-sm" title={d.seasonEnd.scheduleHint}>
                   {d.seasonEnd.schedule}
                 </th>
               )}
@@ -79,22 +79,22 @@ export function OutlookTable({
                       {team(r.team, lang).name}
                     </Link>
                   </td>
-                  <td className="c num muted">{pts}</td>
+                  <td className="c num muted hide-sm">{pts}</td>
                   <td className="c num">
                     <b>{r.avgPoints.toFixed(0)}</b>
                   </td>
                   {schedule && (
-                    <td className={`c num ${(schedule.get(r.team) ?? 0) >= 15 ? "down" : (schedule.get(r.team) ?? 0) <= -15 ? "up" : "muted"}`}>
+                    <td className={`c num hide-sm ${(schedule.get(r.team) ?? 0) >= 15 ? "down" : (schedule.get(r.team) ?? 0) <= -15 ? "up" : "muted"}`}>
                       {schedule.has(r.team) ? `${schedule.get(r.team)! > 0 ? "+" : ""}${Math.round(schedule.get(r.team)!)}` : "–"}
                     </td>
                   )}
-                  <td style={{ minWidth: 110 }}>
+                  <td className="ol-bar">
                     <Bar v={r.champion} color="var(--warn)" lang={lang} />
                   </td>
-                  <td style={{ minWidth: 110 }}>
+                  <td className="ol-bar">
                     <Bar v={r.europe} color="var(--eu)" lang={lang} />
                   </td>
-                  <td style={{ minWidth: 110 }}>
+                  <td className="ol-bar">
                     <Bar v={r.relegation} color="var(--bad)" lang={lang} />
                   </td>
                 </tr>

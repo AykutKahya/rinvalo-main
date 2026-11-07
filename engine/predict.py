@@ -234,11 +234,13 @@ def main() -> None:
     )
 
     # Pre-match market view of finished current-season games, for the "Rinvalo vs market" record.
+    # Keyed by the site's fixture id (which gains a season suffix from 2027-28), not rebuilt here.
     current = df[df["season"] == df["season"].max()]
+    id_of = {(f["home"], f["away"]): f["id"] for f in fixtures}
     market_out = {
-        f"{r.home}-{r.away}": [round(float(x), 4) for x in market_probs(r.oh, r.od, r.oa)]
+        id_of[(r.home, r.away)]: [round(float(x), 4) for x in market_probs(r.oh, r.od, r.oa)]
         for r in current.itertuples()
-        if pd.notna(r.oh) and pd.notna(r.oa)
+        if pd.notna(r.oh) and pd.notna(r.oa) and (r.home, r.away) in id_of
     }
     (DATA / "market.json").write_text(json.dumps(market_out, separators=(",", ":")) + "\n", "utf-8")
     print(f"{refreshed} tahmin güncellendi ({VERSION}), {len(market_out)} maçın piyasa verisi kaydedildi")

@@ -11,8 +11,9 @@ import { Analytics } from "@vercel/analytics/next";
 import { siteUrl } from "@/lib/site";
 import "../app/globals.css";
 
-const body = Barlow({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
-const display = Barlow_Condensed({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700", "800"], variable: "--font-display-face", display: "swap" });
+// Three weights a family (500 falls to the nearest); latin-ext carries the Turkish letters.
+const body = Barlow({ subsets: ["latin", "latin-ext"], weight: ["400", "600", "700"], variable: "--font-body", display: "swap" });
+const display = Barlow_Condensed({ subsets: ["latin", "latin-ext"], weight: ["600", "700", "800"], variable: "--font-display-face", display: "swap", preload: false });
 
 export function shellMetadata(lang: Lang): Metadata {
   const t = dict(lang);
@@ -57,7 +58,10 @@ export function Shell({ lang, children }: { lang: Lang; children: React.ReactNod
                 <img className="on-dark" src="/brand/mark-light.png" alt="" width={34} height={34} />
               </span>
               {/* eslint-enable @next/next/no-img-element */}
-              <span className="logo-word">RINVALO</span>
+              <span className="logo-text">
+                <span className="logo-word">RINVALO</span>
+                <span className="logo-tag">{t.tagline}</span>
+              </span>
             </Link>
             <TopNav lang={lang} />
             <div className="topbar-right">

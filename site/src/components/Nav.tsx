@@ -24,7 +24,7 @@ function links(lang: Lang) {
   ] as const;
 }
 
-function active(path: string, l: ReturnType<typeof links>[number]) {
+function active(path: string, l: { key: string; href: string; also: readonly string[] }) {
   if (path === l.href) return true;
   if (l.key === "matches") return l.also.some((b) => path.startsWith(`${b}/`));
   return [l.href, ...l.also].some((b) => path.startsWith(`${b}/`) || path === b);
@@ -32,9 +32,12 @@ function active(path: string, l: ReturnType<typeof links>[number]) {
 
 export function TopNav({ lang }: { lang: Lang }) {
   const path = usePathname();
+  // The top bar has room for national teams; the phone's bottom bar keeps its five.
+  const all = links(lang);
+  const top = [...all.slice(0, 2), { key: "national", href: paths(lang).national, label: dict(lang).nav.national, also: [] } as const, ...all.slice(2)];
   return (
     <nav className="nav" aria-label={dict(lang).nav.main}>
-      {links(lang).map((l) => (
+      {top.map((l) => (
         <Link key={l.key} href={l.href} className={l.key === "headlines" ? "manset-link" : undefined} aria-current={active(path, l) ? "page" : undefined}>
           {l.label}
         </Link>
