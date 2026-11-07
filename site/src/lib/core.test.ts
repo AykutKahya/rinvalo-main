@@ -106,6 +106,23 @@ test("season simulation sums to one champion per run", () => {
   assert.ok(a[0] > a[2]);
 });
 
+test("if-they-win odds never fall below if-they-draw, nor those below if-they-lose", () => {
+  const league = { ...LEAGUES[0], zones: { europe: 2, relegation: 1 } };
+  const teams = ["a", "b", "c", "d"];
+  const fixtures = teams.flatMap((h, i) => teams.filter((a) => a !== h).map((a, j) => fx(`${h}${a}`, h, a, null, null, `2026-11-${String(1 + i * 3 + j).padStart(2, "0")}T18:00:00Z`)));
+  const pred = (id: string) => ({ fixtureId: id, madeAt: "", model: "", lh: 1.3, la: 1.1, p: [0.45, 0.27, 0.28] as [number, number, number], score: [1, 0] as [number, number], top: [], over25: 0.5, btts: 0.5, grid: [] });
+  const preds = Object.fromEntries(fixtures.map((f) => [f.id, pred(f.id)]));
+  const { impact } = simulateLeague(league, fixtures, preds, 1500, new Set(fixtures.map((f) => f.id)));
+  for (const m of Object.values(impact)) {
+    const [hw, hd, hl] = m.home.champion;
+    assert.ok(hw >= hd && hd >= hl, `home ${hw} ${hd} ${hl}`);
+    const [aw, ad, al] = m.away.champion; // home win, draw, away win
+    assert.ok(al >= ad && ad >= aw, `away ${aw} ${ad} ${al}`);
+    const [rw, rd, rl] = m.home.relegation;
+    assert.ok(rw <= rd && rd <= rl, `relegation ${rw} ${rd} ${rl}`);
+  }
+});
+
 test("openfootball lines with and without kick-off time are parsed", () => {
   const text = [
     "▪ Matchday 1",

@@ -70,9 +70,14 @@ function sampleScore(dist: ScoreDist, d: number, rand: () => number): [number, n
   return [dist.cells[k].i, dist.cells[k].j];
 }
 
+/** The cells of a score distribution that end in one result (0 home win, 1 draw, 2 away win). */
+const resultOf = (i: number, j: number) => (i > j ? 0 : i === j ? 1 : 2);
+const only = (dist: ScoreDist, r: number): ScoreDist => ({ cells: dist.cells.filter((c) => resultOf(c.i, c.j) === r) });
+
 /**
- * `focus` lists upcoming fixtures whose stakes we want: for each, the same runs are split by that
- * game's result, so "if they win / draw / lose" odds come at no extra cost.
+ * `focus` lists upcoming fixtures whose stakes we want. In every run each of them is replayed as a
+ * home win, a draw and an away win with everything else held the same, so "if they win / draw /
+ * lose" compares like with like: winning can never come out worse than drawing.
  */
 export function simulateLeague(
   league: League,
@@ -91,46 +96,67 @@ export function simulateLeague(
   const n = base.length;
   const stats = new Map(base.map((r) => [r.team, { champion: 0, europe: 0, relegation: 0, points: 0, position: 0 }]));
   const rand = mulberry32(league.tsdb * 7919 + remaining.length);
-  // Per focus game: counts by its result (0 home win, 1 draw, 2 away win) of each side's season ending.
-  type Tally = { runs: number[]; home: number[][]; away: number[][] }; // [result][champion, europe, relegation]
+  // Replayed scores draw from their own stream, so the season odds stay the same with or without focus games.
+  const replay = mulberry32(league.tsdb * 104729 + remaining.length);
+  // Per focus game: counts by its forced result of each side's season ending [champion, europe, relegation].
+  type Focus = { f: Fixture; by: ScoreDist[]; home: number[][]; away: number[][] };
   const zero = () => [0, 1, 2].map(() => [0, 0, 0]);
-  const tallies = new Map<string, Tally>(remaining.filter((x) => focus.has(x.f.id)).map((x) => [x.f.id, { runs: [0, 0, 0], home: zero(), away: zero() }]));
-  const results = new Map<string, number>();
+  const focused: Focus[] = remaining
+    .filter((x) => focus.has(x.f.id))
+    .map((x) => ({ f: x.f, by: [0, 1, 2].map((r) => only(x.dist, r)), home: zero(), away: zero() }));
+  const played = new Map<string, [number, number]>();
+  const tilt = new Map<string, number>();
+
+  const add = (h: TableRow, a: TableRow, hg: number, ag: number, sign: 1 | -1) => {
+    h.gf += sign * hg;
+    h.ga += sign * ag;
+    a.gf += sign * ag;
+    a.ga += sign * hg;
+    if (hg > ag) h.points += 3 * sign;
+    else if (hg < ag) a.points += 3 * sign;
+    else {
+      h.points += sign;
+      a.points += sign;
+    }
+  };
 
   for (let run = 0; run < runs; run++) {
     const rows = new Map<string, TableRow>(base.map((r) => [r.team, { ...r, form: [] }]));
     const shock = new Map(base.map((r) => [r.team, gauss(rand) * STRENGTH_SD]));
     for (const { f, dist } of remaining) {
-      const [hg, ag] = sampleScore(dist, (shock.get(f.home) ?? 0) - (shock.get(f.away) ?? 0), rand);
-      if (tallies.has(f.id)) results.set(f.id, hg > ag ? 0 : hg === ag ? 1 : 2);
-      const h = rows.get(f.home)!;
-      const a = rows.get(f.away)!;
-      h.gf += hg;
-      h.ga += ag;
-      a.gf += ag;
-      a.ga += hg;
-      if (hg > ag) h.points += 3;
-      else if (hg < ag) a.points += 3;
-      else {
-        h.points++;
-        a.points++;
+      const d = (shock.get(f.home) ?? 0) - (shock.get(f.away) ?? 0);
+      const [hg, ag] = sampleScore(dist, d, rand);
+      if (focus.has(f.id)) {
+        played.set(f.id, [hg, ag]);
+        tilt.set(f.id, d);
       }
+      add(rows.get(f.home)!, rows.get(f.away)!, hg, ag, 1);
     }
     // Level on points, goal difference and goals: a coin toss, never the alphabet.
     const lot = new Map([...rows.keys()].map((t) => [t, rand()]));
-    const order = [...rows.values()].sort((x, y) => compareRows(x, y, false) || lot.get(x.team)! - lot.get(y.team)!);
-    const place = new Map(order.map((r, i) => [r.team, i]));
-    const ending = (team: string) => {
-      const i = place.get(team)!;
-      return [i === 0 ? 1 : 0, i < league.zones.europe ? 1 : 0, i >= n - league.zones.relegation ? 1 : 0];
+    const cmp = (x: TableRow, y: TableRow) => compareRows(x, y, false) || lot.get(x.team)! - lot.get(y.team)!;
+    const order = [...rows.values()].sort(cmp);
+    const ending = (i: number) => [i === 0 ? 1 : 0, i < league.zones.europe ? 1 : 0, i >= n - league.zones.relegation ? 1 : 0];
+    const placeOf = (row: TableRow) => {
+      let i = 0;
+      for (const other of rows.values()) if (other !== row && cmp(other, row) < 0) i++;
+      return i;
     };
-    for (const { f } of remaining) {
-      const t = tallies.get(f.id);
-      if (!t) continue;
-      const r = results.get(f.id)!;
-      t.runs[r]++;
-      ending(f.home).forEach((v, k) => (t.home[r][k] += v));
-      ending(f.away).forEach((v, k) => (t.away[r][k] += v));
+    for (const g of focused) {
+      const h = rows.get(g.f.home)!;
+      const a = rows.get(g.f.away)!;
+      const [hg, ag] = played.get(g.f.id)!;
+      const actual = resultOf(hg, ag);
+      add(h, a, hg, ag, -1);
+      for (let r = 0; r < 3; r++) {
+        // The result this run produced keeps its score; the other two get a score of that result.
+        const [fh, fa] = r === actual ? [hg, ag] : sampleScore(g.by[r], tilt.get(g.f.id)!, replay);
+        add(h, a, fh, fa, 1);
+        ending(placeOf(h)).forEach((v, k) => (g.home[r][k] += v));
+        ending(placeOf(a)).forEach((v, k) => (g.away[r][k] += v));
+        add(h, a, fh, fa, -1);
+      }
+      add(h, a, hg, ag, 1);
     }
     order.forEach((r, i) => {
       const s = stats.get(r.team)!;
@@ -144,14 +170,13 @@ export function simulateLeague(
 
   const r3 = (x: number) => Math.round(x * 1000) / 1000;
   const impact: Record<string, MatchImpact> = {};
-  for (const [id, t] of tallies) {
-    // Too few runs with one of the results to say anything reliable.
-    if (Math.min(...t.runs) < 150) continue;
+  for (const g of focused) {
+    if (g.by.some((d) => !d.cells.length)) continue;
     const side = (c: number[][]) => {
-      const by = (k: number) => [0, 1, 2].map((r) => r3(c[r][k] / t.runs[r])) as [number, number, number];
+      const by = (k: number) => [0, 1, 2].map((r) => r3(c[r][k] / runs)) as [number, number, number];
       return { champion: by(0), europe: by(1), relegation: by(2) };
     };
-    impact[id] = { home: side(t.home), away: side(t.away) };
+    impact[g.f.id] = { home: side(g.home), away: side(g.away) };
   }
   const outlook = [...stats.entries()]
     .map(([team, s]) => ({
