@@ -119,6 +119,12 @@ jobs:
       - name: Season simulation
         run: npm run simulate
 
+      - name: Prediction history and daily summary
+        id: snapshot
+        # Keeps how each prediction and the season odds move; this cannot be rebuilt later.
+        continue-on-error: true
+        run: python ../engine/snapshot.py
+
       - name: Model tracking
         id: track
         # This season's accuracy per league; a drifting league becomes a warning on the run page.
@@ -142,7 +148,7 @@ jobs:
         # (GitHub then emails the owner), since the simple fallback would be published in its place.
         if: always()
         run: |
-          for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }}; do
+          for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }} snapshot:${{ steps.snapshot.outcome }}; do
             [ "${s#*:}" = failure ] && echo "::warning::${s%%:*} adımı başarısız oldu."
           done
           bad=0
