@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnalysisNav } from "@/components/AnalysisNav";
 import { Paged } from "@/components/Pager";
 import { SurpriseRow } from "@/components/SurpriseRow";
 import { getMatches, type MatchView } from "@/lib/data";
@@ -29,10 +30,10 @@ export function Surprises({ lang }: { lang: Lang }) {
     <>
       <div className="page-head">
         <div>
-          <span className="eyebrow">{d.analysis.eyebrow}</span>
           <h1>{t.title}</h1>
         </div>
       </div>
+      <AnalysisNav current="surprises" lang={lang} />
 
       <div className="surprise-grid">
         <section className="card group" style={{ margin: 0 }}>

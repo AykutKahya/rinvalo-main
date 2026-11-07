@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnalysisNav } from "@/components/AnalysisNav";
 import Link from "next/link";
 import { ConfidencePill } from "@/components/Confidence";
 import { CountUp } from "@/components/CountUp";
@@ -35,6 +36,7 @@ export function Analysis({ lang }: { lang: Lang }) {
           <h1>{t.title}</h1>
         </div>
       </div>
+      <AnalysisNav current="analysis" lang={lang} />
 
       <div className="hub-grid">
         <Link href={p.power} className="card card-pad hub-card reveal">

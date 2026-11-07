@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnalysisNav } from "@/components/AnalysisNav";
 import Link from "next/link";
 import { Crest, LeagueMark } from "@/components/Crest";
 import { Tabs } from "@/components/Tabs";
@@ -167,10 +168,10 @@ export function Power({ lang }: { lang: Lang }) {
     <>
       <div className="page-head">
         <div>
-          <span className="eyebrow">{d.analysis.eyebrow}</span>
           <h1>{d.power.title}</h1>
         </div>
       </div>
+      <AnalysisNav current="power" lang={lang} />
       <Tabs
         tabs={[
           ...LEAGUES.filter((l) => leagues[l.code]?.length).map((l) => ({

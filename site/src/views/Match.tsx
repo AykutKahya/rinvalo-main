@@ -29,6 +29,7 @@ import { firstGoalMinute, liveOdds } from "@/lib/live";
 import { team } from "@/lib/teams";
 import { TeamPair } from "@/components/TeamPair";
 import { Squads } from "@/components/Squads";
+import { SectionNav } from "@/components/SectionNav";
 
 const DAY = 86_400_000;
 
@@ -191,13 +192,27 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
         {p && <ProbBar p={p.p} labels={[h.short, "X", a.short]} lang={lang} />}
       </div>
 
+      {(() => {
+        const sq = getSquads()[m.id];
+        const sn = t.secnav.match;
+        const items = [
+          p && { id: "tahmin", label: sn.pick },
+          sq && (sq.lineups || sq.absent?.home.length || sq.absent?.away.length) && { id: "kadro", label: sn.squads },
+          p && { id: "olasilik", label: sn.more },
+          { id: "form", label: sn.form },
+          h2h.length > 0 && { id: "h2h", label: sn.h2h },
+          table.some((r) => r.played > 0) && { id: "tablo", label: sn.table },
+        ].filter((x): x is { id: string; label: string } => !!x);
+        return <SectionNav items={items} label={t.secnav.label} />;
+      })()}
+
       <div className="match-grid">
         <div className="stack">
           {p && !finished && (
             <LiveMatch id={m.id} kickoff={m.kickoff} lh={p.lh} la={p.la} status={m.status} hg={m.hg} ag={m.ag} home={h.short} away={a.short} lang={lang} />
           )}
           {p ? (
-            <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <section id="tahmin" className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
                 <h2>{tm.section}</h2>
                 {finished && (
@@ -273,11 +288,15 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
 
           {cup && getSimulation().ties?.[m.id] && <TieOdds tie={getSimulation().ties![m.id]} lang={lang} />}
           {!cup && <Stakes stakes={stakesOf(getSimulation().impact?.[m.id], m.home, m.away)} league={leagueByCode(m.league)!} lang={lang} />}
-          {getSquads()[m.id] && <Squads entry={getSquads()[m.id]} home={m.home} away={m.away} lang={lang} />}
+          {getSquads()[m.id] && (
+            <div id="kadro">
+              <Squads entry={getSquads()[m.id]} home={m.home} away={m.away} lang={lang} />
+            </div>
+          )}
 
           {p && (
             // The full numbers stay one tap away, so the pick and its reasons lead the page.
-            <details className="card more-box">
+            <details id="olasilik" className="card more-box">
               <summary>
                 <span>{tm.more}</span>
                 <small className="muted">{tm.moreHint}</small>
@@ -308,7 +327,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
             </details>
           )}
 
-          <section className="card card-pad">
+          <section id="form" className="card card-pad">
             <div className="section-title">
               <h2>{tm.form}</h2>
               <Link href={`${path.compare}?a=${m.home}&b=${m.away}`}>{t.compare.cta} →</Link>
@@ -329,7 +348,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           </section>
 
           {h2h.length > 0 && (
-            <section className="card card-pad">
+            <section id="h2h" className="card card-pad">
               <div className="section-title">
                 <h2>{tm.h2h}</h2>
               </div>
@@ -355,7 +374,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
         <aside className="stack">
           <GuessWidget id={m.id} home={h.name} away={a.name} kickoff={m.kickoff} model={p ? p.score : null} actual={actual} lang={lang} />
           {table.some((r) => r.played > 0) && (
-            <section className="card card-pad">
+            <section id="tablo" className="card card-pad">
               <div className="section-title">
                 <h2 style={{ fontSize: 16 }}>{tm.table}</h2>
                 <Link href={path.leagueOf(m.league)}>{tm.fullTable}</Link>

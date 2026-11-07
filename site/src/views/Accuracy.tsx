@@ -4,6 +4,8 @@ import { CountUp } from "@/components/CountUp";
 import { LeagueMark } from "@/components/Crest";
 import { MatchRow } from "@/components/MatchRow";
 import { Paged } from "@/components/Pager";
+import { AnalysisNav } from "@/components/AnalysisNav";
+import { SectionNav } from "@/components/SectionNav";
 import { accuracy, getEngineBacktest, getMarket, getMatches, getTracking, LEAGUES } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, type Lang } from "@/lib/i18n";
@@ -47,11 +49,11 @@ export function Accuracy({ lang }: { lang: Lang }) {
     <>
       <div className="page-head">
         <div>
-          <span className="eyebrow">{d.analysis.eyebrow}</span>
           <h1>{t.title}</h1>
           <p>{t.sub}</p>
         </div>
       </div>
+      <AnalysisNav current="accuracy" lang={lang} />
 
       <div className="stat-row">
         <div className="card stat">
@@ -72,6 +74,16 @@ export function Accuracy({ lang }: { lang: Lang }) {
         </div>
       </div>
 
+      <SectionNav
+        label={d.secnav.label}
+        items={[
+          { id: "nasil", label: d.secnav.accuracy.how },
+          ...(eb ? [{ id: "test", label: d.secnav.accuracy.test }] : []),
+          { id: "tahminler", label: d.secnav.accuracy.list },
+          { id: "lig-lig", label: d.secnav.accuracy.side },
+        ]}
+      />
+
       <section id="nasil" className="card card-pad how">
         <h2>{t.howTitle}</h2>
         <div className="how-grid">
@@ -87,7 +99,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
       <div className="match-grid">
         <div className="stack">
           {eb && (
-            <section className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <section id="test" className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div className="section-title" style={{ margin: 0 }}>
                 <h2>{t.last3}</h2>
                 <span className="muted" style={{ fontSize: 13 }}>
@@ -124,7 +136,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
             </section>
           )}
 
-          <section className="card group" style={{ margin: 0 }}>
+          <section id="tahminler" className="card group" style={{ margin: 0 }}>
             <div className="group-head">
               <span>{t.gradedList}</span>
               <span>{t.pickScore}</span>
@@ -221,7 +233,7 @@ export function Accuracy({ lang }: { lang: Lang }) {
             </section>
           )}
 
-          <section className="card card-pad">
+          <section id="lig-lig" className="card card-pad">
             <div className="section-title">
               <h2 style={{ fontSize: 18 }}>{t.perLeague}</h2>
             </div>

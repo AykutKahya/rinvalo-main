@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SectionNav } from "@/components/SectionNav";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { CalendarButton } from "@/components/CalendarButton";
@@ -117,11 +118,24 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
         </div>
       )}
 
+      <SectionNav
+        label={d.secnav.label}
+        items={[
+          league && { id: "sezon", label: d.secnav.team.season },
+          upcoming.length > 0 && { id: "fikstur", label: d.secnav.team.next },
+          { id: "sonuclar", label: d.secnav.team.played },
+        ].filter((x): x is { id: string; label: string } => !!x)}
+      />
+
       <div className="match-grid">
         <div className="stack">
-          {league && <SeasonChart series={teamSeries(slug, entry.league)} lang={lang} />}
+          {league && (
+            <div id="sezon">
+              <SeasonChart series={teamSeries(slug, entry.league)} lang={lang} />
+            </div>
+          )}
           {upcoming.length > 0 && (
-            <section className="card group" style={{ margin: 0 }}>
+            <section id="fikstur" className="card group" style={{ margin: 0 }}>
               <div className="group-head">
                 <span>{tt.upcoming}</span>
                 <span>
@@ -134,7 +148,7 @@ export function Team({ slug, lang }: { slug: string; lang: Lang }) {
               ))}
             </section>
           )}
-          <section className="card group" style={{ margin: 0 }}>
+          <section id="sonuclar" className="card group" style={{ margin: 0 }}>
             <div className="group-head">
               <span>{tt.played}</span>
               <span>{record.n > 0 ? tt.hits(record.hits, record.n) : ""}</span>
