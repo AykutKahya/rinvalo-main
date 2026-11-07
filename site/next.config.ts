@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
     "/en/league/[code]/round/[round]": ["./data/*.json"],
     "/og/week/[lang]/[code]/[round]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*", "./public/leagues/*"],
     "/en/match/[id]/my-pick/[pick]": ["./data/*.json"],
+    "/og/day/[lang]/[date]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*", "./public/leagues/*", "./public/nations/*"],
     "/og/[lang]/[id]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*"],
     "/live.json": ["./data/*.json"],
   },

@@ -1,5 +1,5 @@
-# Daily post of the day's predictions (and on Mondays last week's record) to Telegram and Bluesky.
-# Does nothing until the secrets below are added in the repository settings.
+# Daily post of the day's predictions (and on Mondays last week's record) with the day's image to
+# Telegram, X, Instagram and Bluesky. A channel is skipped until its secrets are added in the repository settings.
 name: Social posts
 
 on:
@@ -31,4 +31,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
+          SUPABASE_URL: https://cmwfmjbygorsjjopngky.supabase.co
         run: npx tsx scripts/social.ts
