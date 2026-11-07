@@ -141,6 +141,14 @@ export const seasonTeams = cache((): { slug: string; league: string }[] => {
 export interface EuropeFile {
   leagues: { league: string; rating: number }[];
   clubs: { team: string; rating: number; league: string | null }[];
+  /** Every league club on the shared scale, and the cup outcome model fitted on it. */
+  ratings?: Record<string, number>;
+  model?: EuropeModel;
+}
+export interface EuropeModel {
+  coef: number[];
+  intercept: number[];
+  home: number;
 }
 export const getEurope = cache(() => read<EuropeFile>("europe.json", { leagues: [], clubs: [] }));
 
@@ -181,4 +189,26 @@ export interface TeamRating {
   xgf: number;
   xga: number;
 }
+/** 1-X-2 of each prediction as it moved before kick-off, per mille: [time, home, draw, away]. */
+export const getPredictionHistory = cache(() => read<Record<string, [string, number, number, number][]>>("prediction-history.json", {}));
+
+/** One entry per day: per competition {team: [champion, europe, relegation]} per mille, and "elo": {team: elo}. */
+export const getDaily = cache(() => read<{ days: Record<string, Record<string, Record<string, number[] | number>>> }>("daily.json", { days: {} }).days);
+
+export interface NationalGame {
+  id: string;
+  comp: string;
+  round: number;
+  kickoff: string;
+  home: string;
+  away: string;
+  hg: number | null;
+  ag: number | null;
+  /** Made before kick-off; null for games that started before the first prediction. */
+  pred: { p: [number, number, number]; score: [number, number] } | null;
+}
+export const getInternational = cache(() =>
+  read<{ updatedAt: string; games: NationalGame[]; ratings: [string, number][] }>("international.json", { updatedAt: "", games: [], ratings: [] }),
+);
+
 export const getRatings = cache(() => read<{ at: string; leagues: Record<string, TeamRating[]> }>("ratings.json", { at: "", leagues: {} }));

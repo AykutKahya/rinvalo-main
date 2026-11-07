@@ -103,6 +103,14 @@ export function Leagues({ lang }: { lang: Lang }) {
           );
         })}
       </div>
+
+      <div className="section-title" style={{ marginTop: 28 }}>
+        <h2>{dict(lang).national.title}</h2>
+      </div>
+      <Link href={p.national} className="card card-pad reveal nat-card">
+        <b>{dict(lang).national.nationsLeague}</b>
+        <span className="muted">{dict(lang).national.card}</span>
+      </Link>
     </>
   );
 }

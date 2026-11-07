@@ -7,7 +7,61 @@ import { fmt } from "@/lib/format";
 import { withBrand } from "./Brand";
 import { dict, paths, type Lang } from "@/lib/i18n";
 
-type Metric = { key: string; label: string; get: (t: CompareTeam) => number | null; show: (v: number) => string; lowerIsBetter?: boolean; base?: number };
+type Metric<T = CompareTeam> = { key: string; label: string; get: (t: T) => number | null; show: (v: number) => string; lowerIsBetter?: boolean; base?: number };
+
+function MetricRow<T>({ m, A, B }: { m: Metric<T>; A: T; B: T }) {
+  const va = m.get(A);
+  const vb = m.get(B);
+  if (va === null && vb === null) return null;
+  // Bars show each side's share; for "lower is better" metrics the smaller value gets the longer bar.
+  // Ratings sit around 1500, so measure bars from a floor or every pair looks 50/50.
+  const sa = Math.max((va ?? 0) - (m.base ?? 0), 0);
+  const sb = Math.max((vb ?? 0) - (m.base ?? 0), 0);
+  const wa = m.lowerIsBetter ? sb : sa;
+  const wb = m.lowerIsBetter ? sa : sb;
+  const total = wa + wb || 1;
+  const better = va === null || vb === null || va === vb ? 0 : (m.lowerIsBetter ? va < vb : va > vb) ? -1 : 1;
+  return (
+    <div className="cmp-row">
+      <b className={better === -1 ? "win" : undefined}>{va === null ? "–" : m.show(va)}</b>
+      <div className="cmp-mid">
+        <span>{m.label}</span>
+        <div className="cmp-bars" aria-hidden="true">
+          <i className="ca" style={{ width: `${(wa / total) * 100}%` }} />
+          <i className="cb" style={{ width: `${(wb / total) * 100}%` }} />
+        </div>
+      </div>
+      <b className={better === 1 ? "win" : undefined}>{vb === null ? "–" : m.show(vb)}</b>
+    </div>
+  );
+}
+
+type Form = { n: number; ppg: number | null; gf: number | null; ga: number | null; w: number; d: number; l: number; home: number | null; away: number | null };
+
+/** Results over the last n league games (0 = this season). */
+function formOf(t: CompareTeam, n: number): Form {
+  const list = n ? t.games.slice(-n) : t.games.slice(t.games.length - t.season);
+  const pts = (g: [number, number, number]) => (g[1] > g[2] ? 3 : g[1] === g[2] ? 1 : 0);
+  const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+  return {
+    n: list.length,
+    ppg: avg(list.map(pts)),
+    gf: avg(list.map((g) => g[1])),
+    ga: avg(list.map((g) => g[2])),
+    w: list.filter((g) => g[1] > g[2]).length,
+    d: list.filter((g) => g[1] === g[2]).length,
+    l: list.filter((g) => g[1] < g[2]).length,
+    home: avg(list.filter((g) => g[0] === 1).map(pts)),
+    away: avg(list.filter((g) => g[0] === 0).map(pts)),
+  };
+}
+
+/** 1-X-2 from the shared rating scale; `home` is the home side's edge in rating points. */
+function meet(model: NonNullable<CompareData["model"]>, ra: number, rb: number, home: number): [number, number, number] {
+  const z = model.coef.map((c, i) => Math.exp((c * (ra - rb + home)) / 100 + model.intercept[i]));
+  const s = z[0] + z[1] + z[2];
+  return [z[0] / s, z[1] / s, z[2] / s];
+}
 
 function Picker({ data, value, onChange, lang, label }: { data: CompareData; value: string; onChange: (s: string) => void; lang: Lang; label: string }) {
   const t = data.teams.find((x) => x.slug === value);
@@ -46,6 +100,7 @@ export function CompareTool({ lang }: { lang: Lang }) {
   const [data, setData] = useState<CompareData | null>(null);
   const [a, setA] = useState("galatasaray");
   const [b, setB] = useState("fenerbahce");
+  const [win, setWin] = useState(5);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -92,6 +147,23 @@ export function CompareTool({ lang }: { lang: Lang }) {
     .filter((x) => x.fx)
     .sort((x, y) => x.fx[0].localeCompare(y.fx[0]));
   const name = (s: string) => data.teams.find((x) => x.slug === s)?.name[lang] ?? s;
+  const fa = formOf(A, win);
+  const fb = formOf(B, win);
+  const formRows: Metric<Form>[] = [
+    { key: "ppg", label: t.ppg, get: (x) => x.ppg, show: (v) => f.dec(v, 2) },
+    { key: "gf", label: t.gfpg, get: (x) => x.gf, show: (v) => f.dec(v, 2) },
+    { key: "ga", label: t.gapg, get: (x) => x.ga, show: (v) => f.dec(v, 2), lowerIsBetter: true },
+    { key: "home", label: t.homePpg, get: (x) => x.home, show: (v) => f.dec(v, 2) },
+    { key: "away", label: t.awayPpg, get: (x) => x.away, show: (v) => f.dec(v, 2) },
+  ];
+  const meetings3 =
+    data.model && A.shared !== null && B.shared !== null
+      ? ([
+          [t.neutral, 0],
+          [t.atHome(A.name[lang]), data.model.home],
+          [t.atHome(B.name[lang]), -data.model.home],
+        ] as const).map(([label, home]) => ({ label, p: meet(data.model!, A.shared!, B.shared!, home) }))
+      : [];
 
   return (
     <div className="stack">
@@ -114,32 +186,9 @@ export function CompareTool({ lang }: { lang: Lang }) {
 
       <div className="match-grid" style={{ marginTop: 0 }}>
         <section className="card card-pad cmp-rows">
-          {metrics.map((m) => {
-            const va = m.get(A);
-            const vb = m.get(B);
-            if (va === null && vb === null) return null;
-            // Bars show each side's share; for "lower is better" metrics the smaller value gets the longer bar.
-            // Ratings sit around 1500, so measure bars from a floor or every pair looks 50/50.
-            const sa = Math.max((va ?? 0) - (m.base ?? 0), 0);
-            const sb = Math.max((vb ?? 0) - (m.base ?? 0), 0);
-            const wa = m.lowerIsBetter ? sb : sa;
-            const wb = m.lowerIsBetter ? sa : sb;
-            const total = wa + wb || 1;
-            const better = va === null || vb === null || va === vb ? 0 : (m.lowerIsBetter ? va < vb : va > vb) ? -1 : 1;
-            return (
-              <div key={m.key} className="cmp-row">
-                <b className={better === -1 ? "win" : undefined}>{va === null ? "–" : m.show(va)}</b>
-                <div className="cmp-mid">
-                  <span>{m.label}</span>
-                  <div className="cmp-bars" aria-hidden="true">
-                    <i className="ca" style={{ width: `${(wa / total) * 100}%` }} />
-                    <i className="cb" style={{ width: `${(wb / total) * 100}%` }} />
-                  </div>
-                </div>
-                <b className={better === 1 ? "win" : undefined}>{vb === null ? "–" : m.show(vb)}</b>
-              </div>
-            );
-          })}
+          {metrics.map((m) => (
+            <MetricRow key={m.key} m={m} A={A} B={B} />
+          ))}
           <div className="cmp-row">
             <span className="form">
               {A.form.map((x, i) => (
@@ -163,6 +212,30 @@ export function CompareTool({ lang }: { lang: Lang }) {
         </section>
 
         <aside className="stack">
+          {meetings3.length > 0 && (
+            <section className="card card-pad">
+              <div className="section-title">
+                <h2 style={{ fontSize: 16 }}>{t.ifMet}</h2>
+              </div>
+              <div className="cmp-meet">
+                {meetings3.map(({ label, p: q }) => (
+                  <div key={label}>
+                    <div className="cmp-meet-top">
+                      <span>{label}</span>
+                      <span className="num">
+                        {f.pct(q[0])} · {f.pct(q[1])} · {f.pct(q[2])}
+                      </span>
+                    </div>
+                    <div className="pbar" aria-hidden="true">
+                      <span className="h" style={{ width: `${q[0] * 100}%` }} />
+                      <span className="d" style={{ width: `${q[1] * 100}%` }} />
+                      <span className="a" style={{ width: `${q[2] * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
           <section className="card card-pad">
             <div className="section-title">
               <h2 style={{ fontSize: 16 }}>{t.meeting}</h2>
@@ -197,6 +270,29 @@ export function CompareTool({ lang }: { lang: Lang }) {
           </section>
         </aside>
       </div>
+
+      <section className="card card-pad cmp-rows">
+        <div className="section-title" style={{ margin: 0 }}>
+          <h2 style={{ fontSize: 16 }}>{t.recent}</h2>
+          <span className="seg cmp-win" role="tablist">
+            {[5, 10, 20, 0].map((n) => (
+              <button key={n} role="tab" aria-selected={win === n} onClick={() => setWin(n)}>
+                {n ? t.lastN(n) : t.season}
+              </button>
+            ))}
+          </span>
+        </div>
+        <div className="cmp-row">
+          <b className="num">{`${fa.w}-${fa.d}-${fa.l}`}</b>
+          <div className="cmp-mid">
+            <span>{t.record}</span>
+          </div>
+          <b className="num">{`${fb.w}-${fb.d}-${fb.l}`}</b>
+        </div>
+        {formRows.map((m) => (
+          <MetricRow key={m.key} m={m} A={fa} B={fb} />
+        ))}
+      </section>
     </div>
   );
 }

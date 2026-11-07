@@ -1,5 +1,5 @@
 import { crestSrc } from "@/components/Crest";
-import { getMatches, getRatings, getSimulation, leagueTable, LEAGUES } from "./data";
+import { getEurope, getHistory, getMatches, getRatings, getSeason, getSimulation, leagueTable, LEAGUES, type EuropeModel } from "./data";
 import { leagueStats } from "./stats";
 import { team } from "./teams";
 
@@ -24,6 +24,11 @@ export interface CompareTeam {
   champion: number | null;
   europe: number | null;
   relegation: number | null;
+  /** Rating on the scale shared by every league (the one the cup predictions use). */
+  shared: number | null;
+  /** League games, oldest first: [at home 1/0, goals for, goals against]. The last `season` are this season. */
+  games: [number, number, number][];
+  season: number;
 }
 
 /** Keyed by fixture id ("home-away"): [kickoff date, hg, ag, predicted home goals, predicted away goals]. */
@@ -33,14 +38,36 @@ export interface CompareData {
   leagues: { code: string; name: string }[];
   teams: CompareTeam[];
   fixtures: Record<string, CompareFixture>;
+  model: EuropeModel | null;
 }
 
 const r2 = (x: number) => Math.round(x * 100) / 100;
+
+/** The last 20 league games, or the whole season if longer. */
+function recent(list: { at: string; g: [number, number, number]; now: boolean }[]) {
+  const sorted = [...list].sort((x, y) => x.at.localeCompare(y.at));
+  const season = sorted.filter((x) => x.now).length;
+  return { games: sorted.slice(-Math.max(20, season)).map((x) => x.g), season };
+}
 
 /** Everything the comparison tool needs, sent once as a static JSON file. */
 export function compareData(): CompareData {
   const { leagues: ratings } = getRatings();
   const sim = getSimulation();
+  const europe = getEurope();
+  // League games per team, oldest first: past seasons from the bundled history, then this season.
+  const games = new Map<string, { at: string; g: [number, number, number]; now: boolean }[]>();
+  const add = (at: string, h: string, a: string, hg: number, ag: number, now: boolean) => {
+    for (const [t, g] of [
+      [h, [1, hg, ag]],
+      [a, [0, ag, hg]],
+    ] as const) {
+      if (!games.has(t)) games.set(t, []);
+      games.get(t)!.push({ at, g: [...g], now });
+    }
+  };
+  for (const [, , date, h, a, hg, ag] of getHistory().matches) add(date, h, a, hg, ag, false);
+  for (const f of getSeason().fixtures) if (f.status === "finished" && f.hg !== null && f.ag !== null) add(f.kickoff, f.home, f.away, f.hg, f.ag, true);
   const teams: CompareTeam[] = [];
   for (const l of LEAGUES) {
     const table = leagueTable(l.code);
@@ -72,11 +99,13 @@ export function compareData(): CompareData {
         champion: o ? o.champion : null,
         europe: o ? o.europe : null,
         relegation: o ? o.relegation : null,
+        shared: europe.ratings?.[row.team] ?? null,
+        ...recent(games.get(row.team) ?? []),
       });
     });
   }
   const fixtures = Object.fromEntries(
     getMatches().map((m): [string, CompareFixture] => [m.id, [m.kickoff.slice(0, 10), m.hg, m.ag, m.prediction?.score[0] ?? null, m.prediction?.score[1] ?? null]]),
   );
-  return { leagues: LEAGUES.map((l) => ({ code: l.code, name: l.name })), teams, fixtures };
+  return { leagues: LEAGUES.map((l) => ({ code: l.code, name: l.name })), teams, fixtures, model: europe.model ?? null };
 }

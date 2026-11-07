@@ -12,7 +12,7 @@ DATA = Path(__file__).resolve().parents[2] / "site" / "data"
 
 STAT_COLUMNS = [
     "league", "season", "date", "home", "away", "hg", "ag", "hs", "as_", "hst", "ast", "hxg", "axg",
-    "oh", "od", "oa", "ch", "cd", "ca", "o25", "u25",
+    "oh", "od", "oa", "ch", "cd", "ca", "o25", "u25", "hc", "ac", "hy", "ay", "hr", "ar",
 ]
 
 
@@ -28,6 +28,8 @@ def load_matches() -> pd.DataFrame:
     source already has but football-data has not published yet are added with goals only.
     """
     rows = _read("stats-history.json", []) + _read("stats-current.json", [])
+    # Older rows stop at the odds; corners and cards were added later.
+    rows = [r + [None] * (len(STAT_COLUMNS) - len(r)) for r in rows]
     df = pd.DataFrame(rows, columns=STAT_COLUMNS)
 
     season = _read("season.json", {"season": "", "fixtures": []})

@@ -3,6 +3,8 @@
 prediction-history.json: every prediction's 1-X-2 as it changes before kick-off (per mille),
     {fixtureId: [["2026-11-07T05:23", home, draw, away], ...]}. A new point is added only when
     some outcome moved by at least half a point.
+model-picks.json: Rinvalo's score pick for every game that has started, made before kick-off,
+    {fixtureId: [home, away]}. The prediction league compares players with it.
 daily.json: one entry per day (the last run of the day wins) with the season odds of every
     league and cup, [champion, europe, relegation] per mille, and every team's Elo.
 
@@ -53,6 +55,13 @@ def main() -> None:
         added += 1
     write("prediction-history.json", hist)
 
+    picks = {
+        f["id"]: preds[f["id"]]["score"]
+        for f in fixtures
+        if f["id"] in preds and preds[f["id"]].get("madeAt") and ts(preds[f["id"]]["madeAt"]) < ts(f["kickoff"]) <= now
+    }
+    write("model-picks.json", picks)
+
     sim = read("simulation.json", {"leagues": {}, "cups": {}})
     pm = lambda x: round(x * 1000)  # noqa: E731
     day = {
@@ -65,7 +74,7 @@ def main() -> None:
     daily["days"] = dict(sorted(daily["days"].items())[-KEEP_DAYS:])
     write("daily.json", daily)
 
-    print(f"Tahmin geçmişi: {added} yeni nokta, {len(hist)} maç. Günlük özet: {len(daily['days'])} gün.")
+    print(f"Tahmin geçmişi: {added} yeni nokta, {len(hist)} maç. Rinvalo skorları: {len(picks)} maç. Günlük özet: {len(daily['days'])} gün.")
 
 
 if __name__ == "__main__":

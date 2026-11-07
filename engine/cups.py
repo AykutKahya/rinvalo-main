@@ -248,6 +248,15 @@ def main() -> None:
     europe = {
         "leagues": sorted(({"league": lg, "rating": round(v, 1)} for lg, v in means.items()), key=lambda x: -x["rating"]),
         "clubs": [{"team": t, "rating": round(v, 1), "league": elo.league.get(t)} for t, v in clubs],
+        # Every league club on the shared scale and the fitted outcome model, so the comparison page
+        # can price any pairing in the browser: p = softmax(coef * (rh - ra + home) / 100 + intercept).
+        "ratings": {t: round(v, 1) for t, v in elo.r.items() if t in active and elo.league.get(t) in LEAGUE_NAME},
+        "model": {
+            "coef": [round(float(c[0]), 5) for c in outcome.coef_],
+            "intercept": [round(float(c), 5) for c in outcome.intercept_],
+            "classes": [int(c) for c in outcome.classes_],
+            "home": HOME,
+        },
     }
     (DATA / "europe.json").write_text(json.dumps(europe, ensure_ascii=False, separators=(",", ":")) + "\n", "utf-8")
     print(f"{refreshed} kupa tahmini ({VERSION}); lig ortalamaları: " + ", ".join(f"{x['league']} {x['rating']:.0f}" for x in europe["leagues"]))

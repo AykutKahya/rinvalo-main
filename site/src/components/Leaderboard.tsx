@@ -12,6 +12,8 @@ export type Row = {
   exact: number;
   results: number;
   played: number;
+  /** Rinvalo's points on the same games. */
+  rinvalo?: number;
 };
 export type Period = "week" | "month" | "season";
 
@@ -81,6 +83,9 @@ export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string 
                 <th className="c">{t.exact}</th>
                 <th className="c">{t.results}</th>
                 <th className="c">{t.played}</th>
+                <th className="c" title={t.rinvaloTip}>
+                  {t.rinvalo}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -90,16 +95,21 @@ export function BoardTable({ rows, me, lang }: { rows: Row[] | null; me: string 
                   <td>
                     <b>{r.username}</b>
                   </td>
-                  <td className="c num">
+                  <td className={`c num${r.rinvalo !== undefined && r.points > r.rinvalo ? " duel-win" : ""}`}>
                     <b>{f.int(r.points)}</b>
                   </td>
                   <td className="c num">{r.exact}</td>
                   <td className="c num">{r.results}</td>
                   <td className="c num muted">{r.played}</td>
+                  <td className="c num muted">{r.rinvalo ?? "–"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {(() => {
+            const n = rows.filter((r) => r.rinvalo !== undefined && r.points > r.rinvalo).length;
+            return n > 0 ? <p className="muted duel-note">{t.beat(n)}</p> : null;
+          })()}
           <Pager {...pg} total={rows.length} onChange={pg.setPage} lang={lang} />
         </div>
       ) : (

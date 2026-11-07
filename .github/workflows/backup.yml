@@ -29,7 +29,7 @@ jobs:
           gzip -c league.json | openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:RINVALO_UPLOAD_TOKEN -out league.json.gz.enc
           rm league.json
           # The frozen predictions and fixtures are the record behind the accuracy page; keep them too.
-          for f in predictions season cups tracking prediction-history daily; do
+          for f in predictions season cups tracking prediction-history daily international; do
             curl -fsS "$SUPABASE_URL/storage/v1/object/public/site/data/$f.json" | gzip > "$f.json.gz"
             test "$(stat -c %s "$f.json.gz")" -gt 100
           done
@@ -48,4 +48,5 @@ jobs:
             tracking.json.gz
             prediction-history.json.gz
             daily.json.gz
+            international.json.gz
           retention-days: 90

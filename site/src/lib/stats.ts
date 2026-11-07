@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { cache } from "react";
 import { SEASON } from "./leagues";
 
-/** stats-current.json row: [league, season, date, home, away, hg, ag, hs, as, hst, ast, hxg, axg, ...odds] */
+/** stats-current.json row: [league, season, date, home, away, hg, ag, hs, as, hst, ast, hxg, axg, ...odds (13-20), hc, ac, hy, ay, hr, ar] */
 type StatRow = [string, string, string, string, string, number, number, ...(number | null)[]];
 
 export interface TeamStats {
@@ -87,3 +87,20 @@ export const statsUntil = cache((league: string): string | null => {
   for (const r of read()) if (r[0] === league && r[1] === SEASON && r[11] != null && (!last || r[2] > last)) last = r[2];
   return last;
 });
+
+export interface MatchStats {
+  xg: [number, number] | null;
+  shots: [number, number] | null;
+  onTarget: [number, number] | null;
+  corners: [number, number] | null;
+  yellow: [number, number] | null;
+  red: [number, number] | null;
+}
+
+/** One finished game of this season from football-data, or null before they publish it. */
+export function matchStats(league: string, home: string, away: string): MatchStats | null {
+  const r = read().find((x) => x[0] === league && x[1] === SEASON && x[3] === home && x[4] === away);
+  if (!r) return null;
+  const pair = (i: number): [number, number] | null => (typeof r[i] === "number" && typeof r[i + 1] === "number" ? [r[i] as number, r[i + 1] as number] : null);
+  return { xg: pair(11), shots: pair(7), onTarget: pair(9), corners: pair(21), yellow: pair(23), red: pair(25) };
+}

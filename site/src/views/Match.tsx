@@ -18,7 +18,7 @@ import { NotifyButton } from "@/components/NotifyButton";
 import { ShareButton } from "@/components/ShareButton";
 import { Stakes, TieOdds } from "@/components/Stakes";
 import { Form, StandingsTable } from "@/components/StandingsTable";
-import { getMarket, getSquads, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
+import { getMarket, getPredictionHistory, getSquads, getMatch, getMatches, getSimulation, headToHead, leagueMatches, leagueTable, teamLeague } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { alternates, dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 import { competitionName, isCup, leagueByCode, nameLang, zonesOf } from "@/lib/leagues";
@@ -30,6 +30,9 @@ import { team } from "@/lib/teams";
 import { TeamPair } from "@/components/TeamPair";
 import { Squads } from "@/components/Squads";
 import { SectionNav } from "@/components/SectionNav";
+import { MatchStatsCard } from "@/components/MatchStatsCard";
+import { PredictionHistory } from "@/components/PredictionHistory";
+import { matchStats } from "@/lib/stats";
 
 const DAY = 86_400_000;
 
@@ -195,7 +198,9 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
       {(() => {
         const sq = getSquads()[m.id];
         const sn = t.secnav.match;
+        const stats = finished && matchStats(m.league, m.home, m.away);
         const items = [
+          stats && { id: "istatistik", label: sn.stats },
           p && { id: "tahmin", label: sn.pick },
           sq && (sq.lineups || sq.absent?.home.length || sq.absent?.away.length) && { id: "kadro", label: sn.squads },
           p && { id: "olasilik", label: sn.more },
@@ -211,6 +216,10 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
           {p && !finished && (
             <LiveMatch id={m.id} kickoff={m.kickoff} lh={p.lh} la={p.la} status={m.status} hg={m.hg} ag={m.ag} home={h.short} away={a.short} lang={lang} />
           )}
+          {(() => {
+            const stats = finished ? matchStats(m.league, m.home, m.away) : null;
+            return stats ? <MatchStatsCard stats={stats} expected={p ? [p.lh, p.la] : null} lang={lang} /> : null;
+          })()}
           {p ? (
             <section id="tahmin" className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div className="section-title" style={{ margin: 0 }}>
@@ -250,6 +259,7 @@ export function Match({ id, lang }: { id: string; lang: Lang }) {
                   </b>
                 </div>
               </div>
+              <PredictionHistory line={getPredictionHistory()[m.id] ?? []} labels={[h.short, "X", a.short]} lang={lang} />
               {(() => {
                 const pick = pickOf(p.p);
                 const winner = [h.name, null, a.name][pick];

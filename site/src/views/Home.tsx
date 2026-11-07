@@ -4,7 +4,9 @@ import { Crest } from "@/components/Crest";
 import { JsonLd } from "@/components/JsonLd";
 import { MatchBrowser } from "@/components/MatchBrowser";
 import { LeagueMark } from "@/components/Crest";
+import { FavoritesStrip } from "@/components/FavoritesStrip";
 import { PredictorCard } from "@/components/PredictorCard";
+import { Pulse } from "@/components/Pulse";
 import { ProbBar } from "@/components/ProbBar";
 import { accuracy, getEngineBacktest, getMatches, getSimulation, leagueMatches } from "@/lib/data";
 import { fmt } from "@/lib/format";
@@ -50,6 +52,7 @@ export function Home({ lang }: { lang: Lang }) {
 
   return (
     <>
+      <FavoritesStrip matches={window.map(lite)} lang={lang} />
       <section className="hero" aria-label={h.highlights}>
         {motw && motw.prediction && (
           <div className="card feature hero-motw reveal">
@@ -154,6 +157,7 @@ export function Home({ lang }: { lang: Lang }) {
 
       <aside className="side-stack" aria-label={h.highlights}>
         <PredictorCard lang={lang} />
+        <Pulse lang={lang} now={now} />
 
         <div className="card card-pad">
           <div className="section-title">

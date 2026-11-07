@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page(tr.home, en.home, 1),
     page(tr.headlines, en.headlines, 0.8),
     page(tr.leagues, en.leagues, 0.7),
+    page(tr.national, en.national, 0.6),
     page(tr.analysis, en.analysis, 0.6),
     page(tr.power, en.power, 0.6),
     page(tr.surprises, en.surprises, 0.6),

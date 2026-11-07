@@ -116,6 +116,12 @@ jobs:
         continue-on-error: true
         run: python ../engine/cups.py
 
+      - name: National teams
+        id: intl
+        # Nations League fixtures and predictions; refreshes at most every three hours.
+        continue-on-error: true
+        run: python ../engine/international.py
+
       - name: Season simulation
         run: npm run simulate
 
@@ -148,7 +154,7 @@ jobs:
         # (GitHub then emails the owner), since the simple fallback would be published in its place.
         if: always()
         run: |
-          for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }} snapshot:${{ steps.snapshot.outcome }}; do
+          for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }} snapshot:${{ steps.snapshot.outcome }} intl:${{ steps.intl.outcome }}; do
             [ "${s#*:}" = failure ] && echo "::warning::${s%%:*} adımı başarısız oldu."
           done
           bad=0

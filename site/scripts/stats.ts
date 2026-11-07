@@ -36,6 +36,7 @@ export function parseCsv(text: string, league: string, season: string, unknown: 
     oh: idx("AvgH", "BbAvH"), od: idx("AvgD", "BbAvD"), oa: idx("AvgA", "BbAvA"),
     ch: idx("AvgCH"), cd: idx("AvgCD"), ca: idx("AvgCA"),
     o25: idx("Avg>2.5", "BbAv>2.5"), u25: idx("Avg<2.5", "BbAv<2.5"),
+    hc: idx("HC"), ac: idx("AC"), hy: idx("HY"), ay: idx("AY"), hr: idx("HR"), ar: idx("AR"),
   };
   const num = (c: string[], i: number) => {
     if (i < 0) return null;
@@ -57,6 +58,7 @@ export function parseCsv(text: string, league: string, season: string, unknown: 
       num(c, at.hs), num(c, at.as), num(c, at.hst), num(c, at.ast), num(c, at.hxg), num(c, at.axg),
       num(c, at.oh), num(c, at.od), num(c, at.oa), num(c, at.ch), num(c, at.cd), num(c, at.ca),
       num(c, at.o25), num(c, at.u25),
+      num(c, at.hc), num(c, at.ac), num(c, at.hy), num(c, at.ay), num(c, at.hr), num(c, at.ar),
     ]);
   }
   return out;

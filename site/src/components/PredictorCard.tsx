@@ -11,15 +11,15 @@ export function PredictorCard({ lang }: { lang: Lang }) {
   const h = dict(lang).home;
   const p = paths(lang);
   const account = useAccount();
-  const [mine, setMine] = useState<{ points: number; rank: number | null } | null>(null);
+  const [mine, setMine] = useState<{ points: number; rank: number | null; model: number | null } | null>(null);
 
   useEffect(() => {
     const sb = supabase();
     if (!sb || !account.session || !account.username) return setMine(null);
     sb.rpc("leaderboard", { since: null, max_rows: 500 }).then(({ data }) => {
-      const rows = (data as { username: string; points: number }[]) ?? [];
+      const rows = (data as { username: string; points: number; rinvalo?: number }[]) ?? [];
       const i = rows.findIndex((r) => r.username === account.username);
-      setMine({ points: i >= 0 ? rows[i].points : 0, rank: i >= 0 ? i + 1 : null });
+      setMine({ points: i >= 0 ? rows[i].points : 0, rank: i >= 0 ? i + 1 : null, model: i >= 0 ? (rows[i].rinvalo ?? null) : null });
     });
   }, [account.session, account.username]);
 
@@ -34,7 +34,13 @@ export function PredictorCard({ lang }: { lang: Lang }) {
           <b>{mine ? h.leagueMine(mine.points, mine.rank) : account.username}</b>
           <Link href={p.myPicks}>{h.leagueOpen}</Link>
         </div>
-      ) : (
+      ) : null}
+      {account.session && mine && mine.model !== null ? (
+        <p className="muted" style={{ margin: 0 }}>
+          {h.leagueDuel(mine.points, mine.model)}
+        </p>
+      ) : null}
+      {account.session ? null : (
         <>
           <p>{h.leagueText}</p>
           <Link href={`${p.myPicks}#account`} className="btn accent">
