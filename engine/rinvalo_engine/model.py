@@ -41,7 +41,7 @@ def fit(train: pd.DataFrame) -> RinvaloModel:
     return RinvaloModel(pipe)
 
 
-def rates_for(p: np.ndarray, lh0: float, la0: float) -> tuple[float, float]:
+def rates_for(p: np.ndarray, lh0: float, la0: float, hold: float = 0.05) -> tuple[float, float]:
     """Expected goals whose score grid reproduces the target home/away win probabilities.
 
     Starts from the goal model's rates and keeps the total close to it, so over/under and
@@ -52,7 +52,7 @@ def rates_for(p: np.ndarray, lh0: float, la0: float) -> tuple[float, float]:
     def resid(x):
         lh, la = np.exp(x)
         o = outcome_probs(score_grid(lh, la))
-        return [o[0] - p[0], o[2] - p[2], 0.05 * (lh + la - total0)]
+        return [o[0] - p[0], o[2] - p[2], hold * (lh + la - total0)]
 
     sol = least_squares(resid, x0=np.log([lh0, la0]), bounds=(np.log(0.15), np.log(6)))
     lh, la = np.exp(sol.x)

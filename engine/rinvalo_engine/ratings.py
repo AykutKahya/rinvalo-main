@@ -101,6 +101,15 @@ def outcome_probs(grid: np.ndarray) -> np.ndarray:
     return np.array([np.tril(grid, -1).sum(), np.trace(grid), np.triu(grid, 1).sum()])
 
 
+def match_outcomes(grid: np.ndarray, p: np.ndarray) -> np.ndarray:
+    """Rescale home-win, draw and away-win cells so the grid adds up to exactly p."""
+    o = outcome_probs(grid)
+    n = grid.shape[0]
+    i, j = np.indices((n, n))
+    region = np.where(i > j, 0, np.where(i == j, 1, 2))
+    return grid * (np.asarray(p) / np.maximum(o, 1e-12))[region]
+
+
 class Elo:
     """Goal-difference Elo with home advantage and regression to the mean between seasons."""
 

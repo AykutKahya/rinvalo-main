@@ -15,7 +15,7 @@ from rinvalo_engine.data import market_probs  # noqa: E402
 from rinvalo_engine.features import Engine, build_training  # noqa: E402
 from rinvalo_engine.metrics import confidence, scores  # noqa: E402
 from rinvalo_engine.model import rates_for  # noqa: E402
-from rinvalo_engine.ratings import outcome_probs, score_grid  # noqa: E402
+from rinvalo_engine.ratings import match_outcomes, outcome_probs, score_grid  # noqa: E402
 
 
 def matches(n_rounds: int = 6) -> pd.DataFrame:
@@ -45,6 +45,12 @@ class EngineTest(unittest.TestCase):
         got = outcome_probs(score_grid(lh, la))
         self.assertLess(abs(got[0] - target[0]), 0.01)
         self.assertLess(abs(got[2] - target[2]), 0.01)
+
+    def test_grid_matches_published_outcomes(self):
+        target = np.array([0.30, 0.40, 0.30])  # more draws than a Poisson grid gives
+        grid = match_outcomes(score_grid(*rates_for(target, 1.3, 1.1)), target)
+        np.testing.assert_allclose(outcome_probs(grid), target, atol=1e-9)
+        self.assertAlmostEqual(grid.sum(), 1.0)
 
     def test_features_use_only_the_past(self):
         df = matches()

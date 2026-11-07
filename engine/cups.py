@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from rinvalo_engine.data import DATA, _season_of, load_matches, load_moviodds, market_probs, two_way  # noqa: E402
 from rinvalo_engine.metrics import scores  # noqa: E402
 from rinvalo_engine.model import rates_for  # noqa: E402
-from rinvalo_engine.ratings import score_grid  # noqa: E402
+from rinvalo_engine.ratings import match_outcomes, score_grid  # noqa: E402
 
 VERSION = "rinvalo-europe-1"
 CUPS = {"ucl", "uel", "uecl"}
@@ -149,7 +149,7 @@ def main() -> None:
     elo = EuroElo()
 
     # Walk forward: every cup game is rated before its result is known, for the outcome model and backtest.
-    seen_d, seen_y, seen_season = [], [], []
+    seen_d, seen_y, seen_season, seen_goals = [], [], [], []
     for r in df.itertuples():
         hg, ag = int(r.hg), int(r.ag)
         if r.kind == "league":
@@ -160,6 +160,7 @@ def main() -> None:
             seen_d.append(d)
             seen_y.append(0 if hg > ag else 1 if hg == ag else 2)
             seen_season.append(r.season)
+            seen_goals.append(hg + ag)
 
     X = np.array(seen_d)[:, None] / 100
     y = np.array(seen_y)
@@ -172,6 +173,8 @@ def main() -> None:
             s = scores(m.predict_proba(X[seasons == test]), y[seasons == test])
             print(f"Kupa testi {test}: {int((seasons == test).sum())} maç, isabet %{s['accuracy'] * 100:.1f}, log loss {s['logloss']:.4f}")
     outcome = LogisticRegression(C=1.0).fit(X, y)
+    # Mismatches produce more goals: expected total grows with the rating gap.
+    goals = np.polyfit(np.abs(X[:, 0]), np.array(seen_goals, float), 1)
 
     names = read("team-names.json", {})
     names.update({k: v[0] for k, v in read("cup-teams.json", {}).items()})
@@ -191,8 +194,9 @@ def main() -> None:
         rh, ra = elo.get(h, season, None), elo.get(a, season, None)
         home = 0.0 if f["round"] == FINAL_ROUND else HOME
         p = outcome.predict_proba(np.array([[(rh - ra + home) / 100]]))[0]
-        lh, la = rates_for(p, 1.45, 1.2)
-        grid = score_grid(lh, la)
+        total = float(np.polyval(goals, abs(rh - ra + home) / 100))
+        lh, la = rates_for(p, total * 0.55, total * 0.45, hold=1.0)
+        grid = match_outcomes(score_grid(lh, la), p)
         cells = sorted(((i, j, grid[i, j]) for i in range(grid.shape[0]) for j in range(grid.shape[1])), key=lambda c: -c[2])
         pick = int(np.argmax(p))
         in_pick = next(c for c in cells if (c[0] > c[1], c[0] == c[1], c[0] < c[1])[pick])

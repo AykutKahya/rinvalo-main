@@ -26,7 +26,7 @@ from rinvalo_engine.data import _season_of as season_of  # noqa: E402
 from rinvalo_engine.features import Engine, build_training, fit_shot_coef  # noqa: E402
 from rinvalo_engine.metrics import confidence  # noqa: E402
 from rinvalo_engine.model import VERSION, fit, rates_for  # noqa: E402
-from rinvalo_engine.ratings import Elo, Strengths, score_grid  # noqa: E402
+from rinvalo_engine.ratings import Elo, Strengths, match_outcomes, score_grid  # noqa: E402
 
 # Same exceptions as EN_NAMES in site/src/lib/teams.ts.
 EN_NAMES = {"bayern": "Bayern Munich"}
@@ -167,6 +167,8 @@ def main() -> None:
     engine = Engine(fit_shot_coef(df, ["2021-22", "2022-23"]))
     X = build_training(df, engine)
     model = fit(X)
+    # Training fits strengths at most weekly; refit on every result so far for today's predictions.
+    engine.models.clear()
     names = json.loads((DATA / "team-names.json").read_text("utf-8")) if (DATA / "team-names.json").exists() else {}
     odds = load_upcoming_odds()
     movi = load_moviodds()
@@ -196,7 +198,7 @@ def main() -> None:
         m_btts = two_way(mo[5], mo[6]) if mo else None
 
         lh, la = rates_for(p, feats["dc_lh"], feats["dc_la"])
-        grid = score_grid(lh, la)
+        grid = match_outcomes(score_grid(lh, la), p)
         cells = sorted(((h, a, grid[h, a]) for h in range(grid.shape[0]) for a in range(grid.shape[1])), key=lambda c: -c[2])
         pick = int(np.argmax(p))
         in_pick = next(c for c in cells if (c[0] > c[1], c[0] == c[1], c[0] < c[1])[pick])
