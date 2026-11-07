@@ -7,6 +7,7 @@ import { fmt } from "@/lib/format";
 import { dict, paths, roundLabel, type Lang } from "@/lib/i18n";
 
 type Comp = { code: string; name: string; accent: string };
+import { ConfidenceDot } from "./Confidence";
 import { LeagueMark } from "./Crest";
 import { useFavorites } from "./favorites";
 import { MatchRow } from "./MatchRow";
@@ -108,6 +109,15 @@ export function MatchBrowser({ matches, leagues, initialDay, lang }: { matches: 
             </button>
           ))}
         </div>
+
+        <p className="conf-legend">
+          {(["high", "medium", "low"] as const).map((l) => (
+            <span key={l}>
+              <ConfidenceDot level={l} lang={lang} />
+              {t.conf[l]}
+            </span>
+          ))}
+        </p>
 
         <div key={`${day}:${filter}`} className="stagger">
         {leagues
