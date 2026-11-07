@@ -1,6 +1,5 @@
-// The bot's door into Supabase. POST writes its output (data/*.json, assets.tar.gz, and the day's
-// social image social/day-DD.jpg, overwritten each month) to the public "site" bucket; GET returns
-// the prediction league for the weekly backup.
+// The bot's door into Supabase. POST writes its output (data/*.json and assets.tar.gz) to the public
+// "site" bucket; GET returns the prediction league for the weekly backup.
 // The bot sends the upload token; only its SHA-256 lives here, so this file can be public.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
