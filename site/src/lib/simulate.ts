@@ -28,6 +28,48 @@ function samplePoisson(lambda: number, rand: () => number): number {
   return k - 1;
 }
 
+/** Standard normal draw (Box-Muller). */
+function gauss(rand: () => number): number {
+  return Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
+}
+
+/**
+ * How unsure we are of each side's strength over the rest of the season, on the log scale of its
+ * scoring rate. Without it every run assumes today's ratings are exact and the odds come out too sure.
+ */
+const STRENGTH_SD = 0.08;
+
+/** A game's score distribution: the prediction's grid (draw-corrected) or, without one, Poisson. */
+interface ScoreDist {
+  cells: { i: number; j: number; p: number }[];
+}
+
+function scoreDist(p: Prediction): ScoreDist {
+  const cells: ScoreDist["cells"] = [];
+  if (p.grid?.length) {
+    p.grid.forEach((row, i) => row.forEach((x, j) => x > 1e-6 && cells.push({ i, j, p: x })));
+  } else {
+    const pois = (l: number) => Array.from({ length: 11 }, (_, k) => Math.exp(-l) * l ** k / [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800][k]);
+    const h = pois(p.lh);
+    const a = pois(p.la);
+    h.forEach((x, i) => a.forEach((y, j) => x * y > 1e-6 && cells.push({ i, j, p: x * y })));
+  }
+  return { cells };
+}
+
+/**
+ * One score from the distribution, tilted by the two sides' strength draws for this run: a tilt of
+ * d scales the home rate by e^d and the away rate by e^-d, which keeps the grid's draw correction.
+ */
+function sampleScore(dist: ScoreDist, d: number, rand: () => number): [number, number] {
+  let total = 0;
+  const w = dist.cells.map((c) => (total += c.p * Math.exp(d * (c.i - c.j))));
+  const r = rand() * total;
+  let k = 0;
+  while (k < w.length - 1 && w[k] < r) k++;
+  return [dist.cells[k].i, dist.cells[k].j];
+}
+
 /**
  * `focus` lists upcoming fixtures whose stakes we want: for each, the same runs are split by that
  * game's result, so "if they win / draw / lose" odds come at no extra cost.
@@ -43,7 +85,8 @@ export function simulateLeague(
   const remaining = fixtures
     .filter((f) => f.status !== "finished")
     .map((f) => ({ f, p: predictions[f.id] }))
-    .filter((x) => x.p);
+    .filter((x) => x.p)
+    .map((x) => ({ ...x, dist: scoreDist(x.p) }));
 
   const n = base.length;
   const stats = new Map(base.map((r) => [r.team, { champion: 0, europe: 0, relegation: 0, points: 0, position: 0 }]));
@@ -56,9 +99,9 @@ export function simulateLeague(
 
   for (let run = 0; run < runs; run++) {
     const rows = new Map<string, TableRow>(base.map((r) => [r.team, { ...r, form: [] }]));
-    for (const { f, p } of remaining) {
-      const hg = samplePoisson(p.lh, rand);
-      const ag = samplePoisson(p.la, rand);
+    const shock = new Map(base.map((r) => [r.team, gauss(rand) * STRENGTH_SD]));
+    for (const { f, dist } of remaining) {
+      const [hg, ag] = sampleScore(dist, (shock.get(f.home) ?? 0) - (shock.get(f.away) ?? 0), rand);
       if (tallies.has(f.id)) results.set(f.id, hg > ag ? 0 : hg === ag ? 1 : 2);
       const h = rows.get(f.home)!;
       const a = rows.get(f.away)!;
@@ -73,7 +116,9 @@ export function simulateLeague(
         a.points++;
       }
     }
-    const order = [...rows.values()].sort((x, y) => compareRows(x, y) || (rand() < 0.5 ? -1 : 1));
+    // Level on points, goal difference and goals: a coin toss, never the alphabet.
+    const lot = new Map([...rows.keys()].map((t) => [t, rand()]));
+    const order = [...rows.values()].sort((x, y) => compareRows(x, y, false) || lot.get(x.team)! - lot.get(y.team)!);
     const place = new Map(order.map((r, i) => [r.team, i]));
     const ending = (team: string) => {
       const i = place.get(team)!;

@@ -17,8 +17,9 @@ export function emptyRow(team: string): TableRow {
   return { team, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, points: 0, form: [] };
 }
 
-export function compareRows(a: TableRow, b: TableRow): number {
-  return b.points - a.points || b.gf - b.ga - (a.gf - a.ga) || b.gf - a.gf || a.team.localeCompare(b.team);
+/** Points, goal difference, goals scored; then by name, unless `byName` is off (the simulation draws lots). */
+export function compareRows(a: TableRow, b: TableRow, byName = true): number {
+  return b.points - a.points || b.gf - b.ga - (a.gf - a.ga) || b.gf - a.gf || (byName ? a.team.localeCompare(b.team) : 0);
 }
 
 /** Standings from finished fixtures. `teams` makes sure clubs without a game still appear. */

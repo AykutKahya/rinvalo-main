@@ -75,6 +75,7 @@ jobs:
           node scripts/push-data.mjs snapshot "$RUNNER_TEMP/before"
 
       - name: Absentees and line-ups (API-FOOTBALL)
+        id: squads
         # Early in the run so a line-up published an hour before kick-off is caught; stays inside
         # the free plan (6.5 s apart, at most 90 requests a day) and never fails the run.
         continue-on-error: true
@@ -88,24 +89,29 @@ jobs:
         run: npm run update
 
       - name: Match statistics and odds
+        id: stats
         continue-on-error: true
         run: npm run stats
 
       - name: Market odds (MoviOdds)
+        id: odds
         # One small request; the market's view next to Rinvalo's, never part of the prediction.
         continue-on-error: true
         run: npx tsx scripts/odds.ts
 
       - name: Rinvalo engine predictions
+        id: engine
         # If the engine fails, the fallback predictions written by `npm run update` stay in place.
         continue-on-error: true
         run: python ../engine/predict.py
 
       - name: European cups
+        id: cups
         continue-on-error: true
         run: npm run cups
 
       - name: European cup predictions
+        id: cupengine
         # One Elo scale across the nine leagues and the cups; leaves league predictions untouched.
         continue-on-error: true
         run: python ../engine/cups.py
@@ -114,6 +120,7 @@ jobs:
         run: npm run simulate
 
       - name: Model tracking
+        id: track
         # This season's accuracy per league; a drifting league becomes a warning on the run page.
         continue-on-error: true
         run: python ../engine/track.py
@@ -129,3 +136,17 @@ jobs:
         env:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
         run: curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel derlemesi istendi."
+
+      - name: Health check
+        # Steps above may fail without stopping the run; say so here. A broken engine fails the run
+        # (GitHub then emails the owner), since the simple fallback would be published in its place.
+        if: always()
+        run: |
+          for s in squads:${{ steps.squads.outcome }} stats:${{ steps.stats.outcome }} odds:${{ steps.odds.outcome }} cups:${{ steps.cups.outcome }} track:${{ steps.track.outcome }}; do
+            [ "${s#*:}" = failure ] && echo "::warning::${s%%:*} adımı başarısız oldu."
+          done
+          bad=0
+          for s in engine:${{ steps.engine.outcome }} cupengine:${{ steps.cupengine.outcome }}; do
+            if [ "${s#*:}" = failure ]; then echo "::error::${s%%:*} adımı başarısız oldu."; bad=1; fi
+          done
+          exit $bad

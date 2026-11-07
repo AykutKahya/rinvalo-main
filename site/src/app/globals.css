@@ -826,18 +826,6 @@ table.power td { vertical-align: middle; }
   .fair-cell { padding: 6px 8px; column-gap: 6px; }
 }
 
-.how { margin: 18px 0; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 80px; }
-.how h2 { font-size: 18px; margin: 0; }
-.how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 20px; }
-.how-grid h3 { font-size: 14px; margin: 0 0 4px; }
-.how-grid p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
-.pitch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 14px; }
-.pitch h1 { font-size: clamp(19px, 2.6vw, 24px); margin: 0; text-wrap: balance; }
-.pitch p { margin: 0; color: var(--muted); font-size: 14px; max-width: 70ch; }
-.pitch a { font-size: 14px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-.how-grid.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
-.how-grid.steps li { counter-increment: step; }
-.how-grid.steps h3::before { content: counter(step); display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; }
 .table-note { margin: 10px 0 0; font-size: 12.5px; }
 .table-wrap > .table-note { padding: 0 14px 12px; }
 /* Section strip under the page head: what this page holds, sticky under the top bar. */

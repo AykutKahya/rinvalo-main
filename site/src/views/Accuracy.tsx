@@ -77,24 +77,11 @@ export function Accuracy({ lang }: { lang: Lang }) {
       <SectionNav
         label={d.secnav.label}
         items={[
-          { id: "nasil", label: d.secnav.accuracy.how },
           ...(eb ? [{ id: "test", label: d.secnav.accuracy.test }] : []),
           { id: "tahminler", label: d.secnav.accuracy.list },
           { id: "lig-lig", label: d.secnav.accuracy.side },
         ]}
       />
-
-      <section id="nasil" className="card card-pad how">
-        <h2>{t.howTitle}</h2>
-        <div className="how-grid">
-          {t.how.map(([q, a]) => (
-            <div key={q}>
-              <h3>{q}</h3>
-              <p>{a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <div className="match-grid">
         <div className="stack">

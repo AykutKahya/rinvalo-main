@@ -45,6 +45,33 @@ function same(name) {
   }
 }
 
+/** Record counts of the files the site can't do without; a sharp drop means a source broke. */
+const COUNT = {
+  "season.json": (j) => j.fixtures?.length,
+  "cups.json": (j) => j.fixtures?.length,
+  "predictions.json": (j) => Object.keys(j.predictions ?? {}).length,
+  "stats-current.json": (j) => (Array.isArray(j) ? j.length : undefined),
+  "simulation.json": (j) => Object.keys(j.leagues ?? {}).length,
+};
+
+/** Files whose record count fell by more than 10% since the run started. */
+function shrunk(names) {
+  const out = [];
+  for (const name of names) {
+    const count = COUNT[name];
+    const before = join(dir, "data", name);
+    if (!count || !existsSync(before)) continue;
+    try {
+      const was = count(JSON.parse(readFileSync(before, "utf8"))) ?? 0;
+      const now = count(JSON.parse(readFileSync(join("data", name), "utf8"))) ?? 0;
+      if (was >= 20 && now < was * 0.9) out.push(`${name}: ${was} → ${now}`);
+    } catch {
+      out.push(`${name}: okunamadı`);
+    }
+  }
+  return out;
+}
+
 async function upload(path, body) {
   const res = await fetch(`${process.env.SUPABASE_URL}/functions/v1/upload?path=${encodeURIComponent(path)}`, {
     method: "POST",
@@ -64,6 +91,12 @@ if (mode === "snapshot") {
   const changed = readdirSync("data").filter((n) => n.endsWith(".json") && !GIT_ONLY.has(n) && !same(n));
   // Upload the small files first and the big ones last; the site reads them as one set at build time.
   changed.sort((a, b) => readFileSync(join("data", a)).length - readFileSync(join("data", b)).length);
+  // Never publish a file that lost a big part of its records; the site keeps the last good set.
+  const lost = process.env.ALLOW_SHRINK === "1" ? [] : shrunk(changed);
+  if (lost.length) {
+    console.error(`Yükleme durduruldu, kayıt sayısı düştü (bilerek ise ALLOW_SHRINK=1):\n  ${lost.join("\n  ")}`);
+    process.exit(1);
+  }
   for (const name of changed) {
     await upload(`data/${name}`, readFileSync(join("data", name)));
     console.log(`yüklendi: data/${name}`);
