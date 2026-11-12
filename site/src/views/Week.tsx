@@ -40,7 +40,7 @@ export function allWeeks(): { code: string; round: number }[] {
 export function weekParams() {
   const now = Date.now();
   const seen = new Set<string>();
-  for (const m of getMatches()) if (Math.abs(Date.parse(m.kickoff) - now) < 10 * DAY) seen.add(`${m.league}|${m.round}`);
+  for (const m of getMatches()) if (Date.parse(m.kickoff) > now - DAY && Date.parse(m.kickoff) < now + 3 * DAY) seen.add(`${m.league}|${m.round}`);
   return [...seen].map((k) => ({ code: k.split("|")[0], round: k.split("|")[1] }));
 }
 

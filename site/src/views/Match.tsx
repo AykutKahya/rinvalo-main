@@ -40,7 +40,9 @@ const DAY = 86_400_000;
 export function matchParams() {
   const now = Date.now();
   return getMatches()
-    .filter((m) => Math.abs(Date.parse(m.kickoff) - now) < 10 * DAY)
+    // Every page built at deploy counts against Vercel's ISR write quota, so only the games people
+    // open most (yesterday to three days ahead) are built; the rest render on first visit.
+    .filter((m) => Date.parse(m.kickoff) > now - DAY && Date.parse(m.kickoff) < now + 3 * DAY)
     .map((m) => ({ id: m.id }));
 }
 

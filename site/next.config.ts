@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
     "/og/day/[lang]/[date]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*", "./public/leagues/*", "./public/nations/*"],
     "/og/[lang]/[id]": ["./data/*.json", "./assets/fonts/*", "./public/crests/*"],
     "/live.json": ["./data/*.json"],
+    "/cal/[lang]/[file]": ["./data/*.json"],
   },
   async headers() {
     const supabase = "https://cmwfmjbygorsjjopngky.supabase.co";

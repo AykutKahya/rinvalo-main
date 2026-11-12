@@ -158,13 +158,29 @@ jobs:
           RINVALO_UPLOAD_TOKEN: ${{ secrets.RINVALO_UPLOAD_TOKEN }}
         run: node scripts/push-data.mjs push "$RUNNER_TEMP/before"
 
+      # Every deploy rewrites the prebuilt pages into Vercel's ISR cache, and the free plan allows
+      # 200,000 write units a month. So the site is rebuilt at most twice a day: after the night's
+      # results (05:23 Istanbul) and before the evening games (18:23), plus on manual runs. Other runs
+      # only upload data. The repository variable RINVALO_DEPLOY must be "on" (Settings > Secrets and
+      # variables > Actions > Variables); anything else stops all deploys.
       - name: Rebuild the site
-        if: steps.push.outputs.changed == 'true'
+        # At a rebuild slot the site is rebuilt even if this run changed nothing, so it picks up the
+        # data the runs in between uploaded.
+        if: vars.RINVALO_DEPLOY == 'on'
         env:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          EVENT: ${{ github.event_name }}
+          SCHED: ${{ github.event.schedule }}
         # Storage files are cached for 60 s at the edge; a build that started sooner could read the
-        # previous data, so wait that out first.
+        # previous data, so wait that out first. Scheduled runs often start late, so the slot is
+        # read from the schedule that started the run, not from the clock.
         run: |
+          hour=$(date -u -d "$RINVALO_NOW" +%-H)
+          case "$EVENT|$SCHED" in
+            workflow_dispatch\|*|*"|23 2 "*) ;;
+            *"|23 8,15 * * *") [ "$hour" -ge 12 ] || { echo "Bu koşuda derleme yok."; exit 0; } ;;
+            *) echo "Bu koşuda derleme yok (yalnız 05:23 ve 18:23 TSİ)."; exit 0 ;;
+          esac
           sleep 65
           curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel derlemesi istendi."
 

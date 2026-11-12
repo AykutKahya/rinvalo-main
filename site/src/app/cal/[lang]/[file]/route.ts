@@ -8,10 +8,11 @@ import { team } from "@/lib/teams";
 // One calendar per club and language, e.g. /cal/tr/galatasaray.ics. Calendar apps poll it, so a
 // subscriber gets every kick-off and Rinvalo's pick on their phone without an account.
 export const dynamic = "force-static";
-export const dynamicParams = false;
+// Built on first request rather than at deploy: hundreds of files would count against the ISR write quota.
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return seasonTeams().flatMap((t) => (["tr", "en"] as const).map((lang) => ({ lang, file: `${t.slug}.ics` })));
+  return [] as { lang: string; file: string }[];
 }
 
 const stamp = (iso: string) => iso.replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -34,6 +35,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ lang: stri
   const { lang: raw, file } = await params;
   const lang: Lang = raw === "en" ? "en" : "tr";
   const slug = file.replace(/\.ics$/, "");
+  if ((raw !== "tr" && raw !== "en") || !file.endsWith(".ics") || !seasonTeams().some((t) => t.slug === slug)) return new Response("Not found", { status: 404 });
   const t = dict(lang);
   const f = fmt(lang);
   const p = paths(lang);

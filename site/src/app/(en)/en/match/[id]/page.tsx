@@ -1,7 +1,7 @@
-import { Match, matchMetadata, matchParams } from "@/views/Match";
+import { Match, matchMetadata } from "@/views/Match";
 
-export const generateStaticParams = matchParams;
-// Pages outside the build window are rendered on first visit and kept until the next deploy.
+// English pages are rendered on first visit and kept until the next deploy (fewer ISR writes per deploy).
+export const generateStaticParams = () => [] as { id: string }[];
 export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps<"/en/match/[id]">) {

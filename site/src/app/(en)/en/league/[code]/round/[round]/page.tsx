@@ -1,7 +1,7 @@
-import { Week, weekMetadata, weekParams } from "@/views/Week";
+import { Week, weekMetadata } from "@/views/Week";
 
-export const generateStaticParams = weekParams;
-// Rounds away from today are rendered on first visit and kept until the next deploy.
+// English rounds are rendered on first visit and kept until the next deploy (fewer ISR writes per deploy).
+export const generateStaticParams = () => [] as { code: string; round: string }[];
 export const dynamicParams = true;
 
 export async function generateMetadata({ params }: PageProps<"/en/league/[code]/round/[round]">) {
